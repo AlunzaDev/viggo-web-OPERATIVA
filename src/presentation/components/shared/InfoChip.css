@@ -1,0 +1,75 @@
+.info-chip {
+  --info-chip-color: var(--text);
+  --info-chip-bg: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  --info-chip-border: color-mix(in srgb, var(--border) 84%, transparent);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  max-width: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--info-chip-border);
+  background: var(--info-chip-bg);
+  color: var(--info-chip-color);
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.info-chip__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.info-chip__icon svg,
+.info-chip__icon img {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+.info-chip__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info-chip.is-mono {
+  font-family: var(--font-mono, "Cascadia Code", "Consolas", monospace);
+  font-size: 0.74rem;
+}
+
+.info-chip.is-accent {
+  --info-chip-color: color-mix(in srgb, var(--text) 86%, var(--primary-color));
+  --info-chip-bg: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  --info-chip-border: color-mix(in srgb, var(--primary-color) 38%, var(--border));
+}
+
+.info-chip.is-success {
+  --info-chip-color: #2ecc71;
+  --info-chip-bg: rgba(46, 204, 113, 0.2);
+  --info-chip-border: rgba(46, 204, 113, 0.38);
+}
+
+.info-chip.is-warning {
+  --info-chip-color: #f5b041;
+  --info-chip-bg: rgba(243, 156, 18, 0.2);
+  --info-chip-border: rgba(243, 156, 18, 0.38);
+}
+
+.info-chip.is-info {
+  --info-chip-color: #6fa0ff;
+  --info-chip-bg: rgba(63, 120, 213, 0.18);
+  --info-chip-border: rgba(63, 120, 213, 0.38);
+}
+
+.info-chip.is-muted {
+  --info-chip-color: var(--text-muted);
+  --info-chip-bg: color-mix(in srgb, var(--surface-2) 74%, transparent);
+  --info-chip-border: color-mix(in srgb, var(--border) 88%, transparent);
+}

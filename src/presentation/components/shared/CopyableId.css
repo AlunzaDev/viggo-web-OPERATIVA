@@ -1,0 +1,50 @@
+.copyable-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.copyable-id .info-chip {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.copyable-id__button {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 34%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+  color: var(--text-soft);
+  padding: 0;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-2) var(--ease),
+    background var(--dur-2) var(--ease),
+    color var(--dur-2) var(--ease),
+    transform var(--dur-2) var(--ease);
+}
+
+.copyable-id__button:hover,
+.copyable-id__button:focus-visible {
+  border-color: color-mix(in srgb, var(--primary-color) 54%, var(--border));
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--primary-color);
+  outline: none;
+}
+
+.copyable-id__button:hover {
+  transform: translateY(-1px);
+}
+
+.copyable-id__button.is-copied {
+  border-color: color-mix(in srgb, #2ecc71 48%, var(--border));
+  background: color-mix(in srgb, #2ecc71 14%, transparent);
+  color: #2ecc71;
+}

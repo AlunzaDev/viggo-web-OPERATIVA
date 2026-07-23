@@ -1,0 +1,106 @@
+.main-content {
+  --pad: 20px;
+  --pad-left: 12px;
+  --sidebar-collapsed: var(--sidebar-collapsed-w, 50px);
+
+  position: relative;
+  padding: var(--pad);
+  padding-left: var(--pad-left);
+  padding-top: var(--pad);
+
+  background-color: var(--bg);
+  min-height: calc(100dvh - var(--header-h, 50px));
+  height: calc(100dvh - var(--header-h, 50px));
+  box-sizing: border-box;
+
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  margin-top: var(--header-h, 50px);
+  margin-left: var(--sidebar-collapsed);
+}
+
+.main-content.is-route-loading {
+  overflow: hidden;
+}
+
+.main-layout-route-loader {
+  position: fixed;
+  top: var(--header-h, 50px);
+  right: 0;
+  bottom: 0;
+  left: var(--sidebar-collapsed-w, 50px);
+  z-index: 990;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--primary-color) 14%, transparent), transparent 36%),
+    linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 82%, #000 18%) 100%);
+}
+
+.main-layout-route-loader .screen-loader {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: transparent;
+}
+
+html.has-floating-crud-island-space .main-content,
+html.has-floating-crud-island-space .main-content.shifted,
+body.has-floating-crud-island-space .main-content,
+body.has-floating-crud-island-space .main-content {
+  padding-bottom: calc(var(--pad) + var(--crud-dock-safe-space, 126px));
+  scroll-padding-bottom: calc(var(--pad) + var(--crud-dock-safe-space, 126px));
+}
+
+.page-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.page-card h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-family: var(--font-heading);
+}
+
+.page-card p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .main-content,
+  .main-content.shifted {
+    --pad: 15px;
+    --pad-left: 15px;
+    margin-left: 0;
+    padding: var(--pad);
+    padding-top: var(--pad);
+    min-height: calc(100dvh - var(--header-h, 50px));
+    height: calc(100dvh - var(--header-h, 50px));
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-layout-route-loader {
+    left: 0;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .main-content,
+  .main-content.shifted {
+    --pad: 10px;
+    --pad-left: 10px;
+  }
+}

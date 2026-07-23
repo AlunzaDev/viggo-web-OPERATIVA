@@ -1,0 +1,465 @@
+/* src/presentation/pages/auth/SessionExpiredPage.css */
+
+.session-expired-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+
+  background-color: var(--bg);
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.session-expired-container.game-active {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+.session-expired-container .liquid-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.8;
+}
+
+.session-expired-container .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: session-float 10s infinite ease-in-out alternate;
+}
+
+.session-expired-container .blob-1 {
+  top: 10%;
+  left: 20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--error-color) 60%, transparent) 0%,
+    transparent 70%
+  );
+  animation-duration: 12s;
+}
+
+.session-expired-container .blob-2 {
+  bottom: 10%;
+  right: 15%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--error-color) 30%, transparent) 0%,
+    transparent 70%
+  );
+  animation-duration: 15s;
+  animation-delay: -2s;
+}
+
+.session-expired-container .blob-3 {
+  top: 40%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, #e53e3e 25%, transparent) 0%,
+    transparent 70%
+  );
+  animation-duration: 9s;
+  animation-delay: -5s;
+}
+
+@keyframes session-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  100% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+.session-expired-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  max-width: 460px;
+  width: 100%;
+  z-index: 10;
+  position: relative;
+
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--elev-3);
+
+  padding: 48px 40px;
+  animation: session-slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes session-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.session-expired-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.session-expired-icon {
+  color: var(--error-color);
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--error-color) 70%, transparent));
+  animation: session-icon-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes session-icon-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+.session-expired-icon-pulse {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--error-color) 15%, transparent);
+  animation: session-ring 2.5s ease-in-out infinite;
+}
+
+@keyframes session-ring {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.session-expired-brand {
+  margin-bottom: 0.8rem;
+}
+
+.session-expired-logo {
+  width: 64px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--primary-color) 36%, transparent));
+}
+
+.session-expired-title {
+  margin: 0 0 0.8rem 0;
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.session-expired-message {
+  font-size: 0.97rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0 0 2rem 0;
+  max-width: 360px;
+}
+
+.session-expired-card-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.session-expired-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary-color) 40%, transparent);
+}
+
+.session-expired-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color) 60%, transparent);
+}
+
+.session-expired-btn:active {
+  transform: translateY(0);
+}
+
+.session-expired-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+  padding: 12px 30px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 45%, transparent);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.35px;
+}
+
+.session-expired-secondary-btn:hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--primary-color) 18%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 70%, transparent);
+}
+
+.session-expired-game-shell {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100dvh;
+}
+
+.session-expired-leaderboard {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 18;
+  width: min(340px, calc(100vw - 2rem));
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(15, 23, 42, 0.44);
+  backdrop-filter: blur(8px) saturate(135%);
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.22);
+  color: #e5e7eb;
+  overflow: hidden;
+}
+
+.session-expired-leaderboard-header {
+  padding: 0.72rem 0.82rem 0.66rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.session-expired-leaderboard-header h3 {
+  margin: 0 0 0.28rem;
+  font-size: 0.96rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.2px;
+  color: #f8fafc;
+}
+
+.session-expired-leaderboard-header p {
+  margin: 0.08rem 0;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+}
+
+.session-expired-save-status {
+  color: #93c5fd !important;
+}
+
+.session-expired-leaderboard-empty {
+  margin: 0;
+  padding: 0.8rem;
+  font-size: 0.82rem;
+  color: #dbeafe;
+}
+
+.session-expired-leaderboard-table-wrapper {
+  max-height: 260px;
+  overflow: auto;
+}
+
+.session-expired-leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.session-expired-leaderboard-table th,
+.session-expired-leaderboard-table td {
+  padding: 0.46rem 0.55rem;
+  text-align: left;
+}
+
+.session-expired-leaderboard-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(15, 23, 42, 0.72);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+  color: #bfdbfe;
+}
+
+.session-expired-leaderboard-table tbody tr {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.session-expired-leaderboard-row-active {
+  background: rgba(59, 130, 246, 0.24);
+}
+
+.session-expired-overlay {
+  position: relative;
+  z-index: 12;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.session-expired-overlay .session-expired-card {
+  pointer-events: auto;
+}
+
+.session-expired-floating-login-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 20;
+  font-size: 0.82rem;
+  letter-spacing: 0.5px;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+.session-expired-game-shell .barrier-blaster-stats {
+  margin-top: 0;
+}
+
+@media (max-width: 520px) {
+  .session-expired-card {
+    padding: 36px 24px;
+    border-radius: 18px;
+  }
+
+  .session-expired-title {
+    font-size: 1.5rem;
+  }
+
+  .session-expired-message {
+    font-size: 0.9rem;
+  }
+
+  .session-expired-btn,
+  .session-expired-secondary-btn {
+    width: 100%;
+  }
+
+  .session-expired-floating-login-btn {
+    top: 10px;
+    right: 10px;
+    width: auto;
+    padding: 8px 10px;
+  }
+
+  .session-expired-game-shell .barrier-blaster-stats {
+    margin-top: 0;
+  }
+
+  .session-expired-game-shell {
+    height: 100dvh;
+  }
+
+  .session-expired-leaderboard {
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 0.5rem;
+    width: auto;
+    max-width: unset;
+  }
+
+  .session-expired-leaderboard-header h3 {
+    font-size: 0.9rem;
+  }
+
+  .session-expired-leaderboard-table-wrapper {
+    max-height: 180px;
+  }
+
+  .session-expired-overlay {
+    padding: 1rem;
+  }
+
+  .session-expired-container .blob-1 {
+    width: 250px;
+    height: 250px;
+    top: 0;
+    left: -50px;
+  }
+
+  .session-expired-container .blob-2 {
+    width: 300px;
+    height: 300px;
+    bottom: 0;
+    right: -50px;
+  }
+
+  .session-expired-container .blob-3 {
+    display: none;
+  }
+}

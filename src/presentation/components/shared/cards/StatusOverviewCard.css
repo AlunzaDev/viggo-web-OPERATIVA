@@ -1,0 +1,158 @@
+.status-overview-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--status-color) 30%, var(--border));
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--status-color) 10%, var(--surface)) 0%,
+      color-mix(in srgb, var(--surface-2) 96%, transparent) 100%
+    );
+  box-shadow: var(--elev-1);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--dur-2) var(--ease),
+    border-color var(--dur-2) var(--ease),
+    box-shadow var(--dur-2) var(--ease);
+}
+
+.status-overview-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--status-color) 54%, var(--border));
+  box-shadow: var(--elev-2);
+}
+
+.status-overview-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--status-color) 64%, white);
+  outline-offset: 2px;
+}
+
+.status-overview-card__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+
+.status-overview-card__topstart,
+.status-overview-card__topend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.status-overview-card__topend {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.status-overview-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.status-overview-card__title {
+  min-width: 0;
+}
+
+.status-overview-card__title h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.status-overview-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.status-overview-card__status-pill,
+.status-overview-card__meta-pill,
+.status-overview-card__alert-pill,
+.status-overview-card__live-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-overview-card__status-pill {
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--status-color) 40%, transparent);
+  background: color-mix(in srgb, var(--status-color) 14%, transparent);
+  color: var(--status-color);
+}
+
+.status-overview-card__meta-pill {
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--status-color) 22%, transparent);
+  background: color-mix(in srgb, var(--status-color) 10%, transparent);
+  color: color-mix(in srgb, var(--status-color) 82%, var(--text));
+}
+
+.status-overview-card__alert-pill {
+  gap: 6px;
+  padding: 2px 7px;
+}
+
+.status-overview-card__live-pill {
+  gap: 8px;
+  padding: 3px 8px;
+}
+
+.status-overview-card__live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.status-overview-card__live-dot::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0.18;
+  transform: scale(0.58);
+}
+
+@media (max-width: 420px) {
+  .status-overview-card {
+    padding: 10px;
+  }
+
+  .status-overview-card__topbar,
+  .status-overview-card__topstart,
+  .status-overview-card__topend {
+    gap: 6px;
+  }
+
+  .status-overview-card__title h2 {
+    font-size: 0.86rem;
+  }
+}

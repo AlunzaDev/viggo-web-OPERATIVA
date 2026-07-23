@@ -1,0 +1,505 @@
+/* src/presentation/pages/auth/LoginPage.css */
+
+.login-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+
+    background-color: var(--bg);
+    color: var(--text);
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- LIQUID BACKGROUND ANIMATION --- */
+.liquid-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.8;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 10s infinite ease-in-out alternate;
+}
+
+.blob-1 {
+    top: 10%;
+    left: 20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--primary-color) 80%, transparent) 0%, transparent 70%);
+    animation-duration: 12s;
+}
+
+.blob-2 {
+    bottom: 10%;
+    right: 15%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--primary-color) 40%, transparent) 0%, transparent 70%);
+    animation-duration: 15s;
+    animation-delay: -2s;
+}
+
+.blob-3 {
+    top: 40%;
+    left: 50%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--primary-color-dark) 40%, transparent) 0%, transparent 70%);
+    animation-duration: 9s;
+    animation-delay: -5s;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+
+    100% {
+        transform: translate(-20px, 20px) scale(0.95);
+    }
+}
+
+/* --- SECCIÓN IZQUIERDA --- */
+.login-branding-container {
+    flex: 1;
+    max-width: 450px;
+    min-width: 0;
+    color: var(--text);
+    margin-right: 4rem;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-logo {
+    width: 180px;
+    height: auto;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--primary-color) 40%, transparent));
+    display: block;
+}
+
+.login-mission-statement {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: var(--text-muted);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    padding: 0 1rem;
+    overflow-wrap: anywhere;
+}
+
+/* --- SECCIÓN DERECHA (TARJETA LIQUID GLASS) --- */
+.login-form-container {
+    flex: 0 1 420px;
+    max-width: 420px;
+    width: min(100%, 420px);
+    min-width: 0;
+    z-index: 10;
+    position: relative;
+
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--elev-3);
+
+    padding: 40px;
+    color: var(--text);
+    animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-title {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--text);
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.login-mobile-logo {
+    display: none;
+    width: 110px;
+    height: auto;
+    margin: 0 auto 1rem;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--primary-color) 35%, transparent));
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.login-form-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: -0.35rem;
+    margin-bottom: 0.5rem;
+    min-width: 0;
+}
+
+.forgot-password-link {
+    position: relative;
+    display: inline-flex;
+    align-self: center;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+    max-width: 100%;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.forgot-password-link.secondary {
+    color: var(--text-muted);
+}
+
+.forgot-password-link:hover {
+    color: var(--primary-color-dark);
+    transform: translateY(-1px);
+}
+
+.forgot-password-link.secondary:hover {
+    color: var(--text);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+    min-width: 0;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex-wrap: wrap;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* INPUTS ESTILO VIDRIO ADAPTABLE */
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    border-radius: 12px;
+
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    color: var(--text) !important;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input::placeholder {
+    color: var(--input-placeholder);
+}
+
+.form-group input:focus {
+    outline: none;
+    background: var(--surface-2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--primary-color) 20%, transparent);
+    transform: translateY(-1px);
+}
+
+.password-input-wrapper {
+    position: relative;
+    min-width: 0;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-soft);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle-icon:hover {
+    color: var(--primary-color);
+}
+
+.login-button {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.1rem;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 1.2rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--primary-color) 40%, transparent);
+    width: 100%;
+}
+
+.login-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color) 60%, transparent);
+}
+
+.login-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: translateY(0);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+    .login-page-container {
+        flex-direction: column;
+        gap: 3rem;
+        padding-top: 3rem;
+        justify-content: flex-start;
+    }
+
+    .login-branding-container {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        max-width: 100%;
+    }
+
+    .login-form-container {
+        flex: 0 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-page-container {
+        padding:
+            max(1rem, env(safe-area-inset-top))
+            max(1rem, env(safe-area-inset-right))
+            max(1rem, env(safe-area-inset-bottom))
+            max(1rem, env(safe-area-inset-left));
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .login-branding-container {
+        display: none;
+    }
+
+    .login-form-container {
+        flex: 0 0 auto;
+        max-width: 30rem;
+        width: 100%;
+        padding: 0;
+        margin: 0 auto;
+        border-radius: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .login-mobile-logo {
+        display: block;
+    }
+
+    .login-title {
+        font-size: 1.6rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .blob-1 {
+        width: 250px;
+        height: 250px;
+        top: 0;
+        left: -50px;
+    }
+
+    .blob-2 {
+        width: 300px;
+        height: 300px;
+        bottom: 0;
+        right: -50px;
+    }
+
+    .blob-3 {
+        display: none;
+    }
+
+    .form-group {
+        margin-bottom: 1.1rem;
+    }
+
+    .form-group input {
+        min-height: 48px;
+        font-size: 16px;
+        padding: 0.8rem 0.95rem;
+    }
+
+    .login-form-meta {
+        margin-top: -0.15rem;
+        margin-bottom: 0.5rem;
+        justify-content: flex-start;
+    }
+
+    .forgot-password-link {
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .login-button {
+        min-height: 50px;
+        font-size: 1rem;
+        letter-spacing: 0.6px;
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page-container {
+        padding:
+            max(0.75rem, env(safe-area-inset-top))
+            max(0.75rem, env(safe-area-inset-right))
+            max(0.75rem, env(safe-area-inset-bottom))
+            max(0.75rem, env(safe-area-inset-left));
+    }
+
+    .login-form-container {
+        width: 100%;
+    }
+
+    .login-title {
+        font-size: 1.45rem;
+        line-height: 1.15;
+    }
+
+    .login-mobile-logo {
+        width: 96px;
+        margin-bottom: 0.85rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .forgot-password-link {
+        font-size: 0.84rem;
+    }
+
+    .password-toggle-icon {
+        right: 0.8rem;
+    }
+
+    .blob-1 {
+        width: 220px;
+        height: 220px;
+    }
+
+    .blob-2 {
+        width: 260px;
+        height: 260px;
+    }
+}
+
+@media (max-width: 380px) {
+    .login-page-container {
+        padding:
+            max(0.6rem, env(safe-area-inset-top))
+            max(0.6rem, env(safe-area-inset-right))
+            max(0.75rem, env(safe-area-inset-bottom))
+            max(0.6rem, env(safe-area-inset-left));
+    }
+
+    .login-form-container {
+        padding: 0;
+    }
+
+    .login-title {
+        font-size: 1.28rem;
+    }
+
+    .login-mobile-logo {
+        width: 84px;
+        margin-bottom: 0.7rem;
+    }
+
+    .form-group input {
+        min-height: 46px;
+        padding: 0.76rem 0.9rem;
+    }
+
+    .login-button {
+        min-height: 48px;
+        font-size: 0.94rem;
+        letter-spacing: 0.4px;
+    }
+}

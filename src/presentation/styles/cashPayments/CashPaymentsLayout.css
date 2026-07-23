@@ -1,0 +1,212 @@
+.cash-payments-page {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  position: relative;
+  isolation: isolate;
+}
+
+.cash-payments-page-lock {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.cash-payments-page-lock__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(248, 244, 236, 0.84);
+  backdrop-filter: blur(8px);
+}
+
+.cash-payments-page-lock__card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 480px);
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(214, 160, 24, 0.24);
+  background: linear-gradient(180deg, #fff9ec 0%, #fffdf8 100%);
+  box-shadow: 0 28px 80px rgba(33, 22, 5, 0.2);
+}
+
+.cash-payments-page-lock__badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a5510;
+  background: rgba(214, 160, 24, 0.16);
+}
+
+.cash-payments-page-lock__card h2 {
+  margin: 0;
+  color: #173624;
+  font-size: 1.45rem;
+}
+
+.cash-payments-page-lock__card p {
+  margin: 0;
+  color: #5c6c61;
+  line-height: 1.55;
+}
+
+.cash-payments-page-lock__field {
+  display: grid;
+  gap: 8px;
+  color: #365240;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.cash-payments-page-lock__field .vcombo {
+  z-index: 1;
+}
+
+.cash-payments-page-lock__field .vcombo-btn {
+  min-height: 48px;
+  border-radius: 16px;
+}
+
+.cash-payments-page-lock__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 48px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-weight: 800;
+  color: #f7f5ef;
+  background: linear-gradient(135deg, #1d5436 0%, #2e6a45 100%);
+}
+
+.cash-payments-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 16px;
+  align-items: stretch;
+  transition:
+    opacity 180ms ease,
+    filter 180ms ease,
+    visibility 180ms ease;
+}
+
+.cash-payments-grid--focus-session {
+  grid-template-columns: minmax(320px, 1fr) minmax(0, 2fr);
+}
+
+.cash-payments-grid[aria-hidden="true"] {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.02;
+  filter: blur(10px) saturate(0.4);
+}
+
+.cash-payments-panel {
+  border-radius: 24px;
+  padding: 16px;
+  background: #fffdf8;
+  box-shadow: 0 20px 55px rgba(16, 41, 29, 0.1);
+  border: 1px solid rgba(20, 68, 42, 0.08);
+}
+
+.cash-payments-panel h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  color: #173624;
+}
+
+.cash-payments-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cash-payments-panel__header h2 {
+  margin: 0;
+}
+
+.cash-payments-panel__caption {
+  margin: 0 0 10px;
+  color: #67786d;
+}
+
+@media (max-width: 980px) {
+  .cash-payments-grid,
+  .cash-payments-grid--focus-session {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .cash-payments-panel {
+    padding: 14px;
+    border-radius: 20px;
+  }
+}
+
+:root[data-theme="dark"] .cash-payments-panel,
+:root:not([data-theme="light"]) .cash-payments-panel {
+  background:
+    linear-gradient(180deg, rgba(24, 29, 26, 0.98) 0%, rgba(18, 23, 20, 0.98) 100%);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.36);
+}
+
+:root[data-theme="dark"] .cash-payments-panel h2,
+:root:not([data-theme="light"]) .cash-payments-panel h2 {
+  color: #eef6ef;
+}
+
+:root[data-theme="dark"] .cash-payments-panel__caption,
+:root:not([data-theme="light"]) .cash-payments-panel__caption {
+  color: rgba(234, 241, 255, 0.68);
+}
+
+:root[data-theme="dark"] .cash-payments-page-lock__backdrop,
+:root:not([data-theme="light"]) .cash-payments-page-lock__backdrop {
+  background: rgba(7, 10, 13, 0.82);
+}
+
+:root[data-theme="dark"] .cash-payments-page-lock__card,
+:root:not([data-theme="light"]) .cash-payments-page-lock__card {
+  border-color: rgba(222, 161, 57, 0.18);
+  background:
+    linear-gradient(180deg, rgba(38, 30, 16, 0.98) 0%, rgba(22, 22, 18, 0.98) 100%);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] .cash-payments-page-lock__badge,
+:root:not([data-theme="light"]) .cash-payments-page-lock__badge {
+  color: #f2cb82;
+  background: rgba(222, 161, 57, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-page-lock__card h2,
+:root:not([data-theme="light"]) .cash-payments-page-lock__card h2 {
+  color: #eef6ef;
+}
+
+:root[data-theme="dark"] .cash-payments-page-lock__card p,
+:root:not([data-theme="light"]) .cash-payments-page-lock__card p {
+  color: rgba(234, 241, 255, 0.76);
+}
+
+:root[data-theme="dark"] .cash-payments-page-lock__field,
+:root:not([data-theme="light"]) .cash-payments-page-lock__field {
+  color: rgba(234, 241, 255, 0.82);
+}

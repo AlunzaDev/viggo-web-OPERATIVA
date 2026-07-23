@@ -1,0 +1,86 @@
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 10px 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.empty-state__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--empty-state-color, var(--primary-color)) 34%, var(--border));
+  background: color-mix(in srgb, var(--empty-state-color, var(--primary-color)) 11%, var(--surface-2));
+  color: color-mix(in srgb, var(--empty-state-color, var(--primary-color)) 76%, var(--text));
+}
+
+.empty-state__icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.empty-state__title {
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.empty-state__description {
+  max-width: 460px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.empty-state__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-top: 2px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 64%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  color: color-mix(in srgb, var(--text) 82%, var(--primary-color));
+  padding: 0 12px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-2) var(--ease),
+    background var(--dur-2) var(--ease),
+    transform var(--dur-2) var(--ease);
+}
+
+.empty-state__action:hover {
+  border-color: color-mix(in srgb, var(--primary-color) 84%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  transform: translateY(-1px);
+}
+
+.empty-state__action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color) 64%, transparent);
+  outline-offset: 2px;
+}
+
+.empty-state.is-filtered {
+  --empty-state-color: #6aa4ff;
+}
+
+.empty-state.is-error {
+  --empty-state-color: var(--error-color);
+}
+
+.empty-state.is-permission {
+  --empty-state-color: #f5b041;
+}

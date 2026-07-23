@@ -1,0 +1,165 @@
+.cash-payments-session {
+  display: grid;
+  gap: 10px;
+}
+
+.cash-payments-session--empty {
+  position: relative;
+  align-content: start;
+  justify-items: stretch;
+  min-height: auto;
+  padding: 8px 0 0;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+}
+
+.cash-payments-session__status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cash-payments-session__status--pending_cash,
+.cash-payments-session__status--created {
+  color: #755100;
+  background: #fff4d8;
+}
+
+.cash-payments-session__status--partially_paid {
+  color: #1f5a6a;
+  background: #e7f7fb;
+}
+
+.cash-payments-session__status--paid {
+  color: #235934;
+  background: #e8f7ea;
+}
+
+.cash-payments-session__status--cancelled,
+.cash-payments-session__status--expired,
+.cash-payments-session__status--failed {
+  color: #8f3434;
+  background: #fdeeee;
+}
+
+.cash-payments-session__status--open {
+  color: #1d6f44;
+  background: rgba(44, 160, 95, 0.14);
+}
+
+.cash-payments-session__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.cash-payments-session__summary article {
+  border-radius: 18px;
+  padding: 12px;
+  background: #f4f7f4;
+}
+
+.cash-payments-session__summary span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #698072;
+}
+
+.cash-payments-session__summary strong {
+  font-size: 1.02rem;
+  color: #173624;
+}
+
+.cash-payments-events {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  max-height: 260px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.cash-payments-events article {
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: #f7f7f3;
+  border: 1px solid #ecefe7;
+}
+
+.cash-payments-events article header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.cash-payments-events strong {
+  color: #173624;
+  text-transform: uppercase;
+  font-size: 0.83rem;
+  letter-spacing: 0.06em;
+}
+
+.cash-payments-events time,
+.cash-payments-events p {
+  color: #6a796f;
+  margin: 0;
+}
+
+.cash-payments-session__empty-copy {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.cash-payments-session__empty-copy h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #173624;
+}
+
+.cash-payments-panel__header--compact {
+  margin-bottom: 10px;
+}
+
+.cash-payments-session__empty-copy .cash-payments-panel__caption {
+  margin: 0;
+}
+
+.cash-payments-session__empty-copy .cash-payments-session__summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.cash-payments-session__empty-copy .cash-payments-events {
+  max-height: 210px;
+}
+
+@media (max-width: 1280px) {
+  .cash-payments-session__empty-copy .cash-payments-session__summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .cash-payments-session__empty-copy .cash-payments-session__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+:root[data-theme="dark"] .cash-payments-session__status--open,
+:root:not([data-theme="light"]) .cash-payments-session__status--open {
+  color: #7be0a1;
+  background: rgba(43, 164, 94, 0.18);
+}

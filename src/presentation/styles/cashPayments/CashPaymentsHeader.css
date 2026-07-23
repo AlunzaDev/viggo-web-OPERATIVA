@@ -1,0 +1,132 @@
+.cash-payments-hero {
+  border-radius: 22px;
+  padding: 18px 20px;
+  background: #fffdf8;
+  border: 1px solid rgba(20, 68, 42, 0.08);
+  box-shadow: 0 14px 34px rgba(16, 41, 29, 0.08);
+  color: #173624;
+}
+
+.cash-payments-hero__content {
+  display: grid;
+  gap: 10px;
+}
+
+.cash-payments-hero__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6e7e73;
+}
+
+.cash-payments-hero h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.6vw, 2.15rem);
+  line-height: 1.05;
+  color: #173624;
+}
+
+.cash-payments-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 4px 0 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.cash-payments-stepper__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  position: relative;
+}
+
+.cash-payments-stepper__item:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  margin: 0 10px;
+  background: #e0e6df;
+  border-radius: 999px;
+}
+
+.cash-payments-stepper__item--done:not(:last-child)::after {
+  background: #2e6a45;
+}
+
+.cash-payments-stepper__circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #edf1ec;
+  color: #7c8d82;
+  border: 2px solid #e0e6df;
+}
+
+.cash-payments-stepper__item--active .cash-payments-stepper__circle {
+  background: #2e6a45;
+  border-color: #2e6a45;
+  color: #fff;
+}
+
+.cash-payments-stepper__item--done .cash-payments-stepper__circle {
+  background: #e8f1eb;
+  border-color: #2e6a45;
+  color: #2e6a45;
+}
+
+.cash-payments-stepper__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7c8d82;
+  white-space: nowrap;
+}
+
+.cash-payments-stepper__item--active .cash-payments-stepper__label {
+  color: #173624;
+}
+
+.cash-payments-stepper__item--done .cash-payments-stepper__label {
+  color: #2e6a45;
+}
+
+.cash-payments-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.cash-payments-hero__stats--detail {
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+}
+
+.cash-payments-stat {
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #f5f7f3;
+  border: 1px solid #e5ebe4;
+}
+
+.cash-payments-stat span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #738479;
+}
+
+.cash-payments-stat strong {
+  font-size: 1rem;
+  color: #173624;
+}

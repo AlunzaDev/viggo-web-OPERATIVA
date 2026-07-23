@@ -1,0 +1,138 @@
+.pension-modal {
+  width: min(94vw, 760px);
+}
+
+.pension-modal .modal-section-grid,
+.pension-modal .form-group {
+  min-width: 0;
+}
+
+.pension-modal textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.pension-modal__preset-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pension-modal__preset-bar button {
+  min-height: 34px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 38%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--text);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pension-modal__preset-bar button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary-color) 64%, var(--border));
+  background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+}
+
+.pension-modal__preset-bar button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pension-modal__calendar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pension-modal__day-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--input-border) 88%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--input-bg) 88%, var(--surface) 12%);
+}
+
+.pension-modal__day-card header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pension-modal__day-card header > span {
+  color: var(--text);
+  font-size: 0.94rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.pension-modal__day-card header small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pension-modal__day-card label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pension-modal__day-card label span {
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pension-modal__day-card input {
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.pension-modal__day-card input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--input-bg) 60%, var(--surface-2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 14%, transparent);
+}
+
+@media (max-width: 768px) {
+  .pension-modal {
+    width: min(96vw, 760px);
+  }
+
+  .pension-modal__calendar {
+    grid-template-columns: 1fr;
+  }
+
+  .pension-modal__day-card header {
+    display: grid;
+  }
+
+  .pension-modal__day-card header small {
+    text-align: left;
+  }
+}

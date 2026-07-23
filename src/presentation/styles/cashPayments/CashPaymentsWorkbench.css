@@ -1,0 +1,292 @@
+.cash-payments-feedback {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+.cash-payments-form {
+  display: grid;
+  gap: 10px;
+}
+
+.cash-payments-workarea {
+  display: grid;
+  gap: 10px;
+}
+
+.cash-payments-quickbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(220px, 0.8fr);
+  align-items: end;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #f4f7f4;
+  border: 1px solid #e5ebe4;
+}
+
+.cash-payments-shift-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(31, 86, 54, 0.06);
+  border: 1px solid rgba(31, 86, 54, 0.12);
+}
+
+.cash-payments-shift-banner small {
+  color: #5d7263;
+}
+
+.cash-payments-shift-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #155f39;
+  background: rgba(25, 130, 69, 0.12);
+}
+
+.cash-payments-shift-chip--warning {
+  color: #9a6111;
+  background: rgba(214, 160, 24, 0.16);
+}
+
+.cash-payments-shift-chip--muted {
+  color: #60726b;
+  background: rgba(96, 114, 107, 0.14);
+}
+
+.cash-payments-shift-box {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(20, 68, 42, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.cash-payments-shift-box--info {
+  background: rgba(255, 244, 216, 0.72);
+  border-color: rgba(214, 160, 24, 0.2);
+}
+
+
+.cash-payments-shift-box__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cash-payments-shift-box__header strong {
+  color: #173624;
+}
+
+.cash-payments-shift-box__header span {
+  color: #67786d;
+  font-size: 0.92rem;
+}
+
+.cash-payments-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cash-payments-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #365240;
+  font-weight: 600;
+}
+
+.cash-payments-form input {
+  width: 100%;
+  border: 1px solid #d8dfd8;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  color: #163322;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cash-payments-form input:focus {
+  outline: none;
+  border-color: #2e6a45;
+  box-shadow: 0 0 0 4px rgba(46, 106, 69, 0.12);
+}
+
+.cash-payments-form .vcombo {
+  width: 100%;
+}
+
+.cash-payments-form .vcombo-btn {
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cash-payments-form .vcombo-btn-text {
+  line-height: 1.35;
+}
+
+.cash-payments-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cash-payments-button {
+  appearance: none;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 0.93rem;
+  cursor: pointer;
+}
+
+.cash-payments-button--link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.cash-payments-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cash-payments-button--primary {
+  color: #f7f5ef;
+  background: linear-gradient(135deg, #1d5436 0%, #2e6a45 100%);
+}
+
+.cash-payments-button--secondary {
+  color: #1d5436;
+  background: #eff6f1;
+}
+
+.cash-payments-button--danger {
+  color: #862f2f;
+  background: #faecec;
+}
+
+.cash-payments-alert {
+  border-radius: 18px;
+  padding: 10px 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.cash-payments-alert--error {
+  background: #fdeeee;
+  color: #8f3434;
+  border: 1px solid #f4caca;
+}
+
+.cash-payments-alert--success {
+  background: #edf8ef;
+  color: #235934;
+  border: 1px solid #cce6d0;
+}
+
+.cash-payments-done {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 18px;
+  padding: 12px 14px;
+  background: #edf8ef;
+  border: 1px solid #cce6d0;
+}
+
+.cash-payments-done__icon {
+  flex-shrink: 0;
+  font-size: 1.8rem;
+  color: #2e6a45;
+}
+
+.cash-payments-done p {
+  margin: 0;
+  color: #235934;
+}
+
+@media (max-width: 760px) {
+  .cash-payments-quickbar {
+    grid-template-columns: 1fr;
+  }
+
+  .cash-payments-shift-banner {
+    min-height: auto;
+    justify-content: flex-start;
+  }
+}
+
+:root[data-theme="dark"] .cash-payments-shift-banner,
+:root:not([data-theme="light"]) .cash-payments-shift-banner {
+  background: rgba(54, 116, 78, 0.12);
+  border-color: rgba(118, 196, 145, 0.14);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-banner small,
+:root:not([data-theme="light"]) .cash-payments-shift-banner small {
+  color: rgba(234, 241, 255, 0.72);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-chip,
+:root:not([data-theme="light"]) .cash-payments-shift-chip {
+  color: #7be0a1;
+  background: rgba(43, 164, 94, 0.18);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-chip--warning,
+:root:not([data-theme="light"]) .cash-payments-shift-chip--warning {
+  color: #f2cb82;
+  background: rgba(222, 161, 57, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-chip--muted,
+:root:not([data-theme="light"]) .cash-payments-shift-chip--muted {
+  color: rgba(234, 241, 255, 0.75);
+  background: rgba(99, 112, 121, 0.24);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-box,
+:root:not([data-theme="light"]) .cash-payments-shift-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-box--info,
+:root:not([data-theme="light"]) .cash-payments-shift-box--info {
+  background: rgba(222, 161, 57, 0.09);
+  border-color: rgba(222, 161, 57, 0.16);
+}
+
+
+:root[data-theme="dark"] .cash-payments-shift-box__header strong,
+:root:not([data-theme="light"]) .cash-payments-shift-box__header strong {
+  color: #eef6ef;
+}
+
+:root[data-theme="dark"] .cash-payments-shift-box__header span,
+:root:not([data-theme="light"]) .cash-payments-shift-box__header span {
+  color: rgba(234, 241, 255, 0.7);
+}
