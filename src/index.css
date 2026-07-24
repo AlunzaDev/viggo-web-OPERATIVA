@@ -288,11 +288,11 @@ canvas {
   height: 1em;
   flex: 0 0 auto;
   line-height: 0;
-  background: center / contain no-repeat url("/favicon.svg");
+  background: center / contain no-repeat url("/logos/android_icon.png");
 }
 
 :root[data-theme="light"] .atm-icon {
-  background-image: url("/favicon.svg");
+  background-image: url("/logos/android_icon.png");
 }
 
 button,

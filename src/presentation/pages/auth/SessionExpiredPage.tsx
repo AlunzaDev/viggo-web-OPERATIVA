@@ -36,7 +36,7 @@ export function SessionExpiredPage() {
 
           <div className="session-expired-brand">
             <img
-              src="/favicon.svg"
+              src="/logos/android_icon.png"
               alt="Viggo"
               className="session-expired-logo"
             />

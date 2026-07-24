@@ -16,6 +16,7 @@ import { ScreenLoader } from "../shared/loading/ScreenLoader";
 import { useAuth } from "../../context/auth/useAuth";
 import { PageTitleProvider } from "../../context/page-title/PageTitleContext";
 import { useCurrentPageTitle } from "../../context/page-title/usePageTitle";
+import { InstallationGate } from "../installation/InstallationGate";
 import "./MainLayout.css";
 
 interface MainLayoutProps {
@@ -207,7 +208,7 @@ function MainLayoutContent({ children }: MainLayoutProps) {
         className={`main-content ${showGlobalLoader ? "is-route-loading" : ""}`}
         aria-busy={showGlobalLoader}
       >
-        {children}
+        <InstallationGate>{children}</InstallationGate>
         {showGlobalLoader ? (
           <div className="main-layout-route-loader">
             <ScreenLoader

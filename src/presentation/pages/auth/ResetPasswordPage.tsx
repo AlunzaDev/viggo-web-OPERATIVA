@@ -89,7 +89,7 @@ export function ResetPasswordPage() {
   return (
     <div className="reset-page-container">
       <div className="reset-card">
-        <img src="/favicon.svg" alt="Viggo" className="reset-logo" />
+        <img src="/logos/android_icon.png" alt="Viggo" className="reset-logo" />
         <h1 className="reset-title">Restablecer Contraseña</h1>
         <p className="reset-subtitle">
           Ingresa una nueva contraseña para terminar el proceso de recuperación.
