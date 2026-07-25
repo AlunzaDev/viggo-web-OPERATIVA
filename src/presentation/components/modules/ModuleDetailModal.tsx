@@ -6,6 +6,7 @@ import {
   FaProjectDiagram,
   FaShieldAlt,
   FaUnlink,
+  FaMicrochip,
 } from "react-icons/fa";
 import {
   ModuleEntity,
@@ -143,6 +144,37 @@ export function ModuleDetailModal({
             </p>
           </article>
         </div>
+      </section>
+
+      <section className="modal-form-section">
+        <div className="modal-section-header">
+          <FaMicrochip className="modal-section-icon" />
+          <h3 className="modal-section-title">Submodulos</h3>
+        </div>
+        {item?.submodulos.length ? (
+          <div className="admin-crud-request-list">
+            {item.submodulos.map((submodulo) => (
+              <article key={submodulo.submoduloId} className="admin-crud-request-card">
+                <div className="admin-crud-request-card__header">
+                  <span className="admin-crud-pill">{submodulo.tipo}</span>
+                  <span className={submodulo.estado ? "admin-crud-status admin-crud-status--active" : "admin-crud-status admin-crud-status--inactive"}>
+                    {submodulo.estado ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+                <div className="admin-crud-request-card__body">
+                  <strong>{submodulo.nombre}</strong>
+                  <span>ID: {submodulo.identificador || submodulo.submoduloId}</span>
+                  <span>IP: {submodulo.ip || "Sin IP"}</span>
+                  <span>MAC: {submodulo.mac || "Sin MAC"}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="admin-crud-detail-item">
+            <p className="admin-crud-detail-muted">Sin submodulos registrados</p>
+          </div>
+        )}
       </section>
 
       <section className="modal-form-section">

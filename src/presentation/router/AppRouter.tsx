@@ -36,6 +36,11 @@ const CashHistoryPage = lazy(async () => {
   return { default: module.CashHistoryPage };
 });
 
+const DeviceHeartbeatPage = lazy(async () => {
+  const module = await import("../pages/deviceHeartbeat/DeviceHeartbeatPage");
+  return { default: module.DeviceHeartbeatPage };
+});
+
 const PensionsPage = lazy(async () => {
   const module = await import("../pages/pensions/PensionsPage");
   return { default: module.PensionsPage };
@@ -214,9 +219,17 @@ export function AppRouter() {
         <Route path="/cashiers/*" element={<Navigate to="/caja/cobro" replace />} />
         <Route path="/cashier-guard/*" element={<Navigate to="/caja/cobro" replace />} />
         <Route path="/moves" element={<Navigate to="/caja/cobro" replace />} />
-        <Route path="/device-map/*" element={<Navigate to="/caja/cobro" replace />} />
-        <Route path="/heartbeat/*" element={<Navigate to="/caja/cobro" replace />} />
+        <Route path="/device-map/*" element={<Navigate to="/heartbeat" replace />} />
+        <Route
+          path="/heartbeat"
+          element={
+            <ProtectedRoute modules={["modules"]}>
+              <DeviceHeartbeatPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/settings" element={<Navigate to="/account" replace />} />
+        <Route path="/config" element={<Navigate to="/account" replace />} />
         <Route
           path="/account"
           element={

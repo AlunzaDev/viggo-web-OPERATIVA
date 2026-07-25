@@ -262,6 +262,7 @@ export function ModulesPage() {
             <th>proyecto</th>
             <th>tipo</th>
             <th>identificador</th>
+            <th>submodulos</th>
             <th>vinculacion</th>
             <th className="col-status">estado</th>
             <th>acciones</th>
@@ -287,6 +288,7 @@ export function ModulesPage() {
               <span className="admin-crud-pill">{item.tipo}</span>
             </td>
             <td>{item.identificador}</td>
+            <td>{item.submodulos.length}</td>
             <td>
               <span className={getBindingStatusClassName(item)}>
                 {getBindingStatusLabel(item)}

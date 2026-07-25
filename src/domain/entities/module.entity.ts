@@ -1,4 +1,25 @@
 export type ModuleType = "ENTRADA" | "SALIDA" | "POS";
+export type ModuleSubmoduleType =
+    | "QR_SCANNER"
+    | "PRINTER"
+    | "BARRIER"
+    | "CAMERA"
+    | "CASH_DRAWER"
+    | "CASH_ACCEPTOR"
+    | "DISPLAY"
+    | "KEYPAD"
+    | "OTHER";
+
+export interface ModuleSubmodule {
+    submoduloId: string;
+    nombre: string;
+    tipo: ModuleSubmoduleType;
+    identificador?: string;
+    ip?: string;
+    mac?: string;
+    descripcion?: string;
+    estado: boolean;
+}
 
 export interface ModuleDeviceBinding {
     fingerprint: string;
@@ -78,6 +99,7 @@ export class ModuleEntity {
     readonly deviceBindingRequests: ModuleDeviceBindingRequest[];
     readonly deviceConnectionAudit: ModuleDeviceConnectionAudit | null;
     readonly deviceRuntime: ModuleDeviceRuntime | null;
+    readonly submodulos: ModuleSubmodule[];
 
     constructor(options: {
         id: string;
@@ -91,6 +113,7 @@ export class ModuleEntity {
         deviceBindingRequests?: ModuleDeviceBindingRequest[];
         deviceConnectionAudit?: ModuleDeviceConnectionAudit | null;
         deviceRuntime?: ModuleDeviceRuntime | null;
+        submodulos?: ModuleSubmodule[];
     }) {
         this.id = options.id;
         this.nombre = options.nombre;
@@ -103,6 +126,7 @@ export class ModuleEntity {
         this.deviceBindingRequests = options.deviceBindingRequests ?? [];
         this.deviceConnectionAudit = options.deviceConnectionAudit ?? null;
         this.deviceRuntime = options.deviceRuntime ?? null;
+        this.submodulos = options.submodulos ?? [];
     }
 
     get name() {
@@ -149,6 +173,7 @@ export class ModuleEntity {
         const deviceBindingRequests = parseDeviceBindingRequests(object.deviceBindingRequests);
         const deviceConnectionAudit = parseDeviceConnectionAudit(object.deviceConnectionAudit);
         const deviceRuntime = parseDeviceRuntime(object.deviceRuntime);
+        const submodulos = parseSubmodulos(object.submodulos);
 
         if (!id) throw new Error("El modulo no incluyo id");
         if (!nombre) throw new Error("El modulo no incluyo nombre");
@@ -167,6 +192,7 @@ export class ModuleEntity {
             deviceBindingRequests,
             deviceConnectionAudit,
             deviceRuntime,
+            submodulos,
         });
     }
 
@@ -183,8 +209,56 @@ export class ModuleEntity {
             deviceBindingRequests: module.deviceBindingRequests,
             deviceConnectionAudit: module.deviceConnectionAudit,
             deviceRuntime: module.deviceRuntime,
+            submodulos: module.submodulos,
         });
     }
+}
+
+function parseSubmodulos(value: unknown): ModuleSubmodule[] {
+    if (!Array.isArray(value)) return [];
+
+    return value
+        .map((item) => parseSubmodulo(item))
+        .filter((item): item is ModuleSubmodule => Boolean(item));
+}
+
+function parseSubmodulo(value: unknown): ModuleSubmodule | null {
+    if (!value || typeof value !== "object") return null;
+
+    const source = value as Record<string, unknown>;
+    const submoduloId = String(source.submoduloId ?? source.id ?? source._id ?? "").trim();
+    const nombre = String(source.nombre ?? source.name ?? "").trim();
+    const tipo = parseSubmoduleType(source.tipo ?? source.type);
+
+    if (!submoduloId || !nombre) return null;
+
+    return {
+        submoduloId,
+        nombre,
+        tipo,
+        identificador: normalizeOptionalText(source.identificador),
+        ip: normalizeOptionalText(source.ip),
+        mac: normalizeOptionalText(source.mac),
+        descripcion: normalizeOptionalText(source.descripcion),
+        estado: parseEstado(source.estado ?? source.active ?? source.state),
+    };
+}
+
+function parseSubmoduleType(value: unknown): ModuleSubmoduleType {
+    const normalized = String(value ?? "OTHER").trim().toUpperCase();
+    if (
+        normalized === "QR_SCANNER" ||
+        normalized === "PRINTER" ||
+        normalized === "BARRIER" ||
+        normalized === "CAMERA" ||
+        normalized === "CASH_DRAWER" ||
+        normalized === "CASH_ACCEPTOR" ||
+        normalized === "DISPLAY" ||
+        normalized === "KEYPAD"
+    ) {
+        return normalized;
+    }
+    return "OTHER";
 }
 
 function parseProjectId(value: unknown): string {

@@ -68,6 +68,68 @@
   box-shadow: 0 12px 36px color-mix(in srgb, #000 6%, transparent);
 }
 
+.settings-card--wide {
+  grid-column: 1 / -1;
+}
+
+.settings-sync {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-sync > p {
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.settings-sync__grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-sync__grid span {
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+  border-radius: 16px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.76rem;
+  font-weight: 800;
+  gap: 7px;
+  letter-spacing: 0.06em;
+  padding: 14px;
+  text-transform: uppercase;
+}
+
+.settings-sync__grid strong {
+  color: var(--text-primary);
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+  text-transform: none;
+}
+
+.settings-sync__error,
+.settings-sync__success {
+  border-radius: 15px;
+  font-weight: 700;
+  padding: 12px 14px;
+}
+
+.settings-sync__error {
+  background: color-mix(in srgb, var(--danger-color, #b42318) 12%, transparent);
+  color: var(--danger-color, #b42318);
+}
+
+.settings-sync__success {
+  background: color-mix(in srgb, var(--success-color, #1f7a4d) 12%, transparent);
+  color: var(--success-color, #1f7a4d);
+}
+
 /* Card header */
 .card-header {
   display: flex;

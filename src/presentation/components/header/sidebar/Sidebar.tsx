@@ -1,6 +1,24 @@
 import "./sidebar.css";
-import { forwardRef, memo, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { FaCashRegister, FaChartLine, FaChevronDown, FaCog, FaCreditCard, FaExchangeAlt, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
+import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaCog, FaCreditCard, FaExchangeAlt, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { hasModuleAccess } from "../../../../domain/entities/module-access";
 import { useAuth } from "../../../context/auth/useAuth";
@@ -18,12 +36,71 @@ type SidebarNavItemProps = {
   onClick: (path: string) => void;
 };
 
+type SidebarDockIconProps = {
+  mouseY: MotionValue<number>;
+  isCollapsed: boolean;
+  className?: string;
+  children: ReactNode;
+};
+
+const SidebarDockIcon = ({
+  mouseY,
+  isCollapsed,
+  className,
+  children,
+}: SidebarDockIconProps) => {
+  const iconRef = useRef<HTMLDivElement | null>(null);
+
+  const distance = useTransform(mouseY, (currentY) => {
+    const bounds = iconRef.current?.getBoundingClientRect();
+    if (!bounds) return Number.POSITIVE_INFINITY;
+    const centerY = bounds.top + bounds.height / 2;
+    return currentY - centerY;
+  });
+
+  const proximity = useTransform(distance, (offset) => {
+    const clampRange = Math.min(Math.abs(offset), 220);
+    return Math.max(0, 1 - clampRange / 220);
+  });
+
+  const orbScale = useTransform(proximity, [0, 1], [1, isCollapsed ? 1.42 : 1.2]);
+  const glyphScale = useTransform(proximity, [0, 1], [1, isCollapsed ? 1.12 : 1.05]);
+  const targetX = useTransform(proximity, [0, 1], [0, isCollapsed ? 5 : 2]);
+  const targetY = useTransform(proximity, [0, 1], [0, -1.5]);
+  const bgAlpha = useTransform(proximity, [0, 1], [0, isCollapsed ? 0.16 : 0.1]);
+  const glowAlpha = useTransform(proximity, [0, 1], [0, isCollapsed ? 0.2 : 0.12]);
+
+  const orbScaleSpring = useSpring(orbScale, { mass: 0.2, stiffness: 320, damping: 22 });
+  const glyphScaleSpring = useSpring(glyphScale, { mass: 0.2, stiffness: 320, damping: 22 });
+  const x = useSpring(targetX, { mass: 0.2, stiffness: 340, damping: 22 });
+  const y = useSpring(targetY, { mass: 0.2, stiffness: 340, damping: 22 });
+
+  const bgP = useTransform(bgAlpha, (a) => Math.round(a * 100));
+  const glowP = useTransform(glowAlpha, (a) => Math.round(a * 100));
+  const background = useMotionTemplate`color-mix(in srgb, var(--primary-color) ${bgP}%, transparent)`;
+  const boxShadow = useMotionTemplate`0 0 0 1px color-mix(in srgb, var(--primary-color) ${glowP}%, transparent), 0 10px 20px rgba(0, 0, 0, ${glowAlpha})`;
+
+  return (
+    <motion.div
+      ref={iconRef}
+      className={`sidebar-motion-icon ${isCollapsed ? "is-collapsed" : ""} ${className ?? ""}`}
+      style={{ x, y }}
+    >
+      <motion.span
+        className="sidebar-motion-orb"
+        style={{ scale: orbScaleSpring, background, boxShadow }}
+      />
+      <motion.span className="sidebar-motion-glyph" style={{ scale: glyphScaleSpring }}>
+        {children}
+      </motion.span>
+    </motion.div>
+  );
+};
+
 const SidebarNavItem = memo(({ path, label, icon, isActive, onClick }: SidebarNavItemProps) => (
   <li className={isActive ? "active clickable" : "clickable"} onClick={() => onClick(path)}>
     <span className="sidebar-text">{label}</span>
-    <span className="sidebar-motion-icon">
-      <span className="sidebar-motion-glyph">{icon}</span>
-    </span>
+    {icon}
   </li>
 ));
 
@@ -33,6 +110,8 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
   const { user } = useAuth();
   const userModules = user?.modules;
   const isSuperAdmin = user?.role === "superRole";
+  const mouseY = useMotionValue(-1000);
+  const isCollapsed = !isOpen;
 
   const canViewCashPayments =
     isSuperAdmin ||
@@ -45,6 +124,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
   const canViewPensionMoves =
     isSuperAdmin || hasModuleAccess(userModules, "pensionMoves");
   const canViewPayments = isSuperAdmin || hasModuleAccess(userModules, "payments");
+  const canViewDeviceHeartbeat = isSuperAdmin || hasModuleAccess(userModules, "modules");
   const isCajaRoute =
     location.pathname.startsWith("/caja") || location.pathname.startsWith("/cobro-caja");
   const isPensionsRoute =
@@ -74,8 +154,49 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
     }
   }, [isPensionsRoute]);
 
+  useEffect(() => {
+    if (!isCollapsed) mouseY.set(-1000);
+  }, [isCollapsed, mouseY]);
+
+  const handleSidebarMouseMove = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      mouseY.set(event.clientY);
+    },
+    [mouseY],
+  );
+
+  const handleSidebarMouseLeave = useCallback(() => {
+    mouseY.set(-1000);
+  }, [mouseY]);
+
+  const renderMenuIcon = useCallback(
+    (icon: ReactNode) => {
+      if (!isCollapsed) {
+        return (
+          <span className="sidebar-motion-icon">
+            <span className="sidebar-motion-glyph">{icon}</span>
+          </span>
+        );
+      }
+
+      return (
+        <SidebarDockIcon mouseY={mouseY} isCollapsed>
+          {icon}
+        </SidebarDockIcon>
+      );
+    },
+    [isCollapsed, mouseY],
+  );
+
   const navItems = useMemo(
     () => [
+      {
+        path: "/heartbeat",
+        label: "Heartbeat",
+        icon: <FaBroadcastTower className="sidebar-icon" />,
+        canView: canViewDeviceHeartbeat,
+        isActive: location.pathname.startsWith("/heartbeat") || location.pathname.startsWith("/device-map"),
+      },
       {
         path: "/tickets",
         label: "Tickets",
@@ -98,7 +219,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
         isActive: location.pathname.startsWith("/account") || location.pathname.startsWith("/settings"),
       },
     ],
-    [canViewPayments, canViewTickets, location.pathname],
+    [canViewDeviceHeartbeat, canViewPayments, canViewTickets, location.pathname],
   );
 
   return (
@@ -109,7 +230,12 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
         aria-hidden={!isOpen}
       />
 
-      <aside ref={ref} className={`sidebar ${isOpen ? "open" : "collapsed"}`}>
+      <aside
+        ref={ref}
+        className={`sidebar ${isOpen ? "open" : "collapsed"}`}
+        onMouseMove={isCollapsed ? handleSidebarMouseMove : undefined}
+        onMouseLeave={isCollapsed ? handleSidebarMouseLeave : undefined}
+      >
         <ul>
           {canViewCashPayments ? (
             <li className="sidebar-nav-group sidebar-nav-group--cash">
@@ -132,11 +258,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                       className={`sidebar-chevron${isCajaOpen ? " is-open" : ""}`}
                     />
                   </button>
-                  <span className="sidebar-motion-icon">
-                    <span className="sidebar-motion-glyph">
-                      <FaCashRegister className="sidebar-icon" />
-                    </span>
-                  </span>
+                  {renderMenuIcon(<FaCashRegister className="sidebar-icon" />)}
                 </span>
               </div>
 
@@ -152,11 +274,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                     onClick={() => go("/caja/cobro")}
                   >
                     <span className="sidebar-text">Cobro</span>
-                    <span className="sidebar-motion-icon">
-                      <span className="sidebar-motion-glyph">
-                        <FaWallet className="sidebar-icon" />
-                      </span>
-                    </span>
+                    {renderMenuIcon(<FaWallet className="sidebar-icon" />)}
                   </li>
                   <li
                     className={`sidebar-subnav-item clickable${
@@ -165,11 +283,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                     onClick={() => go("/caja/turno")}
                   >
                     <span className="sidebar-text">Turno de caja</span>
-                    <span className="sidebar-motion-icon">
-                      <span className="sidebar-motion-glyph">
-                        <FaReceipt className="sidebar-icon" />
-                      </span>
-                    </span>
+                    {renderMenuIcon(<FaReceipt className="sidebar-icon" />)}
                   </li>
                   <li
                     className={`sidebar-subnav-item clickable${
@@ -178,11 +292,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                     onClick={() => go("/caja/historial")}
                   >
                     <span className="sidebar-text">Historial</span>
-                    <span className="sidebar-motion-icon">
-                      <span className="sidebar-motion-glyph">
-                        <FaChartLine className="sidebar-icon" />
-                      </span>
-                    </span>
+                    {renderMenuIcon(<FaChartLine className="sidebar-icon" />)}
                   </li>
                 </ul>
               ) : null}
@@ -195,7 +305,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                 key={item.path}
                 path={item.path}
                 label={item.label}
-                icon={item.icon}
+                icon={renderMenuIcon(item.icon)}
                 isActive={item.isActive}
                 onClick={go}
               />
@@ -223,11 +333,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                       className={`sidebar-chevron${isPensionsOpen ? " is-open" : ""}`}
                     />
                   </button>
-                  <span className="sidebar-motion-icon">
-                    <span className="sidebar-motion-glyph">
-                      <FaTicketAlt className="sidebar-icon" />
-                    </span>
-                  </span>
+                  {renderMenuIcon(<FaTicketAlt className="sidebar-icon" />)}
                 </span>
               </div>
 
@@ -241,11 +347,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                       onClick={() => go("/pensiones")}
                     >
                       <span className="sidebar-text">Pensiones</span>
-                      <span className="sidebar-motion-icon">
-                        <span className="sidebar-motion-glyph">
-                          <FaTicketAlt className="sidebar-icon" />
-                        </span>
-                      </span>
+                      {renderMenuIcon(<FaTicketAlt className="sidebar-icon" />)}
                     </li>
                   ) : null}
                   {canViewPensionPasses ? (
@@ -256,11 +358,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                       onClick={() => go("/pension-pass")}
                     >
                       <span className="sidebar-text">Pension Pass</span>
-                      <span className="sidebar-motion-icon">
-                        <span className="sidebar-motion-glyph">
-                          <FaIdCard className="sidebar-icon" />
-                        </span>
-                      </span>
+                      {renderMenuIcon(<FaIdCard className="sidebar-icon" />)}
                     </li>
                   ) : null}
                   {canViewPensionMoves ? (
@@ -271,11 +369,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
                       onClick={() => go("/movimientos")}
                     >
                       <span className="sidebar-text">Movimientos</span>
-                      <span className="sidebar-motion-icon">
-                        <span className="sidebar-motion-glyph">
-                          <FaExchangeAlt className="sidebar-icon" />
-                        </span>
-                      </span>
+                      {renderMenuIcon(<FaExchangeAlt className="sidebar-icon" />)}
                     </li>
                   ) : null}
                 </ul>

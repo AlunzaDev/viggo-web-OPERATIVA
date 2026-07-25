@@ -1,6 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBuilding, FaMoon, FaShieldAlt, FaSignOutAlt, FaSun, FaUserCog, FaUsers } from "react-icons/fa";
+import {
+  FaBuilding,
+  FaCloudDownloadAlt,
+  FaMoon,
+  FaShieldAlt,
+  FaSignOutAlt,
+  FaSun,
+  FaSyncAlt,
+  FaUserCog,
+  FaUsers,
+} from "react-icons/fa";
 import Swal from "sweetalert2";
 import {
   applyTheme,
@@ -11,7 +21,21 @@ import {
 } from "../../../config/theme-mode";
 import { useAuth } from "../../context/auth/useAuth";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
+import {
+  getLocalConfigStatus,
+  syncLocalConfiguration,
+  type LocalConfigStatus,
+  type LocalConfigSyncResult,
+} from "../../services/config/config.api";
 import "../../styles/settings/SettingsPage.css";
+
+const formatDate = (value?: number | null) => {
+  if (!value) return "Sin registro";
+  return new Intl.DateTimeFormat("es-MX", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+};
 
 export function SettingsPage() {
   usePageTitle("Cuenta");
@@ -19,6 +43,11 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [theme, setTheme] = useState<ThemeMode>(() => resolveInitialTheme());
+  const [configStatus, setConfigStatus] = useState<LocalConfigStatus | null>(null);
+  const [syncResult, setSyncResult] = useState<LocalConfigSyncResult | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   const runtimeTheme = resolveThemeForRuntime(theme);
   const ThemeIcon = runtimeTheme === "dark" ? FaMoon : FaSun;
@@ -27,6 +56,33 @@ export function SettingsPage() {
     : runtimeTheme === "dark"
       ? "Oscuro"
       : "Claro";
+  const canManageLocalConfig =
+    user?.role === "superRole" || user?.role === "adminRole";
+
+  const loadConfigStatus = async () => {
+    if (!canManageLocalConfig) {
+      setConfigLoading(false);
+      return;
+    }
+
+    setConfigLoading(true);
+    setConfigError(null);
+    try {
+      setConfigStatus(await getLocalConfigStatus());
+    } catch (error) {
+      setConfigError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo cargar la configuracion local",
+      );
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadConfigStatus();
+  }, [canManageLocalConfig]);
 
   const toggleTheme = () => {
     if (isThemeLockedByEnv) return;
@@ -59,6 +115,21 @@ export function SettingsPage() {
     navigate("/login", { replace: true });
   };
 
+  const handleSyncNow = async () => {
+    setSyncing(true);
+    setConfigError(null);
+    setSyncResult(null);
+    try {
+      const result = await syncLocalConfiguration();
+      setSyncResult(result);
+      await loadConfigStatus();
+    } catch (error) {
+      setConfigError(error instanceof Error ? error.message : "No se pudo sincronizar");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div className="settings-page">
       <div className="settings-header">
@@ -85,6 +156,92 @@ export function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {canManageLocalConfig ? (
+          <div className="settings-card settings-card--wide">
+            <div className="card-header">
+              <FaCloudDownloadAlt className="icon-setting" />
+              <h3>Configuracion local</h3>
+            </div>
+
+            <div className="settings-sync">
+              <p>
+                Sincroniza desde NUBEADMIN proyecto, modulos, submodulos,
+                pensiones, pension pass, usuarios y perfiles de permisos.
+              </p>
+
+              <div className="settings-sync__grid">
+                <span>
+                  Proyecto
+                  <strong>{configStatus?.proyectoNombre ?? "Sin vincular"}</strong>
+                </span>
+                <span>
+                  NUBEADMIN
+                  <strong>{configStatus?.cloudApiUrl ?? "Sin configurar"}</strong>
+                </span>
+                <span>
+                  Ultimo sync
+                  <strong>{formatDate(configStatus?.lastSyncAt)}</strong>
+                </span>
+                <span>
+                  Estado sync
+                  <strong>
+                    {configStatus?.lastSyncStatus === "success"
+                      ? "Correcto"
+                      : configStatus?.lastSyncStatus === "success_with_warnings"
+                        ? "Con alertas"
+                      : configStatus?.lastSyncStatus === "failed"
+                        ? "Fallido"
+                        : "Sin registro"}
+                  </strong>
+                </span>
+                <span>
+                  Version config
+                  <strong>{configStatus?.lastConfigurationVersion ?? "Sin version"}</strong>
+                </span>
+                <span>
+                  Version accesos
+                  <strong>{configStatus?.lastAccessVersion ?? "Sin version"}</strong>
+                </span>
+              </div>
+
+              {configError ? (
+                <p className="settings-sync__error">{configError}</p>
+              ) : null}
+
+              {(configStatus?.lastSyncStatus === "failed" ||
+                configStatus?.lastSyncStatus === "success_with_warnings") &&
+              configStatus.lastSyncError ? (
+                <p className="settings-sync__error">
+                  {configStatus.lastSyncStatus === "failed" ? "Ultimo error" : "Ultima alerta"}:{" "}
+                  {configStatus.lastSyncError}
+                </p>
+              ) : null}
+
+              {syncResult ? (
+                <p className="settings-sync__success">
+                  Aplicado: {syncResult.configuration.modulos} modulos,{" "}
+                  {syncResult.configuration.pensiones} pensiones,{" "}
+                  {syncResult.configuration.pensionPasses} pension pass,{" "}
+                  {syncResult.access.users} usuarios y{" "}
+                  {syncResult.access.permissionProfiles} perfiles.
+                  {syncResult.integrity?.warnings?.length
+                    ? ` Alertas: ${syncResult.integrity.warnings.length}.`
+                    : ""}
+                </p>
+              ) : null}
+
+              <button
+                className="btn-setting-action"
+                disabled={configLoading || syncing || !configStatus?.configured}
+                onClick={handleSyncNow}
+              >
+                {syncing ? <FaSyncAlt /> : <FaCloudDownloadAlt />}
+                {syncing ? "Sincronizando..." : "Sincronizar ahora"}
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="settings-card">
           <div className="card-header">
