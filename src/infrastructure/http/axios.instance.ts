@@ -1,11 +1,12 @@
 import axios from "axios";
-import { apiUrl } from "../../config/backend";
+import { apiUrl, fallbackApiUrl } from "../../config/backend";
 
 let sessionTokenMarker: string | null = null;
 
 declare module "axios" {
   export interface AxiosRequestConfig {
     skipSessionExpiredHandling?: boolean;
+    _viggoRetriedWithFallback?: boolean;
   }
 }
 
@@ -32,7 +33,29 @@ api.interceptors.request.use((config) => {
 // Interceptor de respuesta: detecta token expirado (401)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config;
+    const canRetryWithFallback =
+      !!fallbackApiUrl &&
+      !config?._viggoRetriedWithFallback &&
+      !config?.skipSessionExpiredHandling &&
+      !error.response &&
+      (error.code === "ERR_NETWORK" || error.code === "ECONNREFUSED");
+
+    if (canRetryWithFallback && config) {
+      console.warn("[axios] Primary API unavailable, retrying with fallback", {
+        primary: apiUrl,
+        fallback: fallbackApiUrl,
+        url: config.url,
+      });
+
+      return api.request({
+        ...config,
+        baseURL: fallbackApiUrl,
+        _viggoRetriedWithFallback: true,
+      });
+    }
+
     const responseData =
       typeof error.response?.data === "object" &&
       error.response?.data !== null &&

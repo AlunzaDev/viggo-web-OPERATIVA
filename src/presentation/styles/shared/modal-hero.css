@@ -1,0 +1,51 @@
+.shared-modal-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--border));
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 14%, transparent) 0%, transparent 56%),
+    color-mix(in srgb, var(--surface-2) 74%, transparent);
+}
+
+.shared-modal-hero [hidden] {
+  display: none !important;
+}
+
+.shared-modal-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 84%, #eef7e8 16%) 0%, color-mix(in srgb, var(--primary-color-dark) 90%, #121b10 10%) 100%);
+  color: var(--text-on-primary);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.shared-modal-hero__copy {
+  min-width: 0;
+}
+
+.shared-modal-hero__title {
+  margin: 0;
+  font-size: 1.12rem;
+  font-family: var(--font-heading);
+  color: var(--text);
+}
+
+.shared-modal-hero__meta {
+  margin: 5px 0 0;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}

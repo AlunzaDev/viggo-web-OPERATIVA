@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
+  FaEdit,
+  FaInfoCircle,
+  FaPowerOff,
   FaSortAlphaDown,
   FaSortAlphaDownAlt,
   FaUserPlus,
@@ -12,6 +15,7 @@ import {
 } from "../../components/users/CreateUserModal/CreateUserModal";
 import { UniqueUserModal } from "../../components/users/UniqueUserModal/UniqueUserModal";
 import { FilterSidebar } from "../../components/shared/FilterSidebar";
+import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
 import { MobileCardsList } from "../../components/shared/lists/MobileCardsList";
 import { TableBase } from "../../components/shared/tables/TableBase";
 import { useUsers } from "../../hooks/users/useUsers";
@@ -230,9 +234,8 @@ export function UsersPage() {
         }}
         title="Filtros de Accesos"
       >
-        <section className="users-filters users-filters--sidebar">
-          <div className="users-filters__field">
-            <label htmlFor="status-filter">Estado</label>
+        <SidebarFilterForm>
+          <SidebarFilterField label="Estado" htmlFor="status-filter">
             <select
               id="status-filter"
               value={draftStatusFilter}
@@ -244,10 +247,9 @@ export function UsersPage() {
               <option value="active">Activos</option>
               <option value="inactive">Inactivos</option>
             </select>
-          </div>
+          </SidebarFilterField>
 
-          <div className="users-filters__field">
-            <label htmlFor="role-filter">Rol</label>
+          <SidebarFilterField label="Rol" htmlFor="role-filter">
             <select
               id="role-filter"
               value={draftRoleFilter}
@@ -261,8 +263,8 @@ export function UsersPage() {
               <option value="PENSION_ROLE">Pension</option>
               <option value="CLIENT_ROLE">Cliente</option>
             </select>
-          </div>
-        </section>
+          </SidebarFilterField>
+        </SidebarFilterForm>
       </FilterSidebar>
 
       <CreateUserModal
@@ -317,11 +319,9 @@ export function UsersPage() {
           pageSizeLabel="Tarjetas"
         >
           {visibleUsers.map((user, index) => (
-            <motion.button
+            <motion.div
               key={user.id}
-              type="button"
               className="mobile-data-card--button"
-              onClick={() => setSelectedUser(user)}
               initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={
@@ -357,7 +357,7 @@ export function UsersPage() {
                   </span>
                 </div>
               </div>
-            </motion.button>
+            </motion.div>
           ))}
         </MobileCardsList>
       ) : (
@@ -380,6 +380,7 @@ export function UsersPage() {
               <th className="col-phone">Telefono</th>
               <th className="col-role">Rol</th>
               <th className="col-status">Estado</th>
+              <th className="col-actions">Acciones</th>
             </tr>
           }
         >
@@ -387,14 +388,6 @@ export function UsersPage() {
             <motion.tr
               key={user.id}
               className="base-table__row"
-              onClick={() => setSelectedUser(user)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setSelectedUser(user);
-                }
-              }}
-              tabIndex={0}
               initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={
@@ -415,6 +408,46 @@ export function UsersPage() {
                 <span className={`app-status-pill users-badge users-badge--status ${user.estado ? "users-badge--active" : "users-badge--inactive"}`}>
                   {user.estado ? "Activo" : "Inactivo"}
                 </span>
+              </td>
+              <td className="col-actions">
+                <div className="admin-crud-row-actions">
+                  <button
+                    className="admin-crud-icon-button"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedUser(user);
+                    }}
+                    aria-label={`Ver detalle de ${user.name}`}
+                    title="Detalle"
+                  >
+                    <FaInfoCircle />
+                  </button>
+                  <button
+                    className="admin-crud-icon-button"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setEditingUser(user);
+                    }}
+                    aria-label={`Editar ${user.name}`}
+                    title="Editar"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    className="admin-crud-icon-button admin-crud-icon-button--warning"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void handleToggleUserState(user.id, !user.estado);
+                    }}
+                    aria-label={`${user.estado ? "Desactivar" : "Activar"} ${user.name}`}
+                    title={user.estado ? "Desactivar" : "Activar"}
+                  >
+                    <FaPowerOff />
+                  </button>
+                </div>
               </td>
             </motion.tr>
           ))}

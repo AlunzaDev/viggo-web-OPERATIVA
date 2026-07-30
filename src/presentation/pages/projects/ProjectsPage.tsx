@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaEraser, FaInfoCircle, FaPlus, FaSortAlphaDown, FaSortAlphaDownAlt } from "react-icons/fa";
+import { FaEdit, FaEraser, FaInfoCircle, FaPlus, FaPowerOff, FaSortAlphaDown, FaSortAlphaDownAlt } from "react-icons/fa";
 import { CreateProjectModal, type CreateProjectPayload } from "../../components/projects/CreateProjectModal/CreateProjectModal";
 import { UniqueProjectModal } from "../../components/projects/UniqueProjectModal/UniqueProjectModal";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { CopyableId } from "../../components/shared/CopyableId";
 import { EmptyState } from "../../components/shared/EmptyState";
 import { FilterSidebar } from "../../components/shared/FilterSidebar";
+import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
 import { InfoChip } from "../../components/shared/InfoChip";
 import { MobileCardsList } from "../../components/shared/lists/MobileCardsList";
 import { PageHeader } from "../../components/shared/PageHeader";
@@ -16,6 +17,7 @@ import { useMediaQuery } from "../../hooks/shared/useMediaQuery";
 import { useParkings } from "../../hooks/parkings/useParkings";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import type { ParkingEntity } from "../../../domain/entities/parking.entity";
+import "../../styles/adminCrud/AdminCrud.css";
 import "../../styles/projects/ProjectsPage.css";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
@@ -94,6 +96,19 @@ export function ProjectsPage() {
     await deleteProject(id);
     setSelectedProject(null);
     setEditingProject((current) => (current?.id === id ? null : current));
+  };
+
+  const handleToggleProjectState = async (project: ParkingEntity) => {
+    const updatedProject = await updateProject(project.id, {
+      nombre: project.nombre,
+      ciudad: project.ciudad,
+      coordinates: project.coordinates,
+      identificador: project.identificador,
+      img: project.img,
+      descripcion: project.descripcion,
+      estado: !project.estado,
+    });
+    setSelectedProject((current) => (current?.id === project.id ? updatedProject : current));
   };
 
   const selectedProjectId = selectedProject?.id;
@@ -219,9 +234,8 @@ export function ProjectsPage() {
         }}
         onReset={() => setDraftStatusFilter("active")}
       >
-        <section className="project-devices-filters project-devices-filters--sidebar">
-          <div className="project-devices-filters__field">
-            <label htmlFor="project-status-filter">Estado</label>
+        <SidebarFilterForm>
+          <SidebarFilterField label="Estado" htmlFor="project-status-filter">
             <select
               id="project-status-filter"
               value={draftStatusFilter}
@@ -231,8 +245,8 @@ export function ProjectsPage() {
               <option value="inactive">Inactivos</option>
               <option value="all">Todos</option>
             </select>
-          </div>
-        </section>
+          </SidebarFilterField>
+        </SidebarFilterForm>
       </FilterSidebar>
 
       <CreateProjectModal
@@ -268,6 +282,7 @@ export function ProjectsPage() {
           setSelectedProject(null);
           setEditingProject(project);
         }}
+        onToggleStatus={handleToggleProjectState}
         onDelete={handleDeleteProject}
         onClose={() => setSelectedProject(null)}
       />
@@ -381,18 +396,44 @@ export function ProjectsPage() {
                 <InfoChip className="app-status-pill" tone={project.estado ? "success" : "muted"}>{project.estado ? "Activo" : "Inactivo"}</InfoChip>
               </td>
               <td className="col-actions">
-                <button
-                  type="button"
-                  className="projects-action-btn"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    goToProjectDevices(project);
-                  }}
-                  aria-label={`Abrir detalle de ${project.nombre}`}
-                  title="Ver modulos"
-                >
-                  <FaInfoCircle />
-                </button>
+                <div className="admin-crud-row-actions">
+                  <button
+                    type="button"
+                    className="admin-crud-action-button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedProject(project);
+                    }}
+                    aria-label={`Abrir detalle de ${project.nombre}`}
+                    title="Detalle"
+                  >
+                    <FaInfoCircle />
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-crud-action-button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setEditingProject(project);
+                    }}
+                    aria-label={`Editar ${project.nombre}`}
+                    title="Editar"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-crud-action-button admin-crud-action-button--warning"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void handleToggleProjectState(project);
+                    }}
+                    aria-label={`${project.estado ? "Desactivar" : "Activar"} ${project.nombre}`}
+                    title={project.estado ? "Desactivar" : "Activar"}
+                  >
+                    <FaPowerOff />
+                  </button>
+                </div>
               </td>
             </motion.tr>
           ))}

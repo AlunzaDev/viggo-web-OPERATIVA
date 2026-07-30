@@ -1,0 +1,15 @@
+@import url("./modal-hero.css");
+@import url("./modal-intro.css");
+
+@media (max-width: 768px) {
+  .shared-modal-hero {
+    align-items: flex-start;
+  }
+
+  .shared-modal-hero__badge,
+  .shared-modal-intro__badge {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+}

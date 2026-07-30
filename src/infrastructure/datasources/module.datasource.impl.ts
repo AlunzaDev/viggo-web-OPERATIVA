@@ -1,4 +1,5 @@
 import { ModuleDatasource } from "../../domain/datasources/module.datasource";
+import type { PaginatedModuleResult } from "../../domain/datasources/module.datasource";
 import { ModuleEntity } from "../../domain/entities/module.entity";
 import { api } from "../http/axios.instance";
 import { CreateModuleDto } from "../dtos/module/create-module.dto";
@@ -39,6 +40,46 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
             const { data } = await api.get<{ modulos?: unknown[] } | unknown[]>("/api/modulos", query);
             const modulesList = Array.isArray(data) ? data : (data.modulos ?? []);
             return modulesList.map((item) => ModuleEntity.fromObject(resolveModulePayload(item)));
+        } catch (error: unknown) {
+            const errorMessage = getApiErrorMessage(error);
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+            throw new Error("Ocurrio un error inesperado al listar modulos");
+        }
+    }
+
+    async getPage(params: {
+        page?: number;
+        limit?: number;
+        projectId?: string;
+    }): Promise<PaginatedModuleResult> {
+        try {
+            const { data } = await api.get<{
+                modulos?: unknown[];
+                total?: unknown;
+                page?: unknown;
+                limit?: unknown;
+                totalPages?: unknown;
+            }>("/api/modulos", {
+                params: {
+                    proyecto: params.projectId,
+                    page: params.page,
+                    limit: params.limit,
+                },
+            });
+
+            const items = Array.isArray(data.modulos)
+                ? data.modulos.map((item) => ModuleEntity.fromObject(resolveModulePayload(item)))
+                : [];
+
+            return {
+                items,
+                total: Number(data.total ?? items.length),
+                page: Number(data.page ?? params.page ?? 1),
+                limit: Number(data.limit ?? params.limit ?? Math.max(items.length, 1)),
+                totalPages: Number(data.totalPages ?? 1),
+            };
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {

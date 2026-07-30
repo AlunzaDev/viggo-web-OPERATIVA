@@ -157,39 +157,134 @@
   text-transform: uppercase;
 }
 
-.admin-crud-row-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.admin-crud-icon-button {
+.admin-crud-row-actions,
+.table-actions,
+.actions-cell,
+.row-actions-container {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.admin-crud-page th.col-actions,
+.admin-crud-page td.col-actions,
+.admin-crud-page th.col-acciones,
+.admin-crud-page td.col-acciones {
+  width: 156px;
+  min-width: 156px;
+  white-space: nowrap;
+}
+
+.admin-crud-icon-button,
+.admin-crud-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--text);
   cursor: pointer;
+  transition:
+    transform var(--dur-2) var(--ease),
+    box-shadow var(--dur-2) var(--ease),
+    background var(--dur-2) var(--ease),
+    border-color var(--dur-2) var(--ease),
+    color var(--dur-2) var(--ease),
+    opacity var(--dur-2) var(--ease);
 }
 
-.admin-crud-icon-button:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+.admin-crud-icon-button:hover,
+.admin-crud-action-button:hover {
+  transform: translateY(-1px);
 }
 
-.admin-crud-icon-button--danger {
+.admin-crud-icon-button:active,
+.admin-crud-action-button:active {
+  transform: scale(0.96);
+}
+
+.admin-crud-icon-button:focus-visible,
+.admin-crud-action-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color) 46%, transparent);
+  outline-offset: 2px;
+}
+
+.admin-crud-icon-button,
+.admin-crud-action-button,
+.admin-crud-icon-button--info,
+.admin-crud-action-button--info {
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+  color: color-mix(in srgb, var(--text) 90%, transparent);
+}
+
+.admin-crud-icon-button:hover,
+.admin-crud-action-button:hover,
+.admin-crud-icon-button--info:hover,
+.admin-crud-action-button--info:hover {
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--primary-color) 30%);
+  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border));
+  color: color-mix(in srgb, var(--text) 95%, #ffffff 5%);
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 20%, transparent);
+}
+
+.admin-crud-icon-button--edit,
+.admin-crud-action-button--edit {
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+  color: var(--edit-color, #f59e0b);
+}
+
+.admin-crud-icon-button--edit:hover,
+.admin-crud-action-button--edit:hover {
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--edit-color, #f59e0b) 30%);
+  border-color: color-mix(in srgb, var(--edit-color, #f59e0b) 55%, var(--border));
+  color: var(--edit-color, #f59e0b);
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 20%, transparent);
+}
+
+.admin-crud-action-button--warning {
+  background: color-mix(in srgb, var(--success-color, #22c55e) 12%, transparent);
+  border-color: color-mix(in srgb, var(--success-color, #22c55e) 30%, var(--border));
+  color: var(--success-color, #22c55e);
+}
+
+.admin-crud-action-button--warning:hover {
+  background: color-mix(in srgb, var(--success-color, #22c55e) 20%, transparent);
+  border-color: color-mix(in srgb, var(--success-color, #22c55e) 45%, var(--border));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--success-color, #22c55e) 22%, transparent);
+}
+
+.admin-crud-icon-button--warning {
+  background: color-mix(in srgb, var(--success-color, #22c55e) 12%, transparent);
+  border-color: color-mix(in srgb, var(--success-color, #22c55e) 30%, var(--border));
+  color: var(--success-color, #22c55e);
+}
+
+.admin-crud-icon-button--warning:hover {
+  background: color-mix(in srgb, var(--success-color, #22c55e) 20%, transparent);
+  border-color: color-mix(in srgb, var(--success-color, #22c55e) 45%, var(--border));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--success-color, #22c55e) 22%, transparent);
+}
+
+.admin-crud-icon-button--danger,
+.admin-crud-action-button--danger {
+  background: color-mix(in srgb, var(--error-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--error-color) 30%, var(--border));
+  color: var(--error-color);
+}
+
+.admin-crud-icon-button--danger:hover,
+.admin-crud-action-button--danger:hover {
+  background: color-mix(in srgb, var(--error-color) 20%, transparent);
   border-color: color-mix(in srgb, var(--error-color) 45%, var(--border));
-  color: var(--error-color);
-}
-
-.admin-crud-icon-button--danger:hover {
-  border-color: var(--error-color);
-  background: color-mix(in srgb, var(--error-color) 10%, transparent);
-  color: var(--error-color);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--error-color) 22%, transparent);
 }
 
 .admin-crud-pill {
@@ -229,6 +324,26 @@
   background: rgba(90, 90, 90, 0.26);
   color: rgba(255, 255, 255, 0.72);
 }
+
+.admin-crud-inline-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-crud-inline-filters select,
+.admin-crud-inline-filters input {
+  min-height: 38px;
+  min-width: 170px;
+  border: 1px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--input-bg);
+  color: var(--text);
+  padding: 0 14px;
+  font: inherit;
+}
+
 
 .admin-crud-status--pending {
   border-color: #c08a12;

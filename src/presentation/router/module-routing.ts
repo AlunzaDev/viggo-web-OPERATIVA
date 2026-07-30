@@ -29,5 +29,5 @@ export const getDefaultAuthorizedPath = (user: AuthUserEntity | null | undefined
   if (!user) return "/login";
 
   const allowedModule = MODULE_PRIORITY.find((module) => hasModuleAccess(user.modules, module));
-  return allowedModule ? getModuleRoute(allowedModule) : "/account";
+  return allowedModule ? "/dashboard" : "/account";
 };

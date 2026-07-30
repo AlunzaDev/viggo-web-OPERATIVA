@@ -46,3 +46,30 @@ export const socketUrl = useDevProxy
 export const backendScopeKey =
   (useDevProxy ? runtimeOrigin : apiUrl) || "default";
 export const isProdBackend = isProductionBuild;
+
+const getAlternateLocalhostUrl = (value: string): string | null => {
+  try {
+    const parsed = new URL(value);
+    const isLocalHost =
+      parsed.hostname === "localhost" ||
+      parsed.hostname === "127.0.0.1";
+
+    if (!isLocalHost) return null;
+
+    if (parsed.port === "3002") {
+      parsed.port = "3000";
+      return parsed.toString().replace(/\/$/, "");
+    }
+
+    if (parsed.port === "3000") {
+      parsed.port = "3002";
+      return parsed.toString().replace(/\/$/, "");
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export const fallbackApiUrl = apiUrl ? getAlternateLocalhostUrl(apiUrl) : null;

@@ -1,3 +1,5 @@
+@import url("../shared/page.css");
+
 .projects-page {
     animation: fadeIn 0.4s ease-out;
 }
@@ -25,6 +27,12 @@
 .projects-page th.col-actions,
 .projects-page td.col-actions {
     text-align: center;
+    width: 180px;
+    min-width: 180px;
+}
+
+.projects-page td.col-actions .admin-crud-row-actions {
+    flex-wrap: nowrap;
 }
 
 .projects-page th.col-capacity,
@@ -32,38 +40,6 @@
     text-align: center;
 }
 
-.projects-action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid color-mix(in srgb, var(--primary-color) 40%, var(--border));
-    background: color-mix(in srgb, var(--surface-2) 76%, transparent);
-    color: var(--primary-color);
-    font-family: var(--font-heading);
-    font-size: 0.78rem;
-    font-weight: 700;
-    padding: 0;
-    cursor: pointer;
-    transition:
-        background var(--dur-2) var(--ease),
-        border-color var(--dur-2) var(--ease),
-        color var(--dur-2) var(--ease),
-        transform var(--dur-2) var(--ease);
-}
-
-.projects-action-btn:hover {
-    border-color: color-mix(in srgb, var(--primary-color) 70%, transparent);
-    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
-    transform: translateY(-1px);
-}
-
-.projects-action-btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--primary-color) 46%, transparent);
-    outline-offset: 2px;
-}
 
 .projects-cards-shell {
     margin-top: 14px;

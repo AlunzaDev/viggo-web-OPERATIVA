@@ -1,0 +1,55 @@
+.shared-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.shared-identity [hidden] {
+  display: none !important;
+}
+
+.shared-identity--compact {
+  gap: 10px;
+}
+
+.shared-identity__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 84%, #eef7e8 16%) 0%, color-mix(in srgb, var(--primary-color-dark) 90%, #121b10 10%) 100%);
+  color: var(--text-on-primary);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.shared-identity__copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.shared-identity__copy strong,
+.shared-identity__copy span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shared-identity__copy strong {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.shared-identity__copy span {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}

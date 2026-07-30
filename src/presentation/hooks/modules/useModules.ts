@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { ApproveModuleDeviceBinding } from "../../../application/use-cases/modules/approve-module-device-binding.usecase";
 import { CreateModule } from "../../../application/use-cases/modules/create-module.usecase";
 import { DeleteModule } from "../../../application/use-cases/modules/delete-module.usecase";
-import { GetModules } from "../../../application/use-cases/modules/get-modules.usecase";
 import { RejectModuleDeviceBinding } from "../../../application/use-cases/modules/reject-module-device-binding.usecase";
 import { ReopenModuleDeviceBinding } from "../../../application/use-cases/modules/reopen-module-device-binding.usecase";
 import { ResetModuleDeviceBinding } from "../../../application/use-cases/modules/reset-module-device-binding.usecase";
@@ -16,7 +15,6 @@ import { ModuleRepositoryImpl } from "../../../infrastructure/repositories/modul
 const datasource = new ModuleDatasourceImpl();
 const repository = new ModuleRepositoryImpl(datasource);
 
-const getModulesUseCase = new GetModules(repository);
 const createModuleUseCase = new CreateModule(repository);
 const updateModuleUseCase = new UpdateModule(repository);
 const deleteModuleUseCase = new DeleteModule(repository);
@@ -44,6 +42,8 @@ export function useModules(projectId?: string) {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
 
     const getErrorMessage = (errorValue: unknown, fallback: string) =>
         errorValue instanceof Error ? errorValue.message : fallback;
@@ -52,21 +52,20 @@ export function useModules(projectId?: string) {
         setIsLoading(true);
         setError(null);
         try {
-            const result = await getModulesUseCase.execute(projectId);
-            setModules(result);
+            const result = await datasource.getPage({ projectId, page, limit: pageSize });
+            setModules(result.items);
+            setTotalItems(result.total);
+            setTotalPages(Math.max(1, result.totalPages));
         } catch (err: unknown) {
             setError(getErrorMessage(err, "No se pudieron cargar los modulos"));
         } finally {
             setIsLoading(false);
         }
-    }, [projectId]);
+    }, [page, pageSize, projectId]);
 
     useEffect(() => {
         void fetchModules();
     }, [fetchModules]);
-
-    const totalItems = modules.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
     const goToPage = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -89,7 +88,7 @@ export function useModules(projectId?: string) {
             if (errorDto || !dto) throw new Error(errorDto || "Datos invalidos");
 
             const newModule = await createModuleUseCase.execute(dto);
-            setModules((prev) => [...prev, newModule]);
+            void fetchModules();
             return newModule;
         } catch (err: unknown) {
             const message = getErrorMessage(err, "No se pudo crear el modulo");
@@ -108,7 +107,7 @@ export function useModules(projectId?: string) {
             if (errorDto || !dto) throw new Error(errorDto || "Datos invalidos");
 
             const updated = await updateModuleUseCase.execute(dto);
-            setModules((prev) => prev.map((module) => (module.id === id ? updated : module)));
+            void fetchModules();
             return updated;
         } catch (err: unknown) {
             const message = getErrorMessage(err, "No se pudo actualizar el modulo");
@@ -124,7 +123,7 @@ export function useModules(projectId?: string) {
         setError(null);
         try {
             await deleteModuleUseCase.execute(id);
-            setModules((prev) => prev.filter((module) => module.id !== id));
+            void fetchModules();
         } catch (err: unknown) {
             const message = getErrorMessage(err, "No se pudo eliminar el modulo");
             setError(message);

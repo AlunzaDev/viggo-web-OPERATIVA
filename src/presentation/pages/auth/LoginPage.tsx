@@ -10,12 +10,55 @@ import { AuthRepositoryImpl } from "../../../infrastructure/repositories/auth.re
 import { ForgotPasswordUseCase } from "../../../application/use-cases/auth/forgot-password.usecase";
 import { ResendValidationEmailUseCase } from "../../../application/use-cases/auth/resend-validation-email.usecase";
 import { applyTheme, resolveInitialTheme, type ThemeMode } from "../../../config/theme-mode";
+import { showAppToast } from "../../utils/feedback/swalToast";
 import "../../styles/auth/LoginPage.css";
 
 const authDatasource = new AuthDataSourceImpl();
 const authRepository = new AuthRepositoryImpl(authDatasource);
 const forgotPasswordUseCase = new ForgotPasswordUseCase(authRepository);
 const resendValidationEmailUseCase = new ResendValidationEmailUseCase(authRepository);
+
+const normalizeLoginError = (rawMessage: string) => {
+  const message = rawMessage.trim();
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("cors") ||
+    normalized.includes("network error") ||
+    normalized.includes("servidor no disponible") ||
+    normalized.includes("failed to fetch") ||
+    normalized.includes("load failed")
+  ) {
+    return {
+      title: "No pudimos conectar",
+      message: "Revisa la conexion con el sistema e intenta nuevamente en un momento.",
+    };
+  }
+
+  if (
+    normalized.includes("unauthorized") ||
+    normalized.includes("credenciales") ||
+    normalized.includes("correo o contraseña") ||
+    normalized.includes("correo o contrasena")
+  ) {
+    return {
+      title: "Acceso denegado",
+      message: "Verifica tu correo y contraseña para volver a intentarlo.",
+    };
+  }
+
+  if (normalized.includes("sesion") && normalized.includes("expir")) {
+    return {
+      title: "La sesion ya no es valida",
+      message: "Inicia sesion nuevamente para continuar.",
+    };
+  }
+
+  return {
+    title: "No pudimos iniciar sesion",
+    message: message || "Intenta nuevamente en un momento.",
+  };
+};
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -39,15 +82,7 @@ export function LoginPage() {
       if (isSubmittingRef.current) return;
 
       if (!email.trim() || !password.trim()) {
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "warning",
-          title: "Campos incompletos",
-          text: "Ingresa tu correo y contraseña.",
-          showConfirmButton: false,
-          timer: 3000,
-        });
+        void showAppToast("warning", "Campos incompletos", "Ingresa tu correo y contraseña.");
         return;
       }
 
@@ -60,15 +95,7 @@ export function LoginPage() {
           password,
         });
 
-        void Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: "Bienvenido a Viggo",
-          showConfirmButton: false,
-          timer: 2000,
-          timerProgressBar: true,
-        });
+        void showAppToast("success", "Bienvenido a Viggo");
 
         const nextPath = getDefaultAuthorizedPath(authenticatedUser);
         navigate(nextPath === "/login" ? "/projects" : nextPath, { replace: true });
@@ -77,16 +104,8 @@ export function LoginPage() {
           error instanceof Error
             ? error.message
             : "Credenciales incorrectas o servidor no disponible.";
-
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "error",
-          title: "Acceso denegado",
-          text: errorMessage,
-          showConfirmButton: false,
-          timer: 3500,
-        });
+        const normalizedError = normalizeLoginError(errorMessage);
+        void showAppToast("error", normalizedError.title, normalizedError.message);
       } finally {
         isSubmittingRef.current = false;
         setLoading(false);
@@ -135,15 +154,7 @@ export function LoginPage() {
             ? result.value
             : "Si el correo existe, revisa tu bandeja de entrada.";
 
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: "Enlace enviado",
-          text: backendMessage,
-          timer: 3000,
-          showConfirmButton: false,
-        });
+        void showAppToast("success", "Enlace enviado", backendMessage);
       }
     });
   }, []);
@@ -188,15 +199,7 @@ export function LoginPage() {
             ? result.value
             : "Si el correo existe y sigue pendiente, revisa tu bandeja de entrada.";
 
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: "Validación reenviada",
-          text: backendMessage,
-          timer: 3000,
-          showConfirmButton: false,
-        });
+        void showAppToast("success", "Validacion reenviada", backendMessage);
       }
     });
   }, []);

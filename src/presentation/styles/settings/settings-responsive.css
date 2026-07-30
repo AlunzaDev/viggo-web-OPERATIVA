@@ -1,0 +1,82 @@
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 16px;
+  }
+
+  .settings-title {
+    font-size: 26px;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-card {
+    padding: 16px;
+  }
+
+  .profile-avatar-large {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatar-upload-overlay {
+    font-size: 18px;
+  }
+
+  .settings-monthly-flush-modal__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-project-alerts-modal__toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-project-alerts-modal__toolbar .settings-project-alerts__segmented-actions {
+    width: 100%;
+  }
+
+  .settings-project-alerts-modal__toolbar .settings-project-alerts__segment {
+    flex: 1 1 50%;
+    padding-inline: 10px;
+  }
+
+  .settings-monthly-flush-modal__history-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-monthly-flush-modal__calendar {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .settings-monthly-flush-modal__picker-trigger {
+    grid-template-columns: 1fr auto;
+  }
+
+  .settings-monthly-flush-modal__picker-trigger-meta {
+    grid-column: 1 / -1;
+  }
+
+  .settings-monthly-flush-modal__picker-panel--time {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-monthly-flush-modal__manual-controls {
+    grid-template-columns: 1fr;
+  }
+}
+

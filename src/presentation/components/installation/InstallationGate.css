@@ -1,20 +1,23 @@
 .installation-gate {
-  min-height: calc(100vh - 72px);
+  min-height: 100%;
   display: grid;
   place-items: center;
-  padding: clamp(24px, 5vw, 64px);
+  align-content: center;
+  box-sizing: border-box;
+  padding: clamp(20px, 4vw, 40px);
   background:
     radial-gradient(circle at 18% 20%, rgba(54, 112, 82, 0.16), transparent 32%),
     linear-gradient(135deg, rgba(252, 248, 240, 0.96), rgba(236, 242, 235, 0.92));
 }
 
 .installation-gate__card {
-  width: min(760px, 100%);
+  width: min(880px, 100%);
   padding: clamp(24px, 4vw, 42px);
   border: 1px solid rgba(39, 92, 63, 0.18);
   border-radius: 32px;
   background: rgba(255, 252, 246, 0.9);
   box-shadow: 0 28px 80px rgba(18, 38, 28, 0.16);
+  box-sizing: border-box;
 }
 
 .installation-gate__eyebrow,
@@ -108,10 +111,88 @@
   font-weight: 700;
 }
 
+.installation-gate__alert {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: flex-start;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid rgba(185, 63, 63, 0.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(185, 63, 63, 0.14), transparent 58%),
+    rgba(255, 244, 244, 0.88);
+  box-shadow: 0 18px 36px rgba(120, 35, 35, 0.12);
+}
+
+.installation-gate__alert--warning {
+  border-color: rgba(201, 140, 18, 0.2);
+  background:
+    radial-gradient(circle at top left, rgba(230, 176, 37, 0.16), transparent 58%),
+    rgba(255, 249, 237, 0.9);
+  box-shadow: 0 18px 36px rgba(148, 103, 16, 0.12);
+}
+
+.installation-gate__alert-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(185, 63, 63, 0.12);
+  color: #9e2f2f;
+}
+
+.installation-gate__alert--warning .installation-gate__alert-icon {
+  background: rgba(230, 176, 37, 0.14);
+  color: #9b6509;
+}
+
+.installation-gate__alert-copy {
+  min-width: 0;
+}
+
+.installation-gate__alert-copy strong {
+  display: block;
+  margin: 0;
+  color: #6f2424;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.installation-gate__alert--warning .installation-gate__alert-copy strong {
+  color: #8a5806;
+}
+
+.installation-gate__alert-copy p {
+  margin: 6px 0 0;
+  max-width: none;
+  color: #7a4b4b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.installation-gate__alert--warning .installation-gate__alert-copy p {
+  color: #7f6a42;
+}
+
 .installation-gate__actions {
   justify-content: flex-end;
   flex-wrap: wrap;
   margin-top: 28px;
+}
+
+@media (max-width: 768px) {
+  .installation-gate {
+    padding: 16px;
+    place-items: stretch;
+  }
+
+  .installation-gate__card {
+    width: 100%;
+    border-radius: 24px;
+  }
 }
 
 .installation-gate__actions button {
@@ -158,4 +239,53 @@
 :root[data-theme="dark"] .installation-gate p,
 :root:not([data-theme="light"]) .installation-gate p {
   color: #aebcaf;
+}
+
+:root[data-theme="dark"] .installation-gate__alert,
+:root:not([data-theme="light"]) .installation-gate__alert {
+  border-color: rgba(215, 114, 114, 0.24);
+  background:
+    radial-gradient(circle at top left, rgba(170, 58, 58, 0.2), transparent 58%),
+    rgba(48, 20, 20, 0.86);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="dark"] .installation-gate__alert--warning,
+:root:not([data-theme="light"]) .installation-gate__alert--warning {
+  border-color: rgba(214, 177, 72, 0.24);
+  background:
+    radial-gradient(circle at top left, rgba(214, 177, 72, 0.18), transparent 58%),
+    rgba(58, 47, 18, 0.88);
+}
+
+:root[data-theme="dark"] .installation-gate__alert-icon,
+:root:not([data-theme="light"]) .installation-gate__alert-icon {
+  background: rgba(170, 58, 58, 0.18);
+  color: #ffb3b3;
+}
+
+:root[data-theme="dark"] .installation-gate__alert--warning .installation-gate__alert-icon,
+:root:not([data-theme="light"]) .installation-gate__alert--warning .installation-gate__alert-icon {
+  background: rgba(214, 177, 72, 0.16);
+  color: #ffd98a;
+}
+
+:root[data-theme="dark"] .installation-gate__alert-copy strong,
+:root:not([data-theme="light"]) .installation-gate__alert-copy strong {
+  color: #ffd0d0;
+}
+
+:root[data-theme="dark"] .installation-gate__alert--warning .installation-gate__alert-copy strong,
+:root:not([data-theme="light"]) .installation-gate__alert--warning .installation-gate__alert-copy strong {
+  color: #ffe0a0;
+}
+
+:root[data-theme="dark"] .installation-gate__alert-copy p,
+:root:not([data-theme="light"]) .installation-gate__alert-copy p {
+  color: #dfc4c4;
+}
+
+:root[data-theme="dark"] .installation-gate__alert--warning .installation-gate__alert-copy p,
+:root:not([data-theme="light"]) .installation-gate__alert--warning .installation-gate__alert-copy p {
+  color: #dfd0aa;
 }

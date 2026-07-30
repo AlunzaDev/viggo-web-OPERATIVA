@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   FaEdit,
+  FaInfoCircle,
   FaPlus,
-  FaTrash,
+  FaPowerOff,
 } from "react-icons/fa";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
@@ -76,7 +77,6 @@ export function ModulesPage() {
     changePageSize,
     createModule,
     updateModule,
-    deleteModule,
     approveDeviceBinding,
     rejectDeviceBinding,
     reopenDeviceBinding,
@@ -174,9 +174,15 @@ export function ModulesPage() {
     setIsModalOpen(false);
   };
 
-  const remove = async (item: ModuleEntity) => {
-    if (!window.confirm(`Eliminar modulo "${item.nombre}"?`)) return;
-    await deleteModule(item.id);
+  const toggleModuleState = async (item: ModuleEntity) => {
+    await updateModule(item.id, {
+      nombre: item.nombre,
+      proyecto: item.proyecto,
+      tipo: item.tipo,
+      identificador: item.identificador,
+      descripcion: item.descripcion ?? "",
+      estado: !item.estado,
+    });
   };
 
   const handleApproveBinding = async (
@@ -273,14 +279,6 @@ export function ModulesPage() {
           <tr
             key={item.id}
             className="base-table__row"
-            tabIndex={0}
-            onClick={() => setSelectedItem(item)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                setSelectedItem(item);
-              }
-            }}
           >
             <td>{item.nombre}</td>
             <td>{projectById.get(item.proyecto) ?? item.proyecto}</td>
@@ -312,6 +310,18 @@ export function ModulesPage() {
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
+                    setSelectedItem(item);
+                  }}
+                  aria-label={`Ver detalle de modulo ${item.nombre}`}
+                  title="Detalle"
+                >
+                  <FaInfoCircle />
+                </button>
+                <button
+                  className="admin-crud-icon-button"
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
                     openEdit(item);
                   }}
                   aria-label={`Editar modulo ${item.nombre}`}
@@ -320,16 +330,16 @@ export function ModulesPage() {
                   <FaEdit />
                 </button>
                 <button
-                  className="admin-crud-icon-button admin-crud-icon-button--danger"
+                  className="admin-crud-icon-button admin-crud-icon-button--warning"
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    void remove(item);
+                    void toggleModuleState(item);
                   }}
-                  aria-label={`Eliminar modulo ${item.nombre}`}
-                  title="Eliminar"
+                  aria-label={`${item.estado ? "Desactivar" : "Activar"} modulo ${item.nombre}`}
+                  title={item.estado ? "Desactivar" : "Activar"}
                 >
-                  <FaTrash />
+                  <FaPowerOff />
                 </button>
               </div>
             </td>
@@ -350,6 +360,7 @@ export function ModulesPage() {
         }
         error={error}
         onEdit={openEdit}
+        onToggleStatus={toggleModuleState}
         onResetBinding={handleResetBinding}
         onOpenRequest={(item, request) => {
           setSelectedItem(item);

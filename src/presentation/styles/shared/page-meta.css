@@ -1,0 +1,29 @@
+.shared-page-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.shared-page-meta__pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.shared-page-meta__pill--accent {
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
+}
+
+.shared-page-meta__pill--success {
+  background: rgba(70, 104, 57, 0.24);
+  border-color: rgba(79, 143, 67, 0.34);
+}

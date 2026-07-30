@@ -1,0 +1,49 @@
+.shared-modal-intro {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--border));
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 12%, transparent) 0%, transparent 56%),
+    color-mix(in srgb, var(--surface-2) 82%, transparent);
+}
+
+.shared-modal-intro__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 84%, #eef7e8 16%) 0%, color-mix(in srgb, var(--primary-color-dark) 90%, #121b10 10%) 100%);
+  color: var(--text-on-primary);
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.shared-modal-intro__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shared-modal-intro__copy strong,
+.shared-modal-intro__copy span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shared-modal-intro__copy span {
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+}

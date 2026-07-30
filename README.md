@@ -1,4 +1,4 @@
-# Viggo Web LOCALOPE
+# Viggo Web OPERATIVO
 
 Frontend operativo local para cada parking/proyecto.
 
@@ -9,7 +9,7 @@ operacion local, caja POS, tickets y pensiones en una sola aplicacion.
 
 ## Ahora
 
-Este web apunta al API local `viggo-server-api-LOCALOPE` y debe usarse dentro del
+Este web apunta al API local `viggo-server-api-OPERATIVO` y debe usarse dentro del
 parking para operacion diaria:
 
 - Cobro en caja POS.
@@ -20,7 +20,7 @@ parking para operacion diaria:
 - Cuenta del usuario sincronizado.
 
 La administracion de usuarios, perfiles de permisos, proyectos/parkings y catalogos
-globales vive en `administrativo/viggo-web-NUBEADMIN`.
+globales vive en `administrativo/viggo-web-ADMINISTRATIVO`.
 
 ## Desarrollo
 
@@ -37,4 +37,4 @@ VITE_DEV_SOCKET_URL=http://localhost:3002
 ```
 
 El web local intenta iniciar en `3001`. Si ese puerto ya esta ocupado por
-NUBEADMIN Web, automaticamente usa `3004`.
+ADMINISTRATIVO Web, automaticamente usa `3003`.

@@ -1,3 +1,6 @@
+@import url("../shared/page.css");
+@import url("../shared/modal.css");
+
 .permission-profiles-page {
   display: grid;
   gap: 16px;
@@ -96,6 +99,25 @@
   gap: 12px;
 }
 
+.permission-profiles-page__card-identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.permission-profiles-page__card-badge {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+}
+
+.permission-profiles-page__card-copy {
+  min-width: 0;
+}
+
 .permission-profiles-page__card-header h3 {
   margin: 0;
   font-size: 1.05rem;
@@ -164,15 +186,12 @@
   width: min(92vw, 620px);
 }
 
-.permission-profiles-page__hero {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--border));
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+.permission-profiles-page__hero-badge {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 18px;
+  font-size: 1rem;
 }
 
 .permission-profiles-page__hero-name {
@@ -238,6 +257,20 @@
 .permission-profiles-page__modal {
   display: grid;
   gap: 0;
+}
+
+.permission-profiles-page__modal-badge {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+}
+
+.permission-profiles-page__modal-copy span {
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
 }
 
 .permission-profiles-page__toggle {
@@ -366,5 +399,12 @@
 @media (max-width: 768px) {
   .permission-profiles-page__selector-grid {
     grid-template-columns: 1fr;
+  }
+
+  .permission-profiles-page__hero-badge,
+  .permission-profiles-page__modal-badge {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
   }
 }

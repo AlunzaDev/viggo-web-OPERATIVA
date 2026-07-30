@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaAlignLeft, FaCalendarAlt, FaClock, FaDollarSign, FaEdit, FaPlus, FaProjectDiagram, FaTicketAlt, FaTrash } from "react-icons/fa";
+import { FaAlignLeft, FaCalendarAlt, FaClock, FaDollarSign, FaEdit, FaInfoCircle, FaPlus, FaPowerOff, FaProjectDiagram, FaTicketAlt } from "react-icons/fa";
 import { api } from "../../../infrastructure/http/axios.instance";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { CopyableId } from "../../components/shared/CopyableId";
@@ -189,6 +189,7 @@ function PensionDetailModal({
   isSubmitting,
   error,
   onEdit,
+  onToggleStatus,
   onClose,
 }: {
   open: boolean;
@@ -197,6 +198,7 @@ function PensionDetailModal({
   isSubmitting: boolean;
   error: string | null;
   onEdit: (item: Pension) => void;
+  onToggleStatus: (item: Pension) => Promise<void>;
   onClose: () => void;
 }) {
   const schedule = normalizeValidez(item?.validez);
@@ -209,10 +211,17 @@ function PensionDetailModal({
       className="admin-crud-detail-modal pension-detail-modal"
       isSubmitting={isSubmitting}
       error={error}
+      isEntityActive={item?.estado ?? false}
       onClose={onClose}
       onEditStart={() => {
         if (item) onEdit(item);
       }}
+      onToggleStatus={() => {
+        if (!item) return Promise.resolve();
+        return onToggleStatus(item);
+      }}
+      toggleStatusText={item?.estado ? "Desactivar" : "Activar"}
+      toggleStatusIcon={<FaPowerOff />}
     >
       <section className="modal-form-section">
         <div className="modal-section-header">
@@ -280,29 +289,31 @@ export function PensionsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const projectById = useMemo(() => new Map(projects.map((project) => [project.id, project.nombre])), [projects]);
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return items.filter((item) => !q || [item.nombre, projectById.get(item.proyecto) ?? item.proyecto, String(item.precio)].some((value) => value.toLowerCase().includes(q)));
-  }, [items, projectById, search]);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const visible = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [pensionesResponse, proyectosResponse] = await Promise.all([api.get("/api/pensiones"), api.get("/api/proyectos")]);
-      const pensionesData = asRecord(pensionesResponse.data).pensiones;
+      const [pensionesResponse, proyectosResponse] = await Promise.all([
+        api.get("/api/pensiones", { params: { page, limit: pageSize, search: search.trim() || undefined } }),
+        api.get("/api/proyectos"),
+      ]);
+      const pensionesPayload = asRecord(pensionesResponse.data);
+      const pensionesData = pensionesPayload.pensiones;
       const proyectosData = asRecord(proyectosResponse.data).proyectos;
       setItems(Array.isArray(pensionesData) ? pensionesData.map(normalizePension) : []);
       setProjects(Array.isArray(proyectosData) ? proyectosData.map(normalizeProyecto) : []);
+      setTotalItems(Number(pensionesPayload.total ?? 0));
+      setTotalPages(Math.max(1, Number(pensionesPayload.totalPages ?? 1)));
     } catch (loadError) {
       setError(getErrorMessage(loadError, "No se pudieron cargar las pensiones"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, search]);
   useEffect(() => { void loadData(); }, [loadData]);
   useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
 
@@ -320,14 +331,33 @@ export function PensionsPage() {
       setError(message); throw new Error(message);
     } finally { setSaving(false); }
   };
-  const deleteItem = async (item: Pension) => { if (!window.confirm(`Eliminar pension "${item.nombre}"?`)) return; await api.delete(`/api/pensiones/${item.id}`); await loadData(); };
+  const toggleItemState = async (item: Pension) => {
+    setSaving(true);
+    setError(null);
+    try {
+      await api.patch(`/api/pensiones/${item.id}`, {
+        proyecto: item.proyecto,
+        nombre: item.nombre.trim(),
+        validez: normalizeValidez(item.validez),
+        precio: Number(item.precio),
+        descripcion: item.descripcion?.trim() || undefined,
+        estado: !item.estado,
+      });
+      await loadData();
+      setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
+    } catch (toggleError) {
+      setError(getErrorMessage(toggleError, "No se pudo actualizar el estado de la pension"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <main className="admin-crud-page">
       <CrudActionsIsland searchValue={search} onSearchChange={(event) => { setSearch(event.target.value); setPage(1); }} onSearchClear={() => { setSearch(""); setPage(1); }} searchPlaceholder="Buscar pensiones" showCreate createLabel="Crear pension" createIcon={<FaPlus />} onCreate={openCreate} isBusy={loading || saving} />
       {error ? <p className="admin-crud-error">{error}</p> : null}
-      <TableBase withCard={false} isLoading={loading} isEmpty={visible.length === 0} emptyMessage="No se encontraron pensiones." page={page} pageSize={pageSize} totalItems={filtered.length} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>nombre</th><th>proyecto</th><th>precio</th><th className="col-status">estado</th><th>acciones</th></tr>}>
-        {visible.map((item) => <tr key={item.id} className="base-table__row" tabIndex={0} onClick={() => setSelectedItem(item)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedItem(item); } }}><td>{item.nombre}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{item.precio}</td><td className="col-status"><span className={`admin-crud-status ${item.estado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.estado ? "Activo" : "Inactivo"}</span></td><td><div className="admin-crud-row-actions"><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); openEdit(item); }} aria-label={`Editar pension ${item.nombre}`} title="Editar"><FaEdit /></button><button className="admin-crud-icon-button admin-crud-icon-button--danger" type="button" onClick={(event) => { event.stopPropagation(); void deleteItem(item); }} aria-label={`Eliminar pension ${item.nombre}`} title="Eliminar"><FaTrash /></button></div></td></tr>)}
+      <TableBase withCard={false} isLoading={loading} isEmpty={items.length === 0} emptyMessage="No se encontraron pensiones." page={page} pageSize={pageSize} totalItems={totalItems} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>nombre</th><th>proyecto</th><th>precio</th><th className="col-status">estado</th><th>acciones</th></tr>}>
+        {items.map((item) => <tr key={item.id} className="base-table__row"><td>{item.nombre}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{item.precio}</td><td className="col-status"><span className={`admin-crud-status ${item.estado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.estado ? "Activo" : "Inactivo"}</span></td><td><div className="admin-crud-row-actions"><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); setSelectedItem(item); }} aria-label={`Ver detalle de pension ${item.nombre}`} title="Detalle"><FaInfoCircle /></button><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); openEdit(item); }} aria-label={`Editar pension ${item.nombre}`} title="Editar"><FaEdit /></button><button className="admin-crud-icon-button admin-crud-icon-button--warning" type="button" onClick={(event) => { event.stopPropagation(); void toggleItemState(item); }} aria-label={`${item.estado ? "Desactivar" : "Activar"} pension ${item.nombre}`} title={item.estado ? "Desactivar" : "Activar"}><FaPowerOff /></button></div></td></tr>)}
       </TableBase>
       <PensionDetailModal
         open={Boolean(selectedItem)}
@@ -336,6 +366,7 @@ export function PensionsPage() {
         isSubmitting={saving}
         error={error}
         onEdit={openEdit}
+        onToggleStatus={toggleItemState}
         onClose={() => setSelectedItem(null)}
       />
       <PensionModal open={isModalOpen} editing={Boolean(editingId)} form={form} projects={projects} isSubmitting={saving} error={error} setForm={setForm} onClose={() => setIsModalOpen(false)} onSubmit={save} />

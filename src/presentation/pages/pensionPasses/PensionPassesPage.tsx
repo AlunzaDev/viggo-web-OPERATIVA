@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaCalendarAlt, FaCheckCircle, FaEdit, FaIdCard, FaParking, FaPlus, FaTicketAlt, FaTrash, FaUser } from "react-icons/fa";
+import { FaCalendarAlt, FaCheckCircle, FaEdit, FaIdCard, FaInfoCircle, FaParking, FaPlus, FaPowerOff, FaTicketAlt, FaUser } from "react-icons/fa";
 import { api } from "../../../infrastructure/http/axios.instance";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { CopyableId } from "../../components/shared/CopyableId";
@@ -94,6 +94,7 @@ function PensionPassDetailModal({
   isSubmitting,
   error,
   onEdit,
+  onToggleStatus,
   onClose,
 }: {
   open: boolean;
@@ -103,6 +104,7 @@ function PensionPassDetailModal({
   isSubmitting: boolean;
   error: string | null;
   onEdit: (item: PensionPass) => void;
+  onToggleStatus: (item: PensionPass) => Promise<void>;
   onClose: () => void;
 }) {
   return (
@@ -113,10 +115,17 @@ function PensionPassDetailModal({
       className="admin-crud-detail-modal"
       isSubmitting={isSubmitting}
       error={error}
+      isEntityActive={item?.estado ?? false}
       onClose={onClose}
       onEditStart={() => {
         if (item) onEdit(item);
       }}
+      onToggleStatus={() => {
+        if (!item) return Promise.resolve();
+        return onToggleStatus(item);
+      }}
+      toggleStatusText={item?.estado ? "Desactivar" : "Activar"}
+      toggleStatusIcon={<FaPowerOff />}
     >
       <section className="modal-form-section">
         <div className="modal-section-header">
@@ -218,14 +227,40 @@ export function PensionPassesPage() {
     catch (saveError) { const message = getErrorMessage(saveError, "No se pudo guardar el pension-pass"); setError(message); throw new Error(message); }
     finally { setSaving(false); }
   };
-  const deleteItem = async (item: PensionPass) => { if (!window.confirm(`Eliminar pension-pass "${item.name}"?`)) return; await api.delete(`/api/pension-pass/${item.id}`); await loadData(); };
+  const toggleItemState = async (item: PensionPass) => {
+    setSaving(true);
+    setError(null);
+    try {
+      await api.patch(`/api/pension-pass/${item.id}`, {
+        ...buildPayload({
+          name: item.name,
+          pension: item.pension,
+          idPass: item.idPass,
+          vigent: item.vigent,
+          antiPassback: item.antiPassback,
+          inParking: item.inParking,
+          created: String(item.created),
+          from: String(item.from),
+          to: String(item.to),
+          estado: !item.estado,
+          usuario: item.usuario ?? "",
+        }),
+      });
+      await loadData();
+      setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
+    } catch (toggleError) {
+      setError(getErrorMessage(toggleError, "No se pudo actualizar el estado del pension-pass"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <main className="admin-crud-page">
       <CrudActionsIsland searchValue={search} onSearchChange={(event) => { setSearch(event.target.value); setPage(1); }} onSearchClear={() => { setSearch(""); setPage(1); }} searchPlaceholder="Buscar pension-pass" showCreate createLabel="Crear pension-pass" createIcon={<FaPlus />} onCreate={openCreate} isBusy={loading || saving} />
       {error ? <p className="admin-crud-error">{error}</p> : null}
       <TableBase withCard={false} isLoading={loading} isEmpty={visible.length === 0} emptyMessage="No se encontraron pension-pass." page={page} pageSize={pageSize} totalItems={filtered.length} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>name</th><th>pension</th><th>usuario</th><th>idPass</th><th className="col-status">estado</th><th>acciones</th></tr>}>
-        {visible.map((item) => <tr key={item.id} className="base-table__row" tabIndex={0} onClick={() => setSelectedItem(item)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedItem(item); } }}><td>{item.name}</td><td>{pensionById.get(item.pension) ?? item.pension}</td><td>{item.usuario ? userById.get(item.usuario) ?? item.usuario : "Sin usuario"}</td><td>{item.idPass}</td><td className="col-status"><span className={`admin-crud-status ${item.estado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.estado ? "Activo" : "Inactivo"}</span></td><td><div className="admin-crud-row-actions"><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); openEdit(item); }} aria-label={`Editar pension-pass ${item.name}`} title="Editar"><FaEdit /></button><button className="admin-crud-icon-button admin-crud-icon-button--danger" type="button" onClick={(event) => { event.stopPropagation(); void deleteItem(item); }} aria-label={`Eliminar pension-pass ${item.name}`} title="Eliminar"><FaTrash /></button></div></td></tr>)}
+        {visible.map((item) => <tr key={item.id} className="base-table__row"><td>{item.name}</td><td>{pensionById.get(item.pension) ?? item.pension}</td><td>{item.usuario ? userById.get(item.usuario) ?? item.usuario : "Sin usuario"}</td><td>{item.idPass}</td><td className="col-status"><span className={`admin-crud-status ${item.estado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.estado ? "Activo" : "Inactivo"}</span></td><td><div className="admin-crud-row-actions"><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); setSelectedItem(item); }} aria-label={`Ver detalle de pension-pass ${item.name}`} title="Detalle"><FaInfoCircle /></button><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); openEdit(item); }} aria-label={`Editar pension-pass ${item.name}`} title="Editar"><FaEdit /></button><button className="admin-crud-icon-button admin-crud-icon-button--warning" type="button" onClick={(event) => { event.stopPropagation(); void toggleItemState(item); }} aria-label={`${item.estado ? "Desactivar" : "Activar"} pension-pass ${item.name}`} title={item.estado ? "Desactivar" : "Activar"}><FaPowerOff /></button></div></td></tr>)}
       </TableBase>
       <PensionPassDetailModal
         open={Boolean(selectedItem)}
@@ -235,6 +270,7 @@ export function PensionPassesPage() {
         isSubmitting={saving}
         error={error}
         onEdit={openEdit}
+        onToggleStatus={toggleItemState}
         onClose={() => setSelectedItem(null)}
       />
       <PensionPassModal open={isModalOpen} editing={Boolean(editingId)} form={form} pensions={pensions} users={users} isSubmitting={saving} error={error} setForm={setForm} onClose={() => setIsModalOpen(false)} onSubmit={save} />

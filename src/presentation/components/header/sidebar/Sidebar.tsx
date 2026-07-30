@@ -10,7 +10,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaCog, FaCreditCard, FaExchangeAlt, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
+import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaChartPie, FaCog, FaCreditCard, FaExchangeAlt, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
 import {
   motion,
   useMotionTemplate,
@@ -237,6 +237,14 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
         onMouseLeave={isCollapsed ? handleSidebarMouseLeave : undefined}
       >
         <ul>
+          <SidebarNavItem
+            path="/dashboard"
+            label="Inicio"
+            icon={renderMenuIcon(<FaChartPie className="sidebar-icon" />)}
+            isActive={location.pathname.startsWith("/dashboard")}
+            onClick={go}
+          />
+
           {canViewCashPayments ? (
             <li className="sidebar-nav-group sidebar-nav-group--cash">
               <div

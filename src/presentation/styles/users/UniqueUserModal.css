@@ -1,44 +1,53 @@
 @import url("../modal-form-base.css");
+@import url("../shared/modal.css");
 
 .unique-user-modal {
   width: min(92vw, 620px);
 }
 
 .unique-user-modal__hero {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 12px;
   margin-bottom: 12px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--border));
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+
+.unique-user-modal__hero-avatar-wrap {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
 }
 
 .unique-user-modal__avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
   object-fit: cover;
   border: 1px solid color-mix(in srgb, var(--primary-color) 22%, var(--border));
   background: var(--surface);
-  flex: 0 0 auto;
+  display: block;
+}
+
+.unique-user-modal__avatar-fallback {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
 }
 
 .unique-user-modal__name {
-  margin: 0;
-  font-size: 1.05rem;
-  font-family: var(--font-heading);
-  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unique-user-modal__hero-role {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .unique-user-modal__status {
-  margin: 5px 0 0;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.86rem;
-  color: var(--text-soft);
 }
 
 .unique-user-modal__status svg {

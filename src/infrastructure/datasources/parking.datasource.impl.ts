@@ -1,4 +1,8 @@
 import { ParkingDatasource } from "../../domain/datasources/parking.datasource";
+import type {
+    PaginatedParkingResult,
+    PaginationParams,
+} from "../../domain/datasources/parking.datasource";
 import { ParkingEntity } from "../../domain/entities/parking.entity";
 import { api } from "../http/axios.instance";
 import { CreateParkingDto } from "../dtos/parking/create-parking.dto";
@@ -38,6 +42,43 @@ export class ParkingDatasourceImpl implements ParkingDatasource {
             const { data } = await api.get<{ proyectos?: unknown[] } | unknown[]>("/api/proyectos");
             const parkingsList = Array.isArray(data) ? data : (data.proyectos ?? []);
             return parkingsList.map((parking) => ParkingEntity.fromObject(resolveParkingPayload(parking)));
+        } catch (error: unknown) {
+            const errorMessage = getApiErrorMessage(error);
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+            throw new Error("Ocurrio un error inesperado al listar proyectos");
+        }
+    }
+
+    async getPage(params: PaginationParams): Promise<PaginatedParkingResult> {
+        try {
+            const { data } = await api.get<{
+                proyectos?: unknown[];
+                total?: unknown;
+                page?: unknown;
+                limit?: unknown;
+                totalPages?: unknown;
+            }>("/api/proyectos", {
+                params: {
+                    page: params.page,
+                    limit: params.limit,
+                },
+            });
+
+            const items = Array.isArray(data.proyectos)
+                ? data.proyectos.map((parking) =>
+                      ParkingEntity.fromObject(resolveParkingPayload(parking)),
+                  )
+                : [];
+
+            return {
+                items,
+                total: Number(data.total ?? items.length),
+                page: Number(data.page ?? params.page ?? 1),
+                limit: Number(data.limit ?? params.limit ?? Math.max(items.length, 1)),
+                totalPages: Number(data.totalPages ?? 1),
+            };
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {

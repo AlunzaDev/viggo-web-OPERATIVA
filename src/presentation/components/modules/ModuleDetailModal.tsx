@@ -3,6 +3,7 @@ import {
   FaHashtag,
   FaLayerGroup,
   FaLink,
+  FaPowerOff,
   FaProjectDiagram,
   FaShieldAlt,
   FaUnlink,
@@ -31,6 +32,7 @@ type ModuleDetailModalProps = {
   isSubmitting: boolean;
   error: string | null;
   onEdit: (item: ModuleEntity) => void;
+  onToggleStatus: (item: ModuleEntity) => Promise<void>;
   onResetBinding: (item: ModuleEntity) => Promise<void>;
   onOpenRequest: (item: ModuleEntity, request: ModuleDeviceBindingRequest) => void;
   onClose: () => void;
@@ -43,6 +45,7 @@ export function ModuleDetailModal({
   isSubmitting,
   error,
   onEdit,
+  onToggleStatus,
   onResetBinding,
   onOpenRequest,
   onClose,
@@ -57,6 +60,7 @@ export function ModuleDetailModal({
       className="admin-crud-detail-modal"
       isSubmitting={isSubmitting}
       error={error}
+      isEntityActive={item?.estado ?? false}
       onClose={onClose}
       extraActions={
         item ? (
@@ -80,6 +84,12 @@ export function ModuleDetailModal({
       onEditStart={() => {
         if (item) onEdit(item);
       }}
+      onToggleStatus={() => {
+        if (!item) return Promise.resolve();
+        return onToggleStatus(item);
+      }}
+      toggleStatusText={item?.estado ? "Desactivar" : "Activar"}
+      toggleStatusIcon={<FaPowerOff />}
     >
       <section className="modal-form-section">
         <div className="modal-section-header">

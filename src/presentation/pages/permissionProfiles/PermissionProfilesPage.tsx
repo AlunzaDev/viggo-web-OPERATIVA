@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FaEdit, FaIdBadge, FaPlus, FaShieldAlt, FaTrash } from "react-icons/fa";
+import { FaEdit, FaIdBadge, FaInfoCircle, FaPlus, FaPowerOff, FaShieldAlt, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { PageHeader } from "../../components/shared/PageHeader";
@@ -27,6 +27,16 @@ const INITIAL_FORM: ProfileFormState = {
   descripcion: "",
   estado: true,
   modules: [],
+};
+
+const getProfileInitials = (profile?: Pick<PermissionProfileEntity, "nombre"> | null) => {
+  const source = profile?.nombre?.trim() || "PP";
+  return source
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
 };
 
 const mapProfileToForm = (profile?: PermissionProfileEntity | null): ProfileFormState => ({
@@ -149,6 +159,13 @@ export function PermissionProfilesPage() {
     setSelectedProfile((current) => (current?.id === profile.id ? null : current));
   };
 
+  const handleToggleProfileState = async (profile: PermissionProfileEntity) => {
+    const updated = await updateProfile(profile.id, {
+      estado: !profile.estado,
+    });
+    setSelectedProfile((current) => (current?.id === profile.id ? updated : current));
+  };
+
   return (
     <div className="permission-profiles-page">
       <PageHeader
@@ -188,20 +205,16 @@ export function PermissionProfilesPage() {
               className={`permission-profiles-page__card${
                 selectedProfile?.id === profile.id ? " is-selected" : ""
               }`}
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelectedProfile(profile)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setSelectedProfile(profile);
-                }
-              }}
             >
               <div className="permission-profiles-page__card-header">
-                <div>
-                  <h3>{profile.nombre}</h3>
-                  <p>{profile.descripcion ?? "Sin descripcion."}</p>
+                <div className="shared-identity permission-profiles-page__card-identity">
+                  <span className="shared-identity__badge permission-profiles-page__card-badge">
+                    {getProfileInitials(profile)}
+                  </span>
+                  <div className="shared-identity__copy permission-profiles-page__card-copy">
+                    <h3>{profile.nombre}</h3>
+                    <p>{profile.descripcion ?? "Sin descripcion."}</p>
+                  </div>
                 </div>
                 <span
                   className={`permission-profiles-page__status ${
@@ -225,6 +238,16 @@ export function PermissionProfilesPage() {
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
+                    setSelectedProfile(profile);
+                  }}
+                >
+                  <FaInfoCircle />
+                  <span>Detalle</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
                     openEdit(profile);
                   }}
                 >
@@ -233,15 +256,15 @@ export function PermissionProfilesPage() {
                 </button>
                 <button
                   type="button"
-                  className="is-danger"
-                  disabled={isDeleting}
+                  className={profile.estado ? "is-warning" : ""}
+                  disabled={isUpdating}
                   onClick={(event) => {
                     event.stopPropagation();
-                    void handleDelete(profile);
+                    void handleToggleProfileState(profile);
                   }}
                 >
-                  <FaTrash />
-                  <span>Eliminar</span>
+                  <FaPowerOff />
+                  <span>{profile.estado ? "Desactivar" : "Activar"}</span>
                 </button>
               </div>
             </article>
@@ -267,6 +290,18 @@ export function PermissionProfilesPage() {
             <div className="modal-section-header">
               <FaIdBadge className="modal-section-icon" />
               <h3 className="modal-section-title">Datos del Perfil</h3>
+            </div>
+
+            <div className="shared-modal-intro permission-profiles-page__modal-intro">
+              <span className="shared-modal-intro__badge permission-profiles-page__modal-badge">
+                {getProfileInitials(editingProfile)}
+              </span>
+              <div className="shared-modal-intro__copy permission-profiles-page__modal-copy">
+                <strong>{editingProfile ? "Ajusta este perfil" : "Nuevo perfil de permisos"}</strong>
+                <span>
+                  {form.modules.length} modulo{form.modules.length === 1 ? "" : "s"} seleccionado{form.modules.length === 1 ? "" : "s"}
+                </span>
+              </div>
             </div>
 
             <div className="modal-section-grid">
@@ -386,10 +421,7 @@ export function PermissionProfilesPage() {
         }}
         onToggleStatus={async () => {
           if (!selectedProfile) return;
-          const updated = await updateProfile(selectedProfile.id, {
-            estado: !selectedProfile.estado,
-          });
-          setSelectedProfile(updated);
+          await handleToggleProfileState(selectedProfile);
         }}
         toggleStatusText={selectedProfile?.estado ? "Desactivar" : "Activar"}
         extraActions={
@@ -412,13 +444,16 @@ export function PermissionProfilesPage() {
             <h3 className="modal-section-title">Resumen del Perfil</h3>
           </div>
 
-          <section className="permission-profiles-page__hero">
-            <div>
-              <h4 className="permission-profiles-page__hero-name">
+          <section className="shared-modal-hero permission-profiles-page__hero">
+            <span className="shared-modal-hero__badge permission-profiles-page__hero-badge">
+              {getProfileInitials(selectedProfile)}
+            </span>
+            <div className="shared-modal-hero__copy">
+              <h4 className="shared-modal-hero__title permission-profiles-page__hero-name">
                 {selectedProfile?.nombre ?? "Sin nombre"}
               </h4>
-              <p className="permission-profiles-page__hero-status">
-                {selectedProfile?.estado ? "Perfil activo" : "Perfil inactivo"}
+              <p className="shared-modal-hero__meta permission-profiles-page__hero-status">
+                {selectedProfile?.estado ? "Perfil activo" : "Perfil inactivo"} · {selectedProfile?.modules.length ?? 0} modulo{selectedProfile?.modules.length === 1 ? "" : "s"}
               </p>
             </div>
           </section>

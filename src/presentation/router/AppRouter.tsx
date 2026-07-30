@@ -26,6 +26,11 @@ const CashCheckoutPage = lazy(async () => {
   return { default: module.CashCheckoutPage };
 });
 
+const DashboardPage = lazy(async () => {
+  const module = await import("../pages/dashboard/DashboardPage");
+  return { default: module.DashboardPage };
+});
+
 const CashShiftPage = lazy(async () => {
   const module = await import("../pages/cashPayments/CashShiftPage");
   return { default: module.CashShiftPage };
@@ -134,7 +139,14 @@ export function AppRouter() {
       />
 
       <Route element={<PrivateLayoutRoute />}>
-        <Route path="/dashboard" element={<Navigate to="/caja/cobro" replace />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/actividad" element={<Navigate to="/caja/cobro" replace />} />
         <Route path="/users" element={<Navigate to="/caja/cobro" replace />} />
         <Route

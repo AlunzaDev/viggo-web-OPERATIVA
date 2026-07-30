@@ -35,6 +35,24 @@ const ROLE_LABEL: Record<UserRole, string> = {
   CLIENT_ROLE: "Cliente",
 };
 
+const getUserInitials = (user: UserEntity | null) => {
+  if (!user) return "U";
+
+  const fullName = [user.nombre, user.apellido]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join(" ");
+
+  const source = fullName || user.correo || "U";
+
+  return source
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+};
+
 const formatNacimiento = (value?: number) => {
   if (!value) return "Sin fecha";
   const date = new Date(value);
@@ -67,6 +85,8 @@ export function UniqueUserModal({
   const roleLabel = useMemo(() => {
     return user ? ROLE_LABEL[user.rol] : "";
   }, [user]);
+
+  const userInitials = useMemo(() => getUserInitials(user), [user]);
 
   const coordinatesLabel = useMemo(() => {
     if (!user?.coordinates.length) return "Sin coordenadas";
@@ -166,17 +186,34 @@ export function UniqueUserModal({
           <h3 className="modal-section-title">Informacion General</h3>
         </div>
 
-        <section className="unique-user-modal__hero">
-          {user?.img ? (
-            <img
-              src={user.img}
-              alt={`Imagen de ${user.name}`}
-              className="unique-user-modal__avatar"
-            />
-          ) : null}
-          <div>
-            <h4 className="unique-user-modal__name">{user?.name}</h4>
-            <p className="unique-user-modal__status">
+        <section className="unique-user-modal__hero shared-modal-hero">
+          <div className="unique-user-modal__hero-avatar-wrap">
+            {user?.img ? (
+              <img
+                src={user.img}
+                alt={`Imagen de ${user.name}`}
+                className="unique-user-modal__avatar"
+                onError={(event) => {
+                  const image = event.currentTarget;
+                  if (image.dataset.fallbackApplied === "true") return;
+                  image.dataset.fallbackApplied = "true";
+                  image.style.display = "none";
+                  image.nextElementSibling?.removeAttribute("hidden");
+                }}
+              />
+            ) : null}
+            <span
+              className="unique-user-modal__avatar-fallback shared-modal-hero__badge"
+              aria-hidden="true"
+              hidden={Boolean(user?.img)}
+            >
+              {userInitials}
+            </span>
+          </div>
+          <div className="unique-user-modal__hero-copy shared-modal-hero__copy">
+            <h4 className="unique-user-modal__name shared-modal-hero__title">{user?.name}</h4>
+            <p className="unique-user-modal__hero-role shared-modal-hero__meta">{roleLabel || "Sin rol"}</p>
+            <p className="unique-user-modal__status shared-modal-hero__meta">
               <FaCircle className={user?.estado ? "is-active" : "is-inactive"} />
               {user?.estado ? "Activo" : "Inactivo"}
             </p>

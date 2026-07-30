@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiClock, FiLogIn } from "react-icons/fi";
+import { FiLogIn } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { applyTheme, resolveInitialTheme, type ThemeMode } from "../../../config/theme-mode";
 import { useAuth } from "../../context/auth/useAuth";
@@ -29,14 +29,9 @@ export function SessionExpiredPage() {
 
       <div className="session-expired-overlay">
         <div className="session-expired-card">
-          <div className="session-expired-icon-wrapper">
-            <FiClock className="session-expired-icon" size={48} />
-            <div className="session-expired-icon-pulse" />
-          </div>
-
-          <div className="session-expired-brand">
+          <div className="session-expired-brand-lockup">
             <img
-              src="/logos/android_icon.png"
+              src="/logos/logo.png"
               alt="Viggo"
               className="session-expired-logo"
             />

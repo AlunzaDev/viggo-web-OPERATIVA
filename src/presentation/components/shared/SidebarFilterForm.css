@@ -1,0 +1,27 @@
+.sidebar-filter-form {
+  display: grid;
+  gap: 14px;
+}
+
+.sidebar-filter-form__field {
+  display: grid;
+  gap: 6px;
+}
+
+.sidebar-filter-form__field label {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sidebar-filter-form__field select,
+.sidebar-filter-form__field input {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--input-bg);
+  color: var(--text);
+  padding: 0 12px;
+  font: inherit;
+}

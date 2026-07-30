@@ -7,6 +7,12 @@ export type LocalInstallationStatus =
   | "rejected"
   | "linked";
 
+export type BrowserInstallationLocation = {
+  coordinates: [number, number];
+  accuracy?: number;
+  capturedAt?: number;
+};
+
 export type LocalInstallation = {
   configured: boolean;
   installationId: string;
@@ -41,10 +47,14 @@ export const getInstallationCloudProjects = async (): Promise<unknown[]> => {
 export const requestLocalInstallationProject = async (
   proyectoId: string,
   installationLinkToken: string,
+  browserLocation?: BrowserInstallationLocation,
 ): Promise<LocalInstallation> => {
   const { data } = await api.post<InstallationResponse>("/api/installation/project-request", {
     proyectoId,
     installationLinkToken,
+    browserCoordinates: browserLocation?.coordinates,
+    browserLocationAccuracy: browserLocation?.accuracy,
+    browserLocationCapturedAt: browserLocation?.capturedAt,
   });
   return data.installation;
 };

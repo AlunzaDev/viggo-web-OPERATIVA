@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { ParkingEntity } from "../../../domain/entities/parking.entity";
 import { ParkingDatasourceImpl } from "../../../infrastructure/datasources/parking.datasource.impl";
 import { ParkingRepositoryImpl } from "../../../infrastructure/repositories/parking.repository.impl";
-import { GetParkings } from "../../../application/use-cases/parkings/get-parkings.usecase";
 import { CreateParking } from "../../../application/use-cases/parkings/create-parking.usecase";
 import { UpdateParking } from "../../../application/use-cases/parkings/update-parking.usecase";
 import { DeleteParking } from "../../../application/use-cases/parkings/delete-parking.usecase";
@@ -12,7 +11,6 @@ import { UpdateParkingDto } from "../../../infrastructure/dtos/parking/update-pa
 const datasource = new ParkingDatasourceImpl();
 const repository = new ParkingRepositoryImpl(datasource);
 
-const getParkingsUseCase = new GetParkings(repository);
 const createParkingUseCase = new CreateParking(repository);
 const updateParkingUseCase = new UpdateParking(repository);
 const deleteParkingUseCase = new DeleteParking(repository);
@@ -38,6 +36,8 @@ export function useParkings() {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
 
     const getErrorMessage = (error: unknown, fallback: string) =>
         error instanceof Error ? error.message : fallback;
@@ -46,21 +46,20 @@ export function useParkings() {
         setIsLoading(true);
         setError(null);
         try {
-            const result = await getParkingsUseCase.execute();
-            setParkings(result);
+            const result = await datasource.getPage({ page, limit: pageSize });
+            setParkings(result.items);
+            setTotalItems(result.total);
+            setTotalPages(Math.max(1, result.totalPages));
         } catch (err: unknown) {
             setError(getErrorMessage(err, "No se pudieron cargar los proyectos"));
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [page, pageSize]);
 
     useEffect(() => {
         void fetchParkings();
     }, [fetchParkings]);
-
-    const totalItems = parkings.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
     const goToPage = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -83,7 +82,7 @@ export function useParkings() {
             if (errorDto || !dto) throw new Error(errorDto || "Datos invalidos");
 
             const newParking = await createParkingUseCase.execute(dto);
-            setParkings((prev) => [...prev, newParking]);
+            void fetchParkings();
             return newParking;
         } catch (err: unknown) {
             const message = getErrorMessage(err, "No se pudo crear el proyecto");
@@ -102,7 +101,7 @@ export function useParkings() {
             if (errorDto || !dto) throw new Error(errorDto || "Datos invalidos");
 
             const updated = await updateParkingUseCase.execute(dto);
-            setParkings((prev) => prev.map((project) => (project.id === id ? updated : project)));
+            void fetchParkings();
             return updated;
         } catch (err: unknown) {
             const message = getErrorMessage(err, "No se pudo actualizar el proyecto");
@@ -118,7 +117,7 @@ export function useParkings() {
         setError(null);
         try {
             await deleteParkingUseCase.execute(id);
-            setParkings((prev) => prev.filter((project) => project.id !== id));
+            void fetchParkings();
         } catch (err: unknown) {
             const message = getErrorMessage(err, "No se pudo eliminar el proyecto");
             setError(message);

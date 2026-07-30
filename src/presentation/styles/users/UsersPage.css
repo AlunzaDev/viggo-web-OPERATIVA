@@ -1,3 +1,5 @@
+@import url("../shared/page.css");
+
 .users-page {
   display: grid;
   gap: 16px;

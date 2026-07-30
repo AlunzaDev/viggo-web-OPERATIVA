@@ -6,7 +6,7 @@
   position: relative;
   padding: var(--pad);
   padding-left: var(--pad-left);
-  padding-top: var(--pad);
+  padding-top: 10px;
 
   background-color: var(--bg);
   min-height: calc(100dvh - var(--header-h, 50px));
@@ -83,7 +83,7 @@ body.has-floating-crud-island-space .main-content {
     --pad-left: 15px;
     margin-left: 0;
     padding: var(--pad);
-    padding-top: var(--pad);
+    padding-top: 10px;
     min-height: calc(100dvh - var(--header-h, 50px));
     height: calc(100dvh - var(--header-h, 50px));
     overflow-y: auto;
@@ -102,5 +102,6 @@ body.has-floating-crud-island-space .main-content {
   .main-content.shifted {
     --pad: 10px;
     --pad-left: 10px;
+    padding-top: 8px;
   }
 }

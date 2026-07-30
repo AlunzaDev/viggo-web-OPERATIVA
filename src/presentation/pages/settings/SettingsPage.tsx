@@ -166,7 +166,7 @@ export function SettingsPage() {
 
             <div className="settings-sync">
               <p>
-                Sincroniza desde NUBEADMIN proyecto, modulos, submodulos,
+                Sincroniza desde la nube proyecto, modulos, submodulos,
                 pensiones, pension pass, usuarios y perfiles de permisos.
               </p>
 
@@ -176,7 +176,7 @@ export function SettingsPage() {
                   <strong>{configStatus?.proyectoNombre ?? "Sin vincular"}</strong>
                 </span>
                 <span>
-                  NUBEADMIN
+                  Nube
                   <strong>{configStatus?.cloudApiUrl ?? "Sin configurar"}</strong>
                 </span>
                 <span>

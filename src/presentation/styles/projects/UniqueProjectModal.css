@@ -1,37 +1,29 @@
 @import url("../modal-form-base.css");
+@import url("../shared/modal.css");
 
-/* Hero card */
 .unique-project-modal__hero {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
   margin-bottom: 16px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 22%, var(--border));
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--primary-color) 8%, var(--surface-2)) 0%,
-    color-mix(in srgb, var(--surface-2) 85%, transparent) 100%
-  );
 }
 
-.unique-project-modal__hero-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--primary-color) 70%, #a0e8b0) 0%,
-    color-mix(in srgb, var(--primary-color-dark) 85%, #0a1a0f) 100%
-  );
-  color: var(--text-on-primary);
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--primary-color) 28%, transparent);
+.unique-project-modal__hero-media {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+}
+
+.unique-project-modal__hero-image,
+.unique-project-modal__hero-fallback {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+}
+
+.unique-project-modal__hero-image {
+  display: block;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 20%, var(--border));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary-color) 18%, transparent);
 }
 
 .unique-project-modal__hero-info {
@@ -42,11 +34,12 @@
 }
 
 .unique-project-modal__hero-name {
-  margin: 0;
-  font-size: 1.15rem;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unique-project-modal__hero-subtitle {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -103,6 +96,34 @@
 .unique-project-modal__value--muted {
   color: var(--text-muted);
   font-style: italic;
+}
+
+.unique-project-modal__image-panel {
+  width: 100%;
+  min-height: 164px;
+  border: 1px solid color-mix(in srgb, var(--input-border) 92%, #000 8%);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--input-bg) 88%, var(--surface) 12%);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unique-project-modal__image-preview {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.unique-project-modal__image-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .unique-project-modal__location {

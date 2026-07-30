@@ -4,10 +4,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
-  padding: 2rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
   box-sizing: border-box;
   font-family: var(--font-body);
 
@@ -102,7 +102,7 @@
   align-items: center;
   text-align: center;
 
-  max-width: 460px;
+  max-width: 470px;
   width: 100%;
   z-index: 10;
   position: relative;
@@ -111,11 +111,12 @@
   backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 
-  border-radius: 24px;
+  border-radius: 28px;
   border: 1px solid var(--glass-border);
   box-shadow: var(--elev-3);
 
-  padding: 48px 40px;
+  padding: clamp(2rem, 4vw, 3rem);
+  gap: 1.15rem;
   animation: session-slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -130,88 +131,41 @@
   }
 }
 
-.session-expired-icon-wrapper {
-  position: relative;
+.session-expired-brand-lockup {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.session-expired-icon {
-  color: var(--error-color);
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--error-color) 70%, transparent));
-  animation: session-icon-pulse 2.5s ease-in-out infinite;
-}
-
-@keyframes session-icon-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 0.85;
-  }
-}
-
-.session-expired-icon-pulse {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--error-color) 15%, transparent);
-  animation: session-ring 2.5s ease-in-out infinite;
-}
-
-@keyframes session-ring {
-  0%,
-  100% {
-    transform: scale(0.9);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.15);
-    opacity: 0;
-  }
-}
-
-.session-expired-brand {
-  margin-bottom: 0.8rem;
 }
 
 .session-expired-logo {
-  width: 64px;
+  width: clamp(136px, 18vw, 172px);
   height: auto;
   display: block;
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--primary-color) 36%, transparent));
+  filter: drop-shadow(0 12px 24px color-mix(in srgb, var(--primary-color) 20%, transparent));
 }
 
 .session-expired-title {
-  margin: 0 0 0.8rem 0;
+  margin: 0;
   font-family: var(--font-heading);
-  font-size: 1.9rem;
+  font-size: clamp(1.8rem, 3.2vw, 2.3rem);
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.02em;
 }
 
 .session-expired-message {
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: var(--text-muted);
   line-height: 1.65;
-  margin: 0 0 2rem 0;
-  max-width: 360px;
+  margin: 0;
+  max-width: 32rem;
 }
 
 .session-expired-card-actions {
   width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.35rem;
 }
 
 .session-expired-btn {
@@ -219,6 +173,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
+  width: min(100%, 280px);
 
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
   color: #fff;
@@ -363,12 +318,10 @@
   position: relative;
   z-index: 12;
   width: 100%;
-  min-height: 100dvh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  box-sizing: border-box;
   pointer-events: none;
 }
 
@@ -393,16 +346,8 @@
 
 @media (max-width: 520px) {
   .session-expired-card {
-    padding: 36px 24px;
-    border-radius: 18px;
-  }
-
-  .session-expired-title {
-    font-size: 1.5rem;
-  }
-
-  .session-expired-message {
-    font-size: 0.9rem;
+    padding: 1.6rem 1.2rem;
+    border-radius: 22px;
   }
 
   .session-expired-btn,
@@ -439,10 +384,6 @@
 
   .session-expired-leaderboard-table-wrapper {
     max-height: 180px;
-  }
-
-  .session-expired-overlay {
-    padding: 1rem;
   }
 
   .session-expired-container .blob-1 {
