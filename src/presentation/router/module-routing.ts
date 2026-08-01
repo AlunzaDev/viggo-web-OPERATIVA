@@ -5,6 +5,7 @@ const MODULE_DEFAULT_PATH: Record<AppModuleAccess, string> = {
   cashPayments: "/caja/cobro",
   users: "/caja/cobro",
   permissionProfiles: "/caja/cobro",
+  installations: "/account",
   projects: "/caja/cobro",
   modules: "/caja/cobro",
   pensions: "/pensiones",

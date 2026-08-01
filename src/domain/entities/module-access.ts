@@ -2,6 +2,7 @@ export const AVAILABLE_USER_MODULES = [
   "cashPayments",
   "users",
   "permissionProfiles",
+  "installations",
   "projects",
   "modules",
   "pensions",
@@ -17,6 +18,7 @@ export const USER_MODULE_LABELS: Record<AppModuleAccess, string> = {
   cashPayments: "Cobro en Caja",
   users: "Accesos",
   permissionProfiles: "Perfiles",
+  installations: "Instalaciones",
   projects: "Proyectos",
   modules: "Modulos",
   pensions: "Pensiones",
@@ -31,6 +33,7 @@ const USER_MODULE_SET = new Set<string>(AVAILABLE_USER_MODULES);
 const MODULE_ALIASES: Record<string, AppModuleAccess> = {
   users: "users",
   permissionprofiles: "permissionProfiles",
+  installations: "installations",
   projects: "projects",
   modules: "modules",
   pensions: "pensions",

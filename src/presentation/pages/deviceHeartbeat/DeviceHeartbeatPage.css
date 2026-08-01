@@ -345,7 +345,7 @@
 
 .device-heartbeat-submodules__list span {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 7px;
   max-width: 100%;
   padding: 8px 10px;
@@ -356,14 +356,29 @@
   font-weight: 800;
 }
 
+.device-heartbeat-submodules__copy {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.device-heartbeat-submodules__copy strong {
+  color: var(--text-primary);
+  font-size: 0.84rem;
+}
+
 .device-heartbeat-submodules__list span.is-inactive {
   opacity: 0.54;
 }
 
 .device-heartbeat-submodules__list small {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--text-muted);
   font-size: 0.68rem;
   font-weight: 900;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .device-heartbeat-submodules p {

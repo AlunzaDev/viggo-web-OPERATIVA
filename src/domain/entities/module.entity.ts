@@ -17,6 +17,8 @@ export interface ModuleSubmodule {
     identificador?: string;
     ip?: string;
     mac?: string;
+    ubicacion?: string;
+    coordinates?: [number, number];
     descripcion?: string;
     estado: boolean;
 }
@@ -94,6 +96,10 @@ export class ModuleEntity {
     readonly tipo: ModuleType;
     readonly identificador: string;
     readonly estado: boolean;
+    readonly ip?: string;
+    readonly mac?: string;
+    readonly ubicacion?: string;
+    readonly coordinates?: [number, number];
     readonly descripcion: string;
     readonly deviceBinding: ModuleDeviceBinding | null;
     readonly deviceBindingRequests: ModuleDeviceBindingRequest[];
@@ -108,6 +114,10 @@ export class ModuleEntity {
         tipo: ModuleType;
         identificador: string;
         estado?: boolean;
+        ip?: string;
+        mac?: string;
+        ubicacion?: string;
+        coordinates?: [number, number];
         descripcion?: string;
         deviceBinding?: ModuleDeviceBinding | null;
         deviceBindingRequests?: ModuleDeviceBindingRequest[];
@@ -121,6 +131,10 @@ export class ModuleEntity {
         this.tipo = options.tipo;
         this.identificador = options.identificador;
         this.estado = options.estado ?? true;
+        this.ip = options.ip;
+        this.mac = options.mac;
+        this.ubicacion = options.ubicacion;
+        this.coordinates = options.coordinates;
         this.descripcion = options.descripcion ?? "";
         this.deviceBinding = options.deviceBinding ?? null;
         this.deviceBindingRequests = options.deviceBindingRequests ?? [];
@@ -167,6 +181,10 @@ export class ModuleEntity {
         const proyecto = parseProjectId(object.proyecto ?? object.projectId);
         const tipo = parseModuleType(object.tipo ?? object.type);
         const identificador = String(object.identificador ?? "").trim();
+        const ip = normalizeOptionalText(object.ip);
+        const mac = normalizeOptionalText(object.mac);
+        const ubicacion = normalizeOptionalText(object.ubicacion);
+        const coordinates = parseCoordinates(object.coordinates);
         const descripcion = String(object.descripcion ?? object.description ?? "").trim();
         const estado = parseEstado(object.estado ?? object.active ?? object.state);
         const deviceBinding = parseDeviceBinding(object.deviceBinding);
@@ -186,6 +204,10 @@ export class ModuleEntity {
             proyecto,
             tipo,
             identificador,
+            ip,
+            mac,
+            ubicacion,
+            coordinates,
             descripcion,
             estado,
             deviceBinding,
@@ -203,6 +225,10 @@ export class ModuleEntity {
             proyecto: module.proyecto,
             tipo: module.tipo,
             identificador: module.identificador,
+            ip: module.ip,
+            mac: module.mac,
+            ubicacion: module.ubicacion,
+            coordinates: module.coordinates,
             descripcion: module.descripcion,
             estado,
             deviceBinding: module.deviceBinding,
@@ -239,9 +265,19 @@ function parseSubmodulo(value: unknown): ModuleSubmodule | null {
         identificador: normalizeOptionalText(source.identificador),
         ip: normalizeOptionalText(source.ip),
         mac: normalizeOptionalText(source.mac),
+        ubicacion: normalizeOptionalText(source.ubicacion),
+        coordinates: parseCoordinates(source.coordinates),
         descripcion: normalizeOptionalText(source.descripcion),
         estado: parseEstado(source.estado ?? source.active ?? source.state),
     };
+}
+
+function parseCoordinates(value: unknown): [number, number] | undefined {
+    if (!Array.isArray(value) || value.length !== 2) return undefined;
+    const longitude = Number(value[0]);
+    const latitude = Number(value[1]);
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return undefined;
+    return [longitude, latitude];
 }
 
 function parseSubmoduleType(value: unknown): ModuleSubmoduleType {

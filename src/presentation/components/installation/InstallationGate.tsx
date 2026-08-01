@@ -31,6 +31,17 @@ const LOCATION_TIMEOUT_ERROR = "__location_timeout__";
 const LOCATION_UNAVAILABLE_ERROR = "__location_unavailable__";
 const LOCATION_FETCH_FAILED_ERROR = "__location_fetch_failed__";
 
+const shouldRedirectToSessionExpired = (rawMessage: string): boolean => {
+  const normalized = rawMessage.trim().toLowerCase();
+
+  return (
+    normalized.includes("user not found or inactive") ||
+    normalized.includes("unauthorized") ||
+    normalized.includes("jwt expired") ||
+    normalized.includes("invalid token")
+  );
+};
+
 const normalizeProject = (value: unknown): ProjectOption | null => {
   if (!value || typeof value !== "object") return null;
   const record = value as Record<string, unknown>;
@@ -47,6 +58,22 @@ const getStatusCopy = (installation: LocalInstallation | null) => {
   if (installation.status === "rejected") return "Solicitud rechazada. Revisa el motivo y solicita de nuevo.";
   if (installation.status === "approved") return "Solicitud aprobada. Recarga para terminar la vinculacion.";
   return "Selecciona el proyecto de esta terminal local.";
+};
+
+const getWaitingStateMeta = (installation: LocalInstallation | null) => {
+  if (installation?.status === "approved") {
+    return {
+      title: "Aprobacion recibida",
+      description:
+        "Este punto local ya fue aprobado. Revisa el estado para terminar la vinculacion y entrar al sistema.",
+    };
+  }
+
+  return {
+    title: "Solicitud enviada correctamente",
+    description:
+      "La solicitud ya quedo en revision. Solo falta que la aprueben en administrativo para habilitar este punto local.",
+  };
 };
 
 const normalizeInstallationError = (
@@ -157,8 +184,14 @@ export function InstallationGate({ children }: InstallationGateProps) {
 
   const isWaitingApproval =
     installation?.status === "requested" || installation?.status === "approved";
+  const waitingStateMeta = getWaitingStateMeta(installation);
 
   const showInstallationAlert = (rawMessage: string) => {
+    if (shouldRedirectToSessionExpired(rawMessage)) {
+      window.location.assign("/session-expired");
+      return;
+    }
+
     const nextAlert = normalizeInstallationError(rawMessage);
     void showAppToast(
       nextAlert.tone === "warning" ? "warning" : "error",
@@ -414,18 +447,29 @@ export function InstallationGate({ children }: InstallationGateProps) {
             </div>
           </>
         ) : (
-          <article className="installation-gate__preview">
-            <FaParking />
-            <div>
-              <strong>{installation?.proyectoNombre ?? "Proyecto solicitado"}</strong>
-              <span>{installation?.proyectoIdentificador ?? installation?.cloudRequestId}</span>
-            </div>
-          </article>
+          <div className="installation-gate__waiting-shell">
+            <article className="installation-gate__waiting-banner">
+              <span className="installation-gate__waiting-badge">
+                <FaCheckCircle />
+                {installation?.status === "approved" ? "Aprobado" : "En revision"}
+              </span>
+              <strong>{waitingStateMeta.title}</strong>
+              <p>{waitingStateMeta.description}</p>
+            </article>
+
+            <article className="installation-gate__preview installation-gate__preview--waiting">
+              <FaParking />
+              <div>
+                <strong>{installation?.proyectoNombre ?? "Proyecto solicitado"}</strong>
+                <span>{installation?.proyectoIdentificador ?? installation?.cloudRequestId}</span>
+              </div>
+            </article>
+          </div>
         )}
 
         <div className="installation-gate__actions">
           <button type="button" onClick={() => void loadData()} disabled={saving}>
-            <FaSyncAlt /> Revisar estado
+            <FaSyncAlt /> {isWaitingApproval ? "Actualizar vinculacion" : "Revisar estado"}
           </button>
           {!isWaitingApproval ? (
             <button

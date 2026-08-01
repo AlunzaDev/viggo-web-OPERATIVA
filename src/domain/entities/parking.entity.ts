@@ -1,9 +1,14 @@
 export type ProjectCoordinates = [number, number];
+export type ProjectAreaPoint = {
+    latitude: number;
+    longitude: number;
+};
 
 export class ParkingEntity {
     readonly id: string;
     readonly nombre: string;
     readonly coordinates: ProjectCoordinates;
+    readonly area: ProjectAreaPoint[];
     readonly ciudad: string;
     readonly identificador: string;
     readonly img: string;
@@ -14,6 +19,7 @@ export class ParkingEntity {
         id: string;
         nombre: string;
         coordinates: ProjectCoordinates;
+        area?: ProjectAreaPoint[];
         ciudad: string;
         identificador: string;
         img?: string;
@@ -23,6 +29,7 @@ export class ParkingEntity {
         this.id = options.id;
         this.nombre = options.nombre;
         this.coordinates = options.coordinates;
+        this.area = options.area ?? [];
         this.ciudad = options.ciudad;
         this.identificador = options.identificador;
         this.img = options.img ?? "";
@@ -55,7 +62,8 @@ export class ParkingEntity {
         const nombre = String(object.nombre ?? object.name ?? "").trim();
         const ciudad = String(object.ciudad ?? "").trim();
         const identificador = String(object.identificador ?? "").trim();
-        const coordinates = ParkingEntity.parseCoordinates(object.coordinates);
+        const area = ParkingEntity.parseArea(object.coordinates);
+        const coordinates = ParkingEntity.resolveCenter(area, ParkingEntity.parseCoordinates(object.coordinates));
         const img = String(object.img ?? "").trim();
         const descripcion = String(object.descripcion ?? object.description ?? "").trim();
         const estado = ParkingEntity.parseEstado(object.estado ?? object.active ?? object.state);
@@ -69,6 +77,7 @@ export class ParkingEntity {
             id,
             nombre,
             coordinates,
+            area,
             ciudad,
             identificador,
             img,
@@ -82,6 +91,7 @@ export class ParkingEntity {
             id: project.id,
             nombre: project.nombre,
             coordinates: project.coordinates,
+            area: project.area,
             ciudad: project.ciudad,
             identificador: project.identificador,
             img: project.img,
@@ -100,6 +110,53 @@ export class ParkingEntity {
         }
 
         return [0, 0];
+    }
+
+    private static parseArea(value: unknown): ProjectAreaPoint[] {
+        if (!Array.isArray(value)) return [];
+
+        const source =
+            Array.isArray(value[0]) && Array.isArray((value[0] as unknown[])[0])
+                ? (value[0] as unknown[])
+                : value;
+
+        const points = source
+            .map((point) => ParkingEntity.parseAreaPoint(point))
+            .filter((point): point is ProjectAreaPoint => Boolean(point));
+
+        return points.length >= 3 ? points : [];
+    }
+
+    private static parseAreaPoint(value: unknown): ProjectAreaPoint | null {
+        if (Array.isArray(value) && value.length >= 2) {
+            const longitude = Number(value[0]);
+            const latitude = Number(value[1]);
+            if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+                return { latitude, longitude };
+            }
+        }
+
+        return null;
+    }
+
+    private static resolveCenter(
+        area: ProjectAreaPoint[],
+        fallback: ProjectCoordinates,
+    ): ProjectCoordinates {
+        if (!area.length) return fallback;
+
+        const totals = area.reduce(
+            (accumulator, point) => ({
+                latitude: accumulator.latitude + point.latitude,
+                longitude: accumulator.longitude + point.longitude,
+            }),
+            { latitude: 0, longitude: 0 },
+        );
+
+        return [
+            totals.longitude / area.length,
+            totals.latitude / area.length,
+        ];
     }
 
     private static parseEstado(value: unknown): boolean {

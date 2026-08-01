@@ -4,10 +4,12 @@ import {
   FaCashRegister,
   FaDoorOpen,
   FaExclamationTriangle,
+  FaMapMarkerAlt,
   FaPlug,
   FaQrcode,
   FaSignOutAlt,
   FaSyncAlt,
+  FaWifi,
 } from "react-icons/fa";
 import { useModules } from "../../hooks/modules/useModules";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
@@ -37,6 +39,9 @@ const getTypeIcon = (type: string) => {
   if (type === "SALIDA") return <FaSignOutAlt />;
   return <FaCashRegister />;
 };
+
+const formatCoordinates = (coordinates?: [number, number]) =>
+  coordinates ? `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}` : "Sin coordenadas";
 
 export function DeviceHeartbeatPage() {
   usePageTitle("Heartbeat");
@@ -180,6 +185,14 @@ export function DeviceHeartbeatPage() {
                     Binding
                     <strong>{getBindingLabel(module)}</strong>
                   </span>
+                  <span>
+                    Red local
+                    <strong>{module.ip || "Sin IP configurada"}</strong>
+                  </span>
+                  <span>
+                    Ubicacion
+                    <strong>{module.ubicacion || "Sin ubicacion"}</strong>
+                  </span>
                 </div>
 
                 <p className="device-heartbeat-card__message">{getStatusHint(module)}</p>
@@ -187,6 +200,7 @@ export function DeviceHeartbeatPage() {
                 <div className="device-heartbeat-card__meta">
                   <span>Conectado: {formatDateTime(runtime?.connectedAt)}</span>
                   <span>Ultimo heartbeat: {formatDateTime(runtime?.lastHeartbeatAt)}</span>
+                  <span>Coordenadas: {formatCoordinates(module.coordinates)}</span>
                 </div>
 
                 <div className="device-heartbeat-submodules">
@@ -202,8 +216,12 @@ export function DeviceHeartbeatPage() {
                           className={submodule.estado ? "is-active" : "is-inactive"}
                         >
                           <FaQrcode />
-                          {submodule.nombre}
-                          <small>{submodule.tipo}</small>
+                          <span className="device-heartbeat-submodules__copy">
+                            <strong>{submodule.nombre}</strong>
+                            <small>{submodule.tipo}</small>
+                            <small><FaWifi /> {submodule.ip || "Sin IP"}</small>
+                            <small><FaMapMarkerAlt /> {submodule.ubicacion || "Sin ubicacion"}</small>
+                          </span>
                         </span>
                       ))}
                     </div>
