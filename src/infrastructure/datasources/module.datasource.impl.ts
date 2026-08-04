@@ -2,44 +2,24 @@ import { ModuleDatasource } from "../../domain/datasources/module.datasource";
 import type { PaginatedModuleResult } from "../../domain/datasources/module.datasource";
 import { ModuleEntity } from "../../domain/entities/module.entity";
 import { api } from "../http/axios.instance";
+import {
+    getApiErrorMessage,
+} from "../http/api-contracts";
 import { CreateModuleDto } from "../dtos/module/create-module.dto";
 import { UpdateModuleDto } from "../dtos/module/update-module.dto";
-
-type ApiErrorPayload = {
-    response?: {
-        data?: {
-            error?: string;
-            message?: string;
-        };
-    };
-};
-
-const getApiErrorMessage = (error: unknown): string | undefined => {
-    if (typeof error !== "object" || error === null) return undefined;
-    const parsedError = error as ApiErrorPayload;
-    return parsedError.response?.data?.error || parsedError.response?.data?.message;
-};
-
-const resolveModulePayload = (data: { modulo?: unknown } | unknown): Record<string, unknown> => {
-    const source =
-        typeof data === "object" && data !== null && "modulo" in data
-            ? (data as { modulo?: unknown }).modulo ?? data
-            : data;
-
-    if (typeof source === "object" && source !== null) {
-        return source as Record<string, unknown>;
-    }
-
-    throw new Error("Respuesta de modulo invalida");
-};
+import {
+    normalizeModuleCollection,
+    normalizeModulePage,
+    normalizeModuleRecord,
+} from "./module.contract";
 
 export class ModuleDatasourceImpl implements ModuleDatasource {
     async getAll(projectId?: string): Promise<ModuleEntity[]> {
         try {
             const query = projectId ? { params: { proyecto: projectId } } : undefined;
             const { data } = await api.get<{ modulos?: unknown[] } | unknown[]>("/api/modulos", query);
-            const modulesList = Array.isArray(data) ? data : (data.modulos ?? []);
-            return modulesList.map((item) => ModuleEntity.fromObject(resolveModulePayload(item)));
+            const modulesList = normalizeModuleCollection(data);
+            return modulesList.map((item) => ModuleEntity.fromObject(item));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -69,16 +49,19 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
                 },
             });
 
-            const items = Array.isArray(data.modulos)
-                ? data.modulos.map((item) => ModuleEntity.fromObject(resolveModulePayload(item)))
-                : [];
+            const pageResult = normalizeModulePage(
+                data,
+                params.page ?? 1,
+                params.limit ?? 20,
+            );
+            const items = pageResult.items.map((item) => ModuleEntity.fromObject(item));
 
             return {
                 items,
-                total: Number(data.total ?? items.length),
-                page: Number(data.page ?? params.page ?? 1),
-                limit: Number(data.limit ?? params.limit ?? Math.max(items.length, 1)),
-                totalPages: Number(data.totalPages ?? 1),
+                total: pageResult.total,
+                page: pageResult.page,
+                limit: pageResult.limit,
+                totalPages: pageResult.totalPages,
             };
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
@@ -92,7 +75,7 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
     async create(createModuleDto: CreateModuleDto): Promise<ModuleEntity> {
         try {
             const { data } = await api.post<{ modulo?: unknown } | unknown>("/api/modulos", createModuleDto);
-            return ModuleEntity.fromObject(resolveModulePayload(data));
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -106,7 +89,7 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
         try {
             const { id, ...rest } = updateModuleDto;
             const { data } = await api.patch<{ modulo?: unknown } | unknown>(`/api/modulos/${id}`, rest);
-            return ModuleEntity.fromObject(resolveModulePayload(data));
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -134,7 +117,7 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
                 `/api/modulos/${id}/device-binding/approve`,
                 fingerprint ? { fingerprint } : {},
             );
-            return ModuleEntity.fromObject(resolveModulePayload(data));
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -150,7 +133,7 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
                 `/api/modulos/${id}/device-binding/reject`,
                 fingerprint ? { fingerprint } : {},
             );
-            return ModuleEntity.fromObject(resolveModulePayload(data));
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -166,7 +149,7 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
                 `/api/modulos/${id}/device-binding/pending`,
                 fingerprint ? { fingerprint } : {},
             );
-            return ModuleEntity.fromObject(resolveModulePayload(data));
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -182,7 +165,7 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
                 `/api/modulos/${id}/device-binding/reset`,
                 {},
             );
-            return ModuleEntity.fromObject(resolveModulePayload(data));
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {

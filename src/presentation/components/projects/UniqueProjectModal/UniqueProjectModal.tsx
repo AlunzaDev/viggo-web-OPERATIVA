@@ -1,5 +1,4 @@
-import { FaAlignLeft, FaBuilding, FaCity, FaHashtag, FaImage, FaPowerOff, FaTrash } from "react-icons/fa";
-import Swal from "sweetalert2";
+import { FaAlignLeft, FaBuilding, FaCity, FaHashtag, FaImage, FaPowerOff } from "react-icons/fa";
 import type { ParkingEntity } from "../../../../domain/entities/parking.entity";
 import { CopyableId } from "../../shared/CopyableId";
 import { UniqueModalBase } from "../../shared/modals/UniqueModalBase";
@@ -12,7 +11,6 @@ type UniqueProjectModalProps = {
   errorMessage?: string | null;
   onEdit: (project: ParkingEntity) => void;
   onToggleStatus?: (project: ParkingEntity) => Promise<void> | void;
-  onDelete?: (id: string) => Promise<void> | void;
   onClose: () => void;
 };
 
@@ -35,44 +33,9 @@ export function UniqueProjectModal({
   errorMessage = null,
   onEdit,
   onToggleStatus,
-  onDelete,
   onClose,
 }: UniqueProjectModalProps) {
   const projectInitials = getProjectInitials(project);
-
-  const handleDeleteProject = async () => {
-    if (!project || !onDelete) return;
-
-    const result = await Swal.fire({
-      title: "Eliminar proyecto",
-      text: `Estas seguro de eliminar "${project.nombre}"? Esta accion no se puede deshacer.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Si, eliminar",
-      cancelButtonText: "Cancelar",
-      background: "transparent",
-      customClass: {
-        popup: "swal-custom-popup",
-        title: "swal-custom-title",
-        htmlContainer: "swal-custom-text",
-      },
-    });
-
-    if (!result.isConfirmed) return;
-
-    await onDelete(project.id);
-    onClose();
-
-    void Swal.fire({
-      toast: true,
-      position: "bottom-end",
-      icon: "success",
-      title: "Proyecto eliminado",
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-    });
-  };
 
   if (typeof window === "undefined") return null;
 
@@ -95,19 +58,6 @@ export function UniqueProjectModal({
       }}
       toggleStatusText={project?.estado ? "Desactivar" : "Activar"}
       toggleStatusIcon={<FaPowerOff />}
-      extraActions={
-        onDelete ? (
-          <button
-            type="button"
-            className="btn-form-secondary btn-form-danger"
-            onClick={handleDeleteProject}
-            disabled={isSubmitting}
-          >
-            <FaTrash />
-            <span>Eliminar</span>
-          </button>
-        ) : null
-      }
     >
       <section className="modal-form-section">
         <div className="modal-section-header">

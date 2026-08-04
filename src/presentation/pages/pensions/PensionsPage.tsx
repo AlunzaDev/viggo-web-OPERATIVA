@@ -1,54 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaAlignLeft, FaCalendarAlt, FaClock, FaDollarSign, FaEdit, FaInfoCircle, FaPlus, FaPowerOff, FaProjectDiagram, FaTicketAlt } from "react-icons/fa";
+import { FaAlignLeft, FaCalendarAlt, FaClock, FaDollarSign, FaPlus, FaPowerOff, FaProjectDiagram, FaTicketAlt } from "react-icons/fa";
 import { api } from "../../../infrastructure/http/axios.instance";
+import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
+import { loadProjectOptions } from "../../services/catalogs/catalog-options";
+import { CrudRowActions } from "../../components/shared/CrudRowActions";
+import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { CopyableId } from "../../components/shared/CopyableId";
 import { CreateModalBase } from "../../components/shared/modals/CreateModalBase";
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { TableBase } from "../../components/shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
+import { buildPensionForm, buildPensionPayload, buildWeekSchedule, createInitialPensionForm, normalizePensionsPage, normalizeValidez, type PensionForm, type PensionRecord, type ValidezItem, WEEK_DAYS } from "../../services/pensions/pensions.contract";
 import "../../styles/adminCrud/AdminCrud.css";
 import "../../styles/pensions/PensionsPage.css";
 
-type ValidezItem = { weekDay: number; from: number[]; to: number[] };
-type Pension = { id: string; proyecto: string; nombre: string; validez: ValidezItem[]; precio: number; estado: boolean; descripcion?: string };
+type Pension = PensionRecord;
 type ProyectoOption = { id: string; nombre: string };
-type PensionForm = { proyecto: string; nombre: string; validez: ValidezItem[]; precio: string; descripcion: string; estado: boolean };
 
-const DEFAULT_VALIDEZ: ValidezItem[] = Array.from({ length: 7 }, (_, weekDay) => ({ weekDay, from: [0, 0], to: [23, 59] }));
-const WEEK_DAYS = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
-const cloneDefaultValidez = () => DEFAULT_VALIDEZ.map((item) => ({ ...item, from: [...item.from], to: [...item.to] }));
-const INITIAL_FORM: PensionForm = { proyecto: "", nombre: "", validez: cloneDefaultValidez(), precio: "", descripcion: "", estado: true };
+const INITIAL_FORM: PensionForm = createInitialPensionForm();
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
-const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
-const getErrorMessage = (error: unknown, fallback: string) => {
-  const data = asRecord(asRecord(asRecord(error).response).data);
-  return String(data.error ?? data.message ?? fallback);
-};
-const normalizePension = (value: unknown): Pension => {
-  const item = asRecord(value);
-  return {
-    id: String(item.id ?? item._id ?? ""),
-    proyecto: String(item.proyecto ?? ""),
-    nombre: String(item.nombre ?? ""),
-    validez: Array.isArray(item.validez) ? item.validez as ValidezItem[] : [],
-    precio: Number(item.precio ?? 0),
-    estado: Boolean(item.estado ?? true),
-    descripcion: typeof item.descripcion === "string" ? item.descripcion : undefined,
-  };
-};
-const normalizeProyecto = (value: unknown): ProyectoOption => {
-  const item = asRecord(value);
-  return { id: String(item.id ?? item._id ?? ""), nombre: String(item.nombre ?? "") };
-};
-const normalizeValidez = (value: unknown): ValidezItem[] => {
-  if (!Array.isArray(value) || value.length === 0) return cloneDefaultValidez();
-  const parsed = value.map((item) => {
-    const record = asRecord(item);
-    return { weekDay: Number(record.weekDay), from: Array.isArray(record.from) ? record.from.map(Number) : [], to: Array.isArray(record.to) ? record.to.map(Number) : [] };
-  });
-  return cloneDefaultValidez().map((defaultItem) => parsed.find((item) => item.weekDay === defaultItem.weekDay) ?? defaultItem);
-};
+const getErrorMessage = (error: unknown, fallback: string) => getApiErrorMessage(error) ?? fallback;
 const formatTime = (value: number[]) => {
   const [hour = 0, minute = 0] = value;
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
@@ -57,9 +29,6 @@ const parseTime = (value: string): number[] => {
   const [hour = "0", minute = "0"] = value.split(":");
   return [Number(hour), Number(minute)];
 };
-const buildWeekSchedule = (from: number[], to: number[]) =>
-  DEFAULT_VALIDEZ.map((item) => ({ ...item, from: [...from], to: [...to] }));
-
 function PensionModal({
   open,
   editing,
@@ -297,17 +266,15 @@ export function PensionsPage() {
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [pensionesResponse, proyectosResponse] = await Promise.all([
+      const [pensionesResponse, proyectosData] = await Promise.all([
         api.get("/api/pensiones", { params: { page, limit: pageSize, search: search.trim() || undefined } }),
-        api.get("/api/proyectos"),
+        loadProjectOptions(),
       ]);
-      const pensionesPayload = asRecord(pensionesResponse.data);
-      const pensionesData = pensionesPayload.pensiones;
-      const proyectosData = asRecord(proyectosResponse.data).proyectos;
-      setItems(Array.isArray(pensionesData) ? pensionesData.map(normalizePension) : []);
-      setProjects(Array.isArray(proyectosData) ? proyectosData.map(normalizeProyecto) : []);
-      setTotalItems(Number(pensionesPayload.total ?? 0));
-      setTotalPages(Math.max(1, Number(pensionesPayload.totalPages ?? 1)));
+      const pensionesPage = normalizePensionsPage(pensionesResponse.data, page, pageSize);
+      setItems(pensionesPage.items);
+      setProjects(proyectosData);
+      setTotalItems(pensionesPage.total);
+      setTotalPages(Math.max(1, pensionesPage.totalPages));
     } catch (loadError) {
       setError(getErrorMessage(loadError, "No se pudieron cargar las pensiones"));
     } finally {
@@ -317,12 +284,12 @@ export function PensionsPage() {
   useEffect(() => { void loadData(); }, [loadData]);
   useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
 
-  const openCreate = () => { setEditingId(null); setForm({ ...INITIAL_FORM, validez: cloneDefaultValidez(), proyecto: projects[0]?.id ?? "" }); setIsModalOpen(true); };
-  const openEdit = (item: Pension) => { setSelectedItem(null); setEditingId(item.id); setForm({ proyecto: item.proyecto, nombre: item.nombre, validez: normalizeValidez(item.validez), precio: String(item.precio), descripcion: item.descripcion ?? "", estado: item.estado }); setIsModalOpen(true); };
+  const openCreate = () => { setEditingId(null); setForm({ ...createInitialPensionForm(), proyecto: projects[0]?.id ?? "" }); setIsModalOpen(true); };
+  const openEdit = (item: Pension) => { setSelectedItem(null); setEditingId(item.id); setForm(buildPensionForm(item)); setIsModalOpen(true); };
   const save = async () => {
     setSaving(true); setError(null);
     try {
-      const payload = { proyecto: form.proyecto, nombre: form.nombre.trim(), validez: form.validez, precio: Number(form.precio), descripcion: form.descripcion.trim() || undefined, estado: form.estado };
+      const payload = buildPensionPayload(form);
       if (editingId) await api.patch(`/api/pensiones/${editingId}`, payload);
       else await api.post("/api/pensiones", payload);
       setIsModalOpen(false); await loadData();
@@ -335,14 +302,7 @@ export function PensionsPage() {
     setSaving(true);
     setError(null);
     try {
-      await api.patch(`/api/pensiones/${item.id}`, {
-        proyecto: item.proyecto,
-        nombre: item.nombre.trim(),
-        validez: normalizeValidez(item.validez),
-        precio: Number(item.precio),
-        descripcion: item.descripcion?.trim() || undefined,
-        estado: !item.estado,
-      });
+      await api.patch(`/api/pensiones/${item.id}`, buildPensionPayload({ ...buildPensionForm(item), estado: !item.estado }));
       await loadData();
       setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
     } catch (toggleError) {
@@ -357,7 +317,7 @@ export function PensionsPage() {
       <CrudActionsIsland searchValue={search} onSearchChange={(event) => { setSearch(event.target.value); setPage(1); }} onSearchClear={() => { setSearch(""); setPage(1); }} searchPlaceholder="Buscar pensiones" showCreate createLabel="Crear pension" createIcon={<FaPlus />} onCreate={openCreate} isBusy={loading || saving} />
       {error ? <p className="admin-crud-error">{error}</p> : null}
       <TableBase withCard={false} isLoading={loading} isEmpty={items.length === 0} emptyMessage="No se encontraron pensiones." page={page} pageSize={pageSize} totalItems={totalItems} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>nombre</th><th>proyecto</th><th>precio</th><th className="col-status">estado</th><th>acciones</th></tr>}>
-        {items.map((item) => <tr key={item.id} className="base-table__row"><td>{item.nombre}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{item.precio}</td><td className="col-status"><span className={`admin-crud-status ${item.estado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.estado ? "Activo" : "Inactivo"}</span></td><td><div className="admin-crud-row-actions"><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); setSelectedItem(item); }} aria-label={`Ver detalle de pension ${item.nombre}`} title="Detalle"><FaInfoCircle /></button><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); openEdit(item); }} aria-label={`Editar pension ${item.nombre}`} title="Editar"><FaEdit /></button><button className="admin-crud-icon-button admin-crud-icon-button--warning" type="button" onClick={(event) => { event.stopPropagation(); void toggleItemState(item); }} aria-label={`${item.estado ? "Desactivar" : "Activar"} pension ${item.nombre}`} title={item.estado ? "Desactivar" : "Activar"}><FaPowerOff /></button></div></td></tr>)}
+        {items.map((item) => <tr key={item.id} className="base-table__row"><td>{item.nombre}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{item.precio}</td><td className="col-status"><CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} /></td><td><CrudRowActions entityName={`pension ${item.nombre}`} isActive={item.estado} onView={() => setSelectedItem(item)} onEdit={() => openEdit(item)} onToggleStatus={() => toggleItemState(item)} /></td></tr>)}
       </TableBase>
       <PensionDetailModal
         open={Boolean(selectedItem)}

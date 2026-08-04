@@ -14,7 +14,8 @@ import {
   FaUserSlash,
 } from "react-icons/fa";
 import type { UserEntity, UserRole } from "../../../../domain/entities/user.entity";
-import { api } from "../../../../infrastructure/http/axios.instance";
+import { loadProjectOptions } from "../../../services/catalogs/catalog-options";
+import { buildInitials } from "../../../utils/identity";
 import { UniqueModalBase } from "../../shared/modals/UniqueModalBase";
 import "../../../styles/users/UniqueUserModal.css";
 
@@ -33,24 +34,6 @@ const ROLE_LABEL: Record<UserRole, string> = {
   ADMIN_ROLE: "Administrador",
   PENSION_ROLE: "Pension",
   CLIENT_ROLE: "Cliente",
-};
-
-const getUserInitials = (user: UserEntity | null) => {
-  if (!user) return "U";
-
-  const fullName = [user.nombre, user.apellido]
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .join(" ");
-
-  const source = fullName || user.correo || "U";
-
-  return source
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
 };
 
 const formatNacimiento = (value?: number) => {
@@ -86,7 +69,10 @@ export function UniqueUserModal({
     return user ? ROLE_LABEL[user.rol] : "";
   }, [user]);
 
-  const userInitials = useMemo(() => getUserInitials(user), [user]);
+  const userInitials = useMemo(
+    () => buildInitials(user?.nombre, user?.apellido, user?.correo || "U"),
+    [user],
+  );
 
   const coordinatesLabel = useMemo(() => {
     if (!user?.coordinates.length) return "Sin coordenadas";
@@ -113,26 +99,10 @@ export function UniqueUserModal({
     let cancelled = false;
     const loadProjects = async () => {
       try {
-        const { data } = await api.get("/api/proyectos");
-        const rawProjects: unknown[] = Array.isArray(data)
-          ? data
-          : (typeof data === "object" &&
-            data !== null &&
-            Array.isArray((data as { proyectos?: unknown[] }).proyectos)
-              ? (data as { proyectos?: unknown[] }).proyectos ?? []
-              : []);
-
-        const mapped = rawProjects
-          .map((project): ProjectOption | null => {
-            if (typeof project !== "object" || project === null) return null;
-            const record = project as Record<string, unknown>;
-            const id = String(record.id ?? record.uid ?? record._id ?? "").trim();
-            const name = String(record.nombre ?? record.name ?? "Proyecto").trim();
-
-            if (!id) return null;
-            return { id, name };
-          })
-          .filter((project): project is ProjectOption => project !== null);
+        const mapped = (await loadProjectOptions()).map((project) => ({
+          id: project.id,
+          name: project.nombre,
+        } satisfies ProjectOption));
 
         if (!cancelled) {
           setProjectsById(new Map(mapped.map((project) => [project.id, project.name])));

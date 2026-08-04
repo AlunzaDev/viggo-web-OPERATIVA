@@ -2,20 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { FaBuilding, FaEdit, FaImage, FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
 import type { ParkingEntity } from "../../../../domain/entities/parking.entity";
+import {
+  MEXICO_CITIES_BY_STATE,
+  MEXICO_STATES,
+  type MexicoCityOption,
+  type MexicoStateOption,
+} from "../../../data/mexico-location-catalog";
 import { CreateModalBase } from "../../shared/modals/CreateModalBase";
 import type { ProjectFormPayload } from "../../../hooks/parkings/useParkings";
 import "../../../styles/projects/CreateProjectModal.css";
-
-type CountryStateCityModule = typeof import("country-state-city");
-type MexicoStateOption = {
-  name: string;
-  isoCode: string;
-};
-type MexicoCityOption = {
-  name: string;
-  latitude?: string | null;
-  longitude?: string | null;
-};
 
 export type CreateProjectPayload = ProjectFormPayload;
 
@@ -58,13 +53,13 @@ const OTHER_CITY_VALUE = "__other__";
 const findStateByCity = (
   cityName: string,
   states: MexicoStateOption[],
-  cityApi: CountryStateCityModule["City"]
+  citiesByState: Record<string, MexicoCityOption[]>,
 ) => {
   const normalizedCity = cityName.trim().toLowerCase();
   if (!normalizedCity) return null;
 
   for (const state of states) {
-    const city = cityApi.getCitiesOfState("MX", state.isoCode).find(
+    const city = (citiesByState[state.isoCode] ?? []).find(
       (item) => item.name.trim().toLowerCase() === normalizedCity
     );
 
@@ -79,10 +74,10 @@ const findStateByCity = (
 const mapProjectToForm = (
   project?: ParkingEntity | null,
   states: MexicoStateOption[] = [],
-  cityApi?: CountryStateCityModule["City"]
+  citiesByState: Record<string, MexicoCityOption[]> = {},
 ): CreateProjectFormState => {
   if (!project) return INITIAL_FORM;
-  const matchedLocation = cityApi ? findStateByCity(project.ciudad, states, cityApi) : null;
+  const matchedLocation = findStateByCity(project.ciudad, states, citiesByState);
 
   return {
     nombre: project.nombre,
@@ -108,13 +103,11 @@ export function CreateProjectModal({
 }: CreateProjectModalProps) {
   const [form, setForm] = useState<CreateProjectFormState>(INITIAL_FORM);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [locationCatalog, setLocationCatalog] = useState<CountryStateCityModule | null>(null);
-  const [mexicoStates, setMexicoStates] = useState<MexicoStateOption[]>([]);
   const isEditMode = mode === "edit";
   const cityOptions = useMemo(() => {
-    if (!form.estadoCiudad || !locationCatalog) return [];
-    return locationCatalog.City.getCitiesOfState("MX", form.estadoCiudad).sort((a, b) => a.name.localeCompare(b.name));
-  }, [form.estadoCiudad, locationCatalog]);
+    if (!form.estadoCiudad) return [];
+    return MEXICO_CITIES_BY_STATE[form.estadoCiudad] ?? [];
+  }, [form.estadoCiudad]);
   const selectedCity = form.ciudad === OTHER_CITY_VALUE ? form.ciudadOtro.trim() : form.ciudad.trim();
 
   useEffect(() => {
@@ -123,25 +116,9 @@ export function CreateProjectModal({
   }, [open]);
 
   useEffect(() => {
-    if (!open || locationCatalog) return;
-    let isMounted = true;
-
-    void import("country-state-city").then((catalog) => {
-      if (!isMounted) return;
-      const states = catalog.State.getStatesOfCountry("MX").sort((a, b) => a.name.localeCompare(b.name));
-      setLocationCatalog(catalog);
-      setMexicoStates(states);
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [locationCatalog, open]);
-
-  useEffect(() => {
     if (!open) return;
-    setForm(mapProjectToForm(initialValues, mexicoStates, locationCatalog?.City));
-  }, [initialValues, locationCatalog, mexicoStates, open]);
+    setForm(mapProjectToForm(initialValues, MEXICO_STATES, MEXICO_CITIES_BY_STATE));
+  }, [initialValues, open]);
 
   const canSubmit = useMemo(() => {
     return (
@@ -300,7 +277,7 @@ export function CreateProjectModal({
               disabled={isSubmitting}
             >
               <option value="">Seleccionar estado</option>
-              {mexicoStates.map((state) => (
+              {MEXICO_STATES.map((state) => (
                 <option key={state.isoCode} value={state.isoCode}>
                   {state.name}
                 </option>

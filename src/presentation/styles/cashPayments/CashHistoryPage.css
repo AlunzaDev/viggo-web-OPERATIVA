@@ -6,12 +6,15 @@
 
 .cash-history-hero,
 .cash-history-kpis,
-.cash-history-filters,
 .cash-history-list,
 .cash-history-detail {
   border: 1px solid rgba(20, 42, 68, 0.08);
   background: #fffdf8;
   box-shadow: 0 20px 55px rgba(16, 41, 29, 0.08);
+}
+
+.cash-history-island {
+  z-index: 30;
 }
 
 .cash-history-hero {
@@ -44,7 +47,6 @@
   color: #627369;
 }
 
-.cash-history-hero button,
 .cash-history-row,
 .cash-history-row__action {
   transition:
@@ -53,27 +55,8 @@
     border-color 160ms ease;
 }
 
-.cash-history-hero button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  border-radius: 16px;
-  padding: 12px 16px;
-  color: #f8fbf4;
-  background: linear-gradient(135deg, #1c5f3b 0%, #2b7949 100%);
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.cash-history-hero button:hover,
 .cash-history-row:hover {
   transform: translateY(-1px);
-}
-
-.cash-history-hero button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .cash-history-kpis {
@@ -112,42 +95,6 @@
 
 .cash-history-kpis small {
   color: #6c7c72;
-}
-
-.cash-history-filters {
-  display: grid;
-  grid-template-columns: auto repeat(3, minmax(160px, 1fr));
-  align-items: end;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 22px;
-}
-
-.cash-history-filters > span,
-.cash-history-filters label {
-  display: grid;
-  gap: 6px;
-  color: #385242;
-  font-size: 0.86rem;
-  font-weight: 800;
-}
-
-.cash-history-filters > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: 13px;
-}
-
-.cash-history-filters select,
-.cash-history-filters input {
-  min-height: 42px;
-  border: 1px solid rgba(20, 68, 42, 0.16);
-  border-radius: 14px;
-  padding: 0 12px;
-  color: #173624;
-  background: #fdfefa;
-  font-weight: 700;
 }
 
 .cash-history-alert {
@@ -327,8 +274,7 @@
 
 @media (max-width: 1180px) {
   .cash-history-layout,
-  .cash-history-kpis,
-  .cash-history-filters {
+  .cash-history-kpis {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -347,7 +293,6 @@
 
   .cash-history-layout,
   .cash-history-kpis,
-  .cash-history-filters,
   .cash-history-detail__numbers {
     grid-template-columns: 1fr;
   }
@@ -360,12 +305,10 @@
 
 :root[data-theme="dark"] .cash-history-hero,
 :root[data-theme="dark"] .cash-history-kpis,
-:root[data-theme="dark"] .cash-history-filters,
 :root[data-theme="dark"] .cash-history-list,
 :root[data-theme="dark"] .cash-history-detail,
 :root:not([data-theme="light"]) .cash-history-hero,
 :root:not([data-theme="light"]) .cash-history-kpis,
-:root:not([data-theme="light"]) .cash-history-filters,
 :root:not([data-theme="light"]) .cash-history-list,
 :root:not([data-theme="light"]) .cash-history-detail {
   background: linear-gradient(180deg, rgba(24, 29, 26, 0.98) 0%, rgba(18, 23, 20, 0.98) 100%);
@@ -432,13 +375,4 @@
 :root:not([data-theme="light"]) .cash-history-row:hover {
   background: rgba(72, 153, 99, 0.13);
   border-color: rgba(72, 153, 99, 0.3);
-}
-
-:root[data-theme="dark"] .cash-history-filters select,
-:root[data-theme="dark"] .cash-history-filters input,
-:root:not([data-theme="light"]) .cash-history-filters select,
-:root:not([data-theme="light"]) .cash-history-filters input {
-  color: #eef6ef;
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
 }

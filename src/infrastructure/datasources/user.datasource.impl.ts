@@ -3,42 +3,21 @@ import { UserEntity } from "../../domain/entities/user.entity";
 import { CreateUserDto } from "../dtos/user/create-user.dto";
 import { UpdateUserDto } from "../dtos/user/update-user.dto";
 import { api } from "../http/axios.instance";
-
-type ApiErrorPayload = {
-  response?: {
-    data?: {
-      message?: string;
-      error?: string;
-    };
-  };
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const resolveUserPayload = (data: unknown): Record<string, unknown> => {
-  if (isRecord(data)) {
-    const userPayload = data.usuario ?? data.user;
-    if (isRecord(userPayload)) {
-      return userPayload;
-    }
-    return data;
-  }
-
-  throw new Error("Respuesta de usuario invalida");
-};
+import {
+  asRecord,
+  getApiErrorMessage,
+} from "../http/api-contracts";
+import { normalizeUserCollection, normalizeUserRecord } from "./user.contract";
 
 export class UserDataSourceImpl implements UserDataSource {
   private extractErrorMessage(error: unknown, fallback: string): string {
-    if (!isRecord(error)) return fallback;
-    const parsedError = error as ApiErrorPayload;
-    return parsedError.response?.data?.message || parsedError.response?.data?.error || fallback;
+    return getApiErrorMessage(error) || fallback;
   }
 
   async register(createUserDto: CreateUserDto): Promise<UserEntity> {
     try {
       const { data } = await api.post("/api/usuarios", createUserDto);
-      return UserEntity.fromObject(resolveUserPayload(data));
+      return UserEntity.fromObject(normalizeUserRecord(data));
     } catch (error: unknown) {
       throw new Error(this.extractErrorMessage(error, "Error al crear el usuario"));
     }
@@ -57,15 +36,12 @@ export class UserDataSourceImpl implements UserDataSource {
         },
       });
 
-      const usersList =
-        Array.isArray(data)
-          ? data
-          : (isRecord(data) && Array.isArray(data.usuarios) ? data.usuarios : []);
-
-      const users = usersList.map((userObj) => UserEntity.fromObject(resolveUserPayload(userObj)));
+      const users = normalizeUserCollection(data).map((userObj) =>
+        UserEntity.fromObject(userObj),
+      );
       const total =
-        isRecord(data) && typeof data.total === "number" && Number.isFinite(data.total)
-          ? data.total
+        typeof asRecord(data)?.total === "number" && Number.isFinite(asRecord(data)?.total)
+          ? (asRecord(data)?.total as number)
           : users.length;
 
       return { users, total, page, limit };
@@ -86,17 +62,17 @@ export class UserDataSourceImpl implements UserDataSource {
 
       if (hasStatusUpdate && !hasUserUpdate) {
         const { data } = await api.patch(`/api/usuarios/${userId}/status`, { estado });
-        return UserEntity.fromObject(resolveUserPayload(data));
+        return UserEntity.fromObject(normalizeUserRecord(data));
       }
 
       const { data } = await api.patch(`/api/usuarios/${userId}`, updatePayload);
 
       if (hasStatusUpdate) {
         const statusResponse = await api.patch(`/api/usuarios/${userId}/status`, { estado });
-        return UserEntity.fromObject(resolveUserPayload(statusResponse.data));
+        return UserEntity.fromObject(normalizeUserRecord(statusResponse.data));
       }
 
-      return UserEntity.fromObject(resolveUserPayload(data));
+      return UserEntity.fromObject(normalizeUserRecord(data));
     } catch (error: unknown) {
       throw new Error(this.extractErrorMessage(error, "Error al actualizar el usuario"));
     }

@@ -4,6 +4,8 @@
   --sidebar-collapsed: var(--sidebar-collapsed-w, 50px);
 
   position: relative;
+  z-index: 1;
+  isolation: isolate;
   padding: var(--pad);
   padding-left: var(--pad-left);
   padding-top: 10px;

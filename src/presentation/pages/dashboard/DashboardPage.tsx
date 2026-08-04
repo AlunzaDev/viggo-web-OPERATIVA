@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FaBroadcastTower, FaCashRegister, FaReceipt, FaTicketAlt, FaUserCog, FaWallet } from "react-icons/fa";
+import { FaBroadcastTower, FaCashRegister, FaReceipt, FaTicketAlt, FaUserCog, FaWallet, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { hasModuleAccess, type AppModuleAccess } from "../../../domain/entities/module-access";
 import type { AppUserRole } from "../../../domain/entities/role.utils";
@@ -68,6 +68,13 @@ export function DashboardPage() {
         path: "/heartbeat",
         icon: <FaBroadcastTower />,
         modules: ["modules"],
+      },
+      {
+        label: "Bitacora",
+        helper: "Revisar eventos e incidencias del punto local",
+        path: "/bitacora",
+        icon: <FaExclamationTriangle />,
+        modules: ["modules", "cashPayments", "payments", "tickets"],
       },
       {
         label: "Tickets",

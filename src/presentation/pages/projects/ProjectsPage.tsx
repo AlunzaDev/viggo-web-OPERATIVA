@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaEraser, FaInfoCircle, FaPlus, FaPowerOff, FaSortAlphaDown, FaSortAlphaDownAlt } from "react-icons/fa";
-import { CreateProjectModal, type CreateProjectPayload } from "../../components/projects/CreateProjectModal/CreateProjectModal";
 import { UniqueProjectModal } from "../../components/projects/UniqueProjectModal/UniqueProjectModal";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { CopyableId } from "../../components/shared/CopyableId";
@@ -19,6 +18,13 @@ import { usePageTitle } from "../../context/page-title/usePageTitle";
 import type { ParkingEntity } from "../../../domain/entities/parking.entity";
 import "../../styles/adminCrud/AdminCrud.css";
 import "../../styles/projects/ProjectsPage.css";
+
+import type { CreateProjectPayload } from "../../components/projects/CreateProjectModal/CreateProjectModal";
+
+const CreateProjectModal = lazy(async () => {
+  const module = await import("../../components/projects/CreateProjectModal/CreateProjectModal");
+  return { default: module.CreateProjectModal };
+});
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 type StatusFilter = "active" | "inactive" | "all";
@@ -39,7 +45,6 @@ export function ProjectsPage() {
     isLoading,
     isSaving,
     isUpdating,
-    isDeleting,
     error: projectError,
     page,
     pageSize,
@@ -47,7 +52,6 @@ export function ProjectsPage() {
     changePageSize,
     createParking: createProject,
     updateParking: updateProject,
-    deleteParking: deleteProject,
   } = useParkings();
 
   const [search, setSearch] = useState("");
@@ -90,12 +94,6 @@ export function ProjectsPage() {
     const updatedProject = await updateProject(editingProject.id, payload);
     setEditingProject(null);
     setSelectedProject(updatedProject);
-  };
-
-  const handleDeleteProject = async (id: string) => {
-    await deleteProject(id);
-    setSelectedProject(null);
-    setEditingProject((current) => (current?.id === id ? null : current));
   };
 
   const handleToggleProjectState = async (project: ParkingEntity) => {
@@ -249,41 +247,44 @@ export function ProjectsPage() {
         </SidebarFilterForm>
       </FilterSidebar>
 
-      <CreateProjectModal
-        open={isCreateOpen}
-        isSubmitting={isSaving}
-        errorMessage={projectError}
-        onClose={() => {
-          if (isSaving) return;
-          setIsCreateOpen(false);
-        }}
-        onSubmit={handleCreateProject}
-      />
+      {(isCreateOpen || Boolean(editingProject)) ? (
+        <Suspense fallback={null}>
+          <CreateProjectModal
+            open={isCreateOpen}
+            isSubmitting={isSaving}
+            errorMessage={projectError}
+            onClose={() => {
+              if (isSaving) return;
+              setIsCreateOpen(false);
+            }}
+            onSubmit={handleCreateProject}
+          />
 
-      <CreateProjectModal
-        open={Boolean(editingProject)}
-        mode="edit"
-        initialValues={editingProject}
-        isSubmitting={isUpdating}
-        errorMessage={projectError}
-        onClose={() => {
-          if (isUpdating) return;
-          setEditingProject(null);
-        }}
-        onSubmit={handleEditProject}
-      />
+          <CreateProjectModal
+            open={Boolean(editingProject)}
+            mode="edit"
+            initialValues={editingProject}
+            isSubmitting={isUpdating}
+            errorMessage={projectError}
+            onClose={() => {
+              if (isUpdating) return;
+              setEditingProject(null);
+            }}
+            onSubmit={handleEditProject}
+          />
+        </Suspense>
+      ) : null}
 
       <UniqueProjectModal
         open={Boolean(selectedProject)}
         project={selectedProject}
-        isSubmitting={isUpdating || isDeleting}
+        isSubmitting={isUpdating}
         errorMessage={projectError}
         onEdit={(project) => {
           setSelectedProject(null);
           setEditingProject(project);
         }}
         onToggleStatus={handleToggleProjectState}
-        onDelete={handleDeleteProject}
         onClose={() => setSelectedProject(null)}
       />
 

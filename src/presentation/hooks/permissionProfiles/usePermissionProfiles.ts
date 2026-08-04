@@ -1,41 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { PermissionProfileEntity } from "../../../domain/entities/permission-profile.entity";
 import { api } from "../../../infrastructure/http/axios.instance";
+import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
+import {
+  normalizePermissionProfileCollection,
+  normalizePermissionProfileRecord,
+} from "./permission-profiles.contract";
 
 type PermissionProfilePayload = {
   nombre: string;
   descripcion?: string;
   estado?: boolean;
   modules: string[];
-};
-
-const extractProfiles = (data: unknown): unknown[] => {
-  if (Array.isArray(data)) return data;
-  if (
-    typeof data === "object" &&
-    data !== null &&
-    Array.isArray((data as { profiles?: unknown[] }).profiles)
-  ) {
-    return (data as { profiles?: unknown[] }).profiles ?? [];
-  }
-  return [];
-};
-
-const extractProfile = (data: unknown): Record<string, unknown> => {
-  if (
-    typeof data === "object" &&
-    data !== null &&
-    typeof (data as { profile?: unknown }).profile === "object" &&
-    (data as { profile?: unknown }).profile !== null
-  ) {
-    return (data as { profile: Record<string, unknown> }).profile;
-  }
-
-  if (typeof data === "object" && data !== null) {
-    return data as Record<string, unknown>;
-  }
-
-  throw new Error("Respuesta invalida del perfil");
 };
 
 export function usePermissionProfiles() {
@@ -47,19 +23,7 @@ export function usePermissionProfiles() {
   const [error, setError] = useState<string | null>(null);
 
   const getErrorMessage = (errorValue: unknown, fallback: string): string => {
-    if (
-      typeof errorValue === "object" &&
-      errorValue !== null &&
-      typeof (errorValue as { response?: { data?: { error?: string; message?: string } } }).response
-        === "object"
-    ) {
-      const response = (
-        errorValue as { response?: { data?: { error?: string; message?: string } } }
-      ).response;
-      return response?.data?.message ?? response?.data?.error ?? fallback;
-    }
-
-    return errorValue instanceof Error ? errorValue.message : fallback;
+    return getApiErrorMessage(errorValue) || (errorValue instanceof Error ? errorValue.message : fallback);
   };
 
   const fetchProfiles = useCallback(async () => {
@@ -67,15 +31,7 @@ export function usePermissionProfiles() {
     setError(null);
     try {
       const { data } = await api.get("/api/permission-profiles");
-      setProfiles(
-        extractProfiles(data).map((item) =>
-          PermissionProfileEntity.fromObject(
-            typeof item === "object" && item !== null
-              ? (item as Record<string, unknown>)
-              : {},
-          ),
-        ),
-      );
+      setProfiles(normalizePermissionProfileCollection(data));
     } catch (err) {
       setError(getErrorMessage(err, "No se pudieron cargar los perfiles"));
     } finally {
@@ -92,7 +48,9 @@ export function usePermissionProfiles() {
     setError(null);
     try {
       const { data } = await api.post("/api/permission-profiles", payload);
-      const created = PermissionProfileEntity.fromObject(extractProfile(data));
+      const created = PermissionProfileEntity.fromObject(
+        normalizePermissionProfileRecord(data),
+      );
       setProfiles((prev) => [...prev, created].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")));
       return created;
     } catch (err) {
@@ -109,7 +67,9 @@ export function usePermissionProfiles() {
     setError(null);
     try {
       const { data } = await api.patch(`/api/permission-profiles/${id}`, payload);
-      const updated = PermissionProfileEntity.fromObject(extractProfile(data));
+      const updated = PermissionProfileEntity.fromObject(
+        normalizePermissionProfileRecord(data),
+      );
       setProfiles((prev) =>
         prev
           .map((profile) => (profile.id === id ? updated : profile))

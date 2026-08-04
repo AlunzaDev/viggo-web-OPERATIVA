@@ -281,6 +281,15 @@ canvas {
   max-width: 100%;
 }
 
+.leaflet-container img,
+.leaflet-pane img,
+.leaflet-control img,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile {
+  max-width: none !important;
+}
+
 .atm-icon {
   position: relative;
   display: inline-block;

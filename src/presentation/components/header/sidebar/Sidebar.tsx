@@ -10,7 +10,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaChartPie, FaCog, FaCreditCard, FaExchangeAlt, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
+import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaChartPie, FaCog, FaCreditCard, FaExchangeAlt, FaExclamationTriangle, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
 import {
   motion,
   useMotionTemplate,
@@ -125,6 +125,12 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
     isSuperAdmin || hasModuleAccess(userModules, "pensionMoves");
   const canViewPayments = isSuperAdmin || hasModuleAccess(userModules, "payments");
   const canViewDeviceHeartbeat = isSuperAdmin || hasModuleAccess(userModules, "modules");
+  const canViewOperationalLogs =
+    isSuperAdmin ||
+    hasModuleAccess(userModules, "modules") ||
+    hasModuleAccess(userModules, "cashPayments") ||
+    hasModuleAccess(userModules, "payments") ||
+    hasModuleAccess(userModules, "tickets");
   const isCajaRoute =
     location.pathname.startsWith("/caja") || location.pathname.startsWith("/cobro-caja");
   const isPensionsRoute =
@@ -191,6 +197,13 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
   const navItems = useMemo(
     () => [
       {
+        path: "/bitacora",
+        label: "Bitacora",
+        icon: <FaExclamationTriangle className="sidebar-icon" />,
+        canView: canViewOperationalLogs,
+        isActive: location.pathname.startsWith("/bitacora"),
+      },
+      {
         path: "/heartbeat",
         label: "Heartbeat",
         icon: <FaBroadcastTower className="sidebar-icon" />,
@@ -219,7 +232,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
         isActive: location.pathname.startsWith("/account") || location.pathname.startsWith("/settings"),
       },
     ],
-    [canViewDeviceHeartbeat, canViewPayments, canViewTickets, location.pathname],
+    [canViewDeviceHeartbeat, canViewOperationalLogs, canViewPayments, canViewTickets, location.pathname],
   );
 
   return (

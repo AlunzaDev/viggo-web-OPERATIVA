@@ -46,6 +46,11 @@ const DeviceHeartbeatPage = lazy(async () => {
   return { default: module.DeviceHeartbeatPage };
 });
 
+const OperationalLogsPage = lazy(async () => {
+  const module = await import("../pages/operationalLogs/OperationalLogsPage");
+  return { default: module.OperationalLogsPage };
+});
+
 const PensionsPage = lazy(async () => {
   const module = await import("../pages/pensions/PensionsPage");
   return { default: module.PensionsPage };
@@ -237,6 +242,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute modules={["modules"]}>
               <DeviceHeartbeatPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bitacora"
+          element={
+            <ProtectedRoute modules={["modules", "cashPayments", "payments", "tickets"]}>
+              <OperationalLogsPage />
             </ProtectedRoute>
           }
         />

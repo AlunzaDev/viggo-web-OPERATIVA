@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { FaEdit, FaIdBadge, FaInfoCircle, FaPlus, FaPowerOff, FaShieldAlt, FaTrash } from "react-icons/fa";
-import Swal from "sweetalert2";
+import { FaEdit, FaIdBadge, FaInfoCircle, FaPlus, FaPowerOff, FaShieldAlt } from "react-icons/fa";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { CreateModalBase } from "../../components/shared/modals/CreateModalBase";
@@ -54,11 +53,9 @@ export function PermissionProfilesPage() {
     isLoading,
     isSaving,
     isUpdating,
-    isDeleting,
     error,
     createProfile,
     updateProfile,
-    deleteProfile,
   } = usePermissionProfiles();
 
   const [search, setSearch] = useState("");
@@ -97,7 +94,6 @@ export function PermissionProfilesPage() {
   };
 
   const closeDetail = () => {
-    if (isDeleting) return;
     setSelectedProfile(null);
   };
 
@@ -142,21 +138,6 @@ export function PermissionProfilesPage() {
     }
 
     setForm(INITIAL_FORM);
-  };
-
-  const handleDelete = async (profile: PermissionProfileEntity) => {
-    const result = await Swal.fire({
-      title: "Eliminar perfil",
-      text: `Se eliminara ${profile.nombre}.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Eliminar",
-      cancelButtonText: "Cancelar",
-    });
-
-    if (!result.isConfirmed) return;
-    await deleteProfile(profile.id);
-    setSelectedProfile((current) => (current?.id === profile.id ? null : current));
   };
 
   const handleToggleProfileState = async (profile: PermissionProfileEntity) => {
@@ -412,7 +393,7 @@ export function PermissionProfilesPage() {
         entityName={selectedProfile?.nombre ?? "Perfil"}
         className="permission-profiles-page__unique-modal"
         isEntityActive={selectedProfile?.estado}
-        isSubmitting={isDeleting}
+        isSubmitting={isUpdating}
         error={error}
         onClose={closeDetail}
         onEditStart={() => {
@@ -424,19 +405,6 @@ export function PermissionProfilesPage() {
           await handleToggleProfileState(selectedProfile);
         }}
         toggleStatusText={selectedProfile?.estado ? "Desactivar" : "Activar"}
-        extraActions={
-          selectedProfile ? (
-            <button
-              type="button"
-              className="btn-form-secondary"
-              onClick={() => void handleDelete(selectedProfile)}
-              disabled={isDeleting}
-            >
-              <FaTrash />
-              <span>Eliminar</span>
-            </button>
-          ) : null
-        }
       >
         <section className="modal-form-section">
           <div className="modal-section-header">

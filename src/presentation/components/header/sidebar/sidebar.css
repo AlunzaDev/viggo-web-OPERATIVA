@@ -1,5 +1,6 @@
 .sidebar {
   position: fixed;
+  isolation: isolate;
   top: var(--header-h, 50px);
   left: 0;
   width: var(--sidebar-open-w, 220px);

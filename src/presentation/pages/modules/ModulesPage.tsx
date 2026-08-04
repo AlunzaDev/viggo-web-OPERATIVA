@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  FaEdit,
-  FaInfoCircle,
   FaPlus,
-  FaPowerOff,
 } from "react-icons/fa";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
@@ -11,6 +8,8 @@ import {
   type ModuleDeviceBindingRequest,
 } from "../../../domain/entities/module.entity";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
+import { CrudRowActions } from "../../components/shared/CrudRowActions";
+import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
 import { EmptyState } from "../../components/shared/EmptyState";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { TableBase } from "../../components/shared/tables/TableBase";
@@ -293,55 +292,16 @@ export function ModulesPage() {
               </span>
             </td>
             <td className="col-status">
-              <span
-                className={`admin-crud-status ${
-                  item.estado
-                    ? "admin-crud-status--active"
-                    : "admin-crud-status--inactive"
-                }`}
-              >
-                {item.estado ? "Activo" : "Inactivo"}
-              </span>
+              <CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} />
             </td>
             <td>
-              <div className="admin-crud-row-actions">
-                <button
-                  className="admin-crud-icon-button"
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setSelectedItem(item);
-                  }}
-                  aria-label={`Ver detalle de modulo ${item.nombre}`}
-                  title="Detalle"
-                >
-                  <FaInfoCircle />
-                </button>
-                <button
-                  className="admin-crud-icon-button"
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    openEdit(item);
-                  }}
-                  aria-label={`Editar modulo ${item.nombre}`}
-                  title="Editar"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  className="admin-crud-icon-button admin-crud-icon-button--warning"
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void toggleModuleState(item);
-                  }}
-                  aria-label={`${item.estado ? "Desactivar" : "Activar"} modulo ${item.nombre}`}
-                  title={item.estado ? "Desactivar" : "Activar"}
-                >
-                  <FaPowerOff />
-                </button>
-              </div>
+              <CrudRowActions
+                entityName={`modulo ${item.nombre}`}
+                isActive={item.estado}
+                onView={() => setSelectedItem(item)}
+                onEdit={() => openEdit(item)}
+                onToggleStatus={() => toggleModuleState(item)}
+              />
             </td>
           </tr>
         ))}

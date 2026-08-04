@@ -37,17 +37,19 @@ body.has-floating-crud-island-space {
   align-items: center;
   justify-content: center;
   gap: var(--crud-dock-gap);
-  padding: 6px 8px;
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  border: 1px solid color-mix(in srgb, var(--glass-border) 82%, var(--primary-color) 18%);
-  background: var(--glass-bg-strong);
-  background: color-mix(in srgb, var(--glass-bg-strong) 82%, transparent);
+  padding: 8px 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(120, 140, 172, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 255, 0.96)),
+    color-mix(in srgb, var(--glass-bg-strong) 88%, transparent);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 26%, transparent),
-    0 8px 26px color-mix(in srgb, #000 22%, transparent);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 10px 28px rgba(18, 28, 45, 0.16),
+    0 0 0 1px rgba(148, 199, 86, 0.14),
+    0 0 22px rgba(148, 199, 86, 0.08);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   animation: crud-actions-island-float-in 0.34s var(--crud-actions-ease);
   transform: scale(var(--crud-island-scale, 1));
   transform-origin: center bottom;
@@ -71,10 +73,11 @@ body.has-floating-crud-island-space {
 
 .crud-actions-island--floating-dock:hover .crud-actions-island__panel {
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 30%, transparent),
-    0 12px 32px color-mix(in srgb, #000 26%, transparent);
-  border-color: var(--glass-border);
-  border-color: color-mix(in srgb, var(--glass-border) 72%, var(--primary-color) 28%);
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 16px 36px rgba(18, 28, 45, 0.2),
+    0 0 0 1px rgba(148, 199, 86, 0.18),
+    0 0 28px rgba(148, 199, 86, 0.12);
+  border-color: color-mix(in srgb, var(--primary-color) 36%, var(--glass-border));
 }
 
 .crud-actions-island__group--search-filter {
@@ -97,24 +100,24 @@ body.has-floating-crud-island-space {
   width: var(--crud-dock-control-size);
   height: var(--crud-dock-control-size);
   flex-shrink: 0;
-  border-radius: 12px;
-  border: 1px solid var(--input-border);
+  border-radius: 13px;
+  border: 1px solid rgba(126, 143, 171, 0.16);
   background:
     linear-gradient(
       155deg,
-      color-mix(in srgb, var(--surface) 80%, #ffffff 20%) 0%,
-      color-mix(in srgb, var(--surface) 92%, transparent) 44%,
-      color-mix(in srgb, var(--surface-2) 88%, transparent) 100%
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(238, 242, 248, 0.98) 44%,
+      rgba(228, 234, 243, 0.98) 100%
     );
-  color: var(--text-soft);
+  color: #34415d;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 26%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, #000000 14%, transparent),
-    0 4px 12px color-mix(in srgb, #000 16%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(133, 149, 176, 0.18),
+    0 6px 14px rgba(18, 28, 45, 0.12);
   transition:
     background var(--crud-actions-dur-fast) var(--crud-actions-ease),
     border-color var(--crud-actions-dur-fast) var(--crud-actions-ease),
@@ -206,24 +209,24 @@ body.has-floating-crud-island-space {
   width: var(--crud-dock-control-size);
   height: var(--crud-dock-control-size);
   flex-shrink: 0;
-  border-radius: 12px;
-  border: 1px solid var(--input-border);
+  border-radius: 13px;
+  border: 1px solid rgba(126, 143, 171, 0.16);
   background:
     linear-gradient(
       155deg,
-      color-mix(in srgb, var(--surface) 80%, #ffffff 20%) 0%,
-      color-mix(in srgb, var(--surface) 92%, transparent) 44%,
-      color-mix(in srgb, var(--surface-2) 88%, transparent) 100%
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(238, 242, 248, 0.98) 44%,
+      rgba(228, 234, 243, 0.98) 100%
     );
-  color: var(--text-soft);
+  color: #34415d;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 26%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, #000000 14%, transparent),
-    0 4px 12px color-mix(in srgb, #000 16%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(133, 149, 176, 0.18),
+    0 6px 14px rgba(18, 28, 45, 0.12);
   transition:
     background var(--crud-actions-dur-fast) var(--crud-actions-ease),
     border-color var(--crud-actions-dur-fast) var(--crud-actions-ease),
@@ -323,24 +326,24 @@ body.has-floating-crud-island-space {
   height: var(--crud-dock-control-size);
   min-height: var(--crud-dock-control-size);
   max-height: var(--crud-dock-control-size);
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
+  border: 1px solid rgba(126, 143, 171, 0.16);
+  border-radius: 13px;
   background:
     linear-gradient(
       155deg,
-      color-mix(in srgb, var(--surface) 80%, #ffffff 20%) 0%,
-      color-mix(in srgb, var(--surface) 92%, transparent) 44%,
-      color-mix(in srgb, var(--surface-2) 88%, transparent) 100%
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(238, 242, 248, 0.98) 44%,
+      rgba(228, 234, 243, 0.98) 100%
     );
-  color: var(--text-soft);
+  color: #34415d;
   font-family: var(--font-heading);
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 26%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, #000000 14%, transparent),
-    0 4px 12px color-mix(in srgb, #000 16%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(133, 149, 176, 0.18),
+    0 6px 14px rgba(18, 28, 45, 0.12);
   transition:
     transform var(--crud-actions-dur-fast) var(--crud-actions-ease),
     border-color var(--crud-actions-dur-fast) var(--crud-actions-ease),
@@ -390,20 +393,22 @@ body.has-floating-crud-island-space {
   align-items: center;
   gap: 8px;
   height: var(--crud-dock-control-size);
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 72%, transparent);
-  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(136, 221, 84, 0.42);
+  padding: 0 20px;
   font-family: var(--font-heading);
   font-size: 15px;
   font-weight: 700;
   color: var(--text-on-primary);
   background: linear-gradient(
     160deg,
-    color-mix(in srgb, var(--primary-color) 92%, #a0e8b0 8%) 0%,
-    color-mix(in srgb, var(--primary-color-dark) 94%, #0a122f 6%) 100%
+    #79d946 0%,
+    #5fbc30 100%
   );
   cursor: pointer;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--primary-color) 28%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 18px rgba(95, 188, 48, 0.28);
   transition:
     transform var(--crud-actions-dur-fast) var(--crud-actions-ease),
     box-shadow var(--crud-actions-dur-fast) var(--crud-actions-ease),
@@ -426,6 +431,54 @@ body.has-floating-crud-island-space {
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--primary-color) 24%, transparent),
     0 10px 20px color-mix(in srgb, var(--primary-color) 32%, transparent);
+}
+
+:root[data-theme="dark"] .crud-actions-island__panel,
+:root:not([data-theme="light"]) .crud-actions-island__panel {
+  border-color: color-mix(in srgb, var(--primary-color) 28%, var(--glass-border));
+  background:
+    linear-gradient(180deg, rgba(39, 41, 44, 0.94), rgba(22, 24, 27, 0.94)),
+    color-mix(in srgb, var(--glass-bg-strong) 82%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 28px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(148, 199, 86, 0.14),
+    0 0 22px rgba(148, 199, 86, 0.08);
+}
+
+:root[data-theme="dark"] .crud-actions-island--floating-dock:hover .crud-actions-island__panel,
+:root:not([data-theme="light"]) .crud-actions-island--floating-dock:hover .crud-actions-island__panel {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 16px 36px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(148, 199, 86, 0.18),
+    0 0 28px rgba(148, 199, 86, 0.12);
+}
+
+:root[data-theme="dark"] .crud-actions-island__search-trigger,
+:root[data-theme="dark"] .crud-actions-island__icon-btn,
+:root[data-theme="dark"] .crud-actions-island__action-btn,
+:root:not([data-theme="light"]) .crud-actions-island__search-trigger,
+:root:not([data-theme="light"]) .crud-actions-island__icon-btn,
+:root:not([data-theme="light"]) .crud-actions-island__action-btn {
+  border-color: rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(
+      155deg,
+      rgba(92, 94, 98, 0.88) 0%,
+      rgba(62, 64, 68, 0.92) 44%,
+      rgba(46, 48, 52, 0.96) 100%
+    );
+  color: #e8edf5;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 6px 14px rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="dark"] .crud-actions-island__action-btn,
+:root:not([data-theme="light"]) .crud-actions-island__action-btn {
+  color: #eef2f8;
 }
 
 @media (max-width: 768px) {

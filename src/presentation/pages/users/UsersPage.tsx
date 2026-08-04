@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  FaEdit,
-  FaInfoCircle,
-  FaPowerOff,
   FaSortAlphaDown,
   FaSortAlphaDownAlt,
   FaUserPlus,
 } from "react-icons/fa";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
+import { CrudRowActions } from "../../components/shared/CrudRowActions";
+import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
 import {
   CreateUserModal,
   type CreateUserPayload,
@@ -405,49 +404,16 @@ export function UsersPage() {
                 </span>
               </td>
               <td className="col-status">
-                <span className={`app-status-pill users-badge users-badge--status ${user.estado ? "users-badge--active" : "users-badge--inactive"}`}>
-                  {user.estado ? "Activo" : "Inactivo"}
-                </span>
+                <CrudStatusBadge label={user.estado ? "Activo" : "Inactivo"} variant={user.estado ? "active" : "inactive"} />
               </td>
               <td className="col-actions">
-                <div className="admin-crud-row-actions">
-                  <button
-                    className="admin-crud-icon-button"
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSelectedUser(user);
-                    }}
-                    aria-label={`Ver detalle de ${user.name}`}
-                    title="Detalle"
-                  >
-                    <FaInfoCircle />
-                  </button>
-                  <button
-                    className="admin-crud-icon-button"
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setEditingUser(user);
-                    }}
-                    aria-label={`Editar ${user.name}`}
-                    title="Editar"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    className="admin-crud-icon-button admin-crud-icon-button--warning"
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void handleToggleUserState(user.id, !user.estado);
-                    }}
-                    aria-label={`${user.estado ? "Desactivar" : "Activar"} ${user.name}`}
-                    title={user.estado ? "Desactivar" : "Activar"}
-                  >
-                    <FaPowerOff />
-                  </button>
-                </div>
+                <CrudRowActions
+                  entityName={`acceso ${user.name}`}
+                  isActive={user.estado}
+                  onView={() => setSelectedUser(user)}
+                  onEdit={() => setEditingUser(user)}
+                  onToggleStatus={() => handleToggleUserState(user.id, !user.estado)}
+                />
               </td>
             </motion.tr>
           ))}

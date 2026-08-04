@@ -81,6 +81,17 @@ export function CrudActionsIsland({
   }, [searchRevealOnIconClick, searchValue]);
 
   useEffect(() => {
+    if (!isSearchExpanded) return;
+
+    const timeoutId = window.setTimeout(() => {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    }, 30);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isSearchExpanded]);
+
+  useEffect(() => {
     if (!isFloatingDock) return;
     document.documentElement.classList.add("has-floating-crud-island");
     document.documentElement.classList.add("has-floating-crud-island-space");
@@ -111,7 +122,6 @@ export function CrudActionsIsland({
 
   const openSearch = useCallback(() => {
     setIsSearchExpanded(true);
-    window.setTimeout(() => searchInputRef.current?.focus(), 0);
   }, []);
 
   const closeSearch = useCallback(() => {

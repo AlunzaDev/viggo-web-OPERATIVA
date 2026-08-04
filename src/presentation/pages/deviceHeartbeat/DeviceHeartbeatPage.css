@@ -1,163 +1,92 @@
 .device-heartbeat-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   min-height: 100%;
   color: var(--text-primary);
 }
 
-.device-heartbeat-hero,
-.device-heartbeat-toolbar,
-.device-heartbeat-stats article,
-.device-heartbeat-card,
+.device-heartbeat-map-shell,
+.device-heartbeat-sidebar,
 .device-heartbeat-empty {
   border: 1px solid var(--border-color);
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 12%, transparent), transparent 36%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 12%, transparent), transparent 34%),
     var(--card-background);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 44px rgba(7, 18, 35, 0.12);
 }
 
-.device-heartbeat-hero {
+.is-spinning {
+  animation: device-heartbeat-spin 0.9s linear infinite;
+}
+
+.device-heartbeat-map-shell,
+.device-heartbeat-workspace,
+.device-heartbeat-project,
+.device-heartbeat-empty--workspace {
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.device-heartbeat-map-shell {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.device-heartbeat-map-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 24px;
-  border-radius: 26px;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.device-heartbeat-eyebrow {
-  display: inline-flex;
-  margin-bottom: 8px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+.device-heartbeat-map-topbar > div:first-child {
+  display: grid;
+  gap: 3px;
 }
 
-.device-heartbeat-hero h1 {
-  margin: 0;
-  font-size: clamp(1.7rem, 2.6vw, 2.45rem);
+.device-heartbeat-map-topbar strong {
   color: var(--text-primary);
 }
 
-.device-heartbeat-hero p {
-  max-width: 720px;
-  margin: 8px 0 0;
+.device-heartbeat-map-topbar span {
   color: var(--text-secondary);
-  line-height: 1.55;
+  font-size: 0.92rem;
 }
 
-.device-heartbeat-refresh {
+.device-heartbeat-map-topbar__stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.device-heartbeat-map-topbar__stats span {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 16px;
-  background: var(--primary-color);
-  color: var(--text-on-primary);
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 18px 34px color-mix(in srgb, var(--primary-color) 24%, transparent);
-}
-
-.device-heartbeat-stats {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.device-heartbeat-stats article {
-  display: grid;
-  gap: 5px;
-  min-height: 104px;
-  padding: 16px;
-  border-radius: 20px;
-}
-
-.device-heartbeat-stats span,
-.device-heartbeat-card__runtime span,
-.device-heartbeat-card__meta,
-.device-heartbeat-submodules__title {
-  color: var(--text-muted);
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
   font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 900;
 }
 
-.device-heartbeat-stats strong {
-  font-size: 2rem;
-  color: var(--text-primary);
-}
-
-.device-heartbeat-stats small {
-  color: var(--text-secondary);
-  font-weight: 700;
-}
-
-.device-heartbeat-stats .is-online strong {
+.device-heartbeat-map-topbar__stats .is-online {
+  background: color-mix(in srgb, #1f9d63 16%, transparent);
   color: #1f9d63;
 }
 
-.device-heartbeat-stats .is-offline strong {
+.device-heartbeat-map-topbar__stats .is-offline {
+  background: color-mix(in srgb, #c44747 14%, transparent);
   color: #c44747;
 }
 
-.device-heartbeat-stats .is-pending strong {
-  color: #b47a1c;
-}
-
-.device-heartbeat-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border-radius: 20px;
-}
-
-.device-heartbeat-toolbar > div:first-child {
-  display: grid;
-  gap: 2px;
-}
-
-.device-heartbeat-toolbar strong {
-  color: var(--text-primary);
-}
-
-.device-heartbeat-toolbar span {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
-.device-heartbeat-filters {
-  display: inline-flex;
-  gap: 8px;
-  padding: 5px;
-  border-radius: 999px;
-  background: var(--surface-2);
-}
-
-.device-heartbeat-filters button {
-  border: 0;
-  border-radius: 999px;
-  padding: 9px 13px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.device-heartbeat-filters button:hover,
-.device-heartbeat-filters button.is-active {
-  background: var(--card-background);
-  color: var(--text-primary);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+.device-heartbeat-map-topbar__stats .is-pending {
+  background: color-mix(in srgb, #d59b28 16%, transparent);
+  color: #a56808;
 }
 
 .device-heartbeat-error,
@@ -170,6 +99,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 16px;
   color: #b23a3a;
   background: color-mix(in srgb, #b23a3a 10%, var(--card-background));
 }
@@ -177,7 +107,7 @@
 .device-heartbeat-empty {
   display: grid;
   place-items: center;
-  min-height: 280px;
+  min-height: 320px;
   text-align: center;
   color: var(--text-secondary);
 }
@@ -196,70 +126,790 @@
   margin: 4px 0 0;
 }
 
-.device-heartbeat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 14px;
-}
-
-.device-heartbeat-card {
+.device-heartbeat-map-panel {
   position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 18px;
-  border-radius: 24px;
+  flex: 1 1 auto;
+  min-height: 620px;
+  z-index: 1;
 }
 
-.device-heartbeat-card::before {
-  content: "";
+.device-heartbeat-map-overlay {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  background: var(--text-muted);
+  top: 18px;
+  left: 18px;
+  z-index: 4;
+  display: grid;
+  gap: 12px;
+  width: min(280px, calc(100% - 36px));
 }
 
-.device-heartbeat-card.is-online::before {
+.device-heartbeat-map-layer-tabs,
+.device-heartbeat-map-status-tabs {
+  padding: 8px;
+  border: 1px solid rgba(17, 32, 58, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 36px rgba(10, 22, 40, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.device-heartbeat-map-layer-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.device-heartbeat-map-layer-tabs button,
+.device-heartbeat-map-status-tab {
+  border-radius: 12px;
+}
+
+.device-heartbeat-map-layer-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  font-size: 0.98rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.device-heartbeat-map-layer-tabs button:hover,
+.device-heartbeat-map-status-tab:hover {
+  transform: translateY(-1px);
+}
+
+.device-heartbeat-map-layer-tabs button.is-active {
+  border-color: rgba(111, 212, 125, 0.7);
+  background: linear-gradient(180deg, rgba(83, 156, 91, 0.98), rgba(57, 126, 64, 0.98));
+}
+
+.device-heartbeat-map-controls {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(17, 32, 58, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 36px rgba(10, 22, 40, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.device-heartbeat-map-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(17, 32, 58, 0.12);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 252, 0.96));
+  color: #33415d;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.device-heartbeat-map-controls button:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--primary-color) 36%, var(--border-color));
+  box-shadow: 0 12px 24px rgba(10, 22, 40, 0.1);
+}
+
+.device-heartbeat-map-controls button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+.device-heartbeat-map-status-tabs {
+  display: grid;
+  gap: 8px;
+}
+
+.device-heartbeat-map-status-tab {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.device-heartbeat-map-status-tab span {
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.device-heartbeat-map-status-tab strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.98rem;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.device-heartbeat-map-status-tab--all.is-active {
+  border-color: rgba(142, 168, 198, 0.34);
+}
+
+.device-heartbeat-map-status-tab--online.is-active {
+  border-color: rgba(111, 212, 125, 0.72);
+  background: linear-gradient(180deg, rgba(80, 123, 88, 0.98), rgba(60, 104, 67, 0.98));
+}
+
+.device-heartbeat-map-status-tab--offline.is-active {
+  border-color: rgba(197, 105, 105, 0.54);
+}
+
+.device-heartbeat-map-status-tab--pending.is-active {
+  border-color: rgba(203, 185, 103, 0.54);
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-layer-tabs,
+:root[data-theme="dark"] .device-heartbeat-map-status-tabs,
+:root[data-theme="dark"] .device-heartbeat-map-controls {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+:root[data-theme="light"] .device-heartbeat-map-layer-tabs,
+:root[data-theme="light"] .device-heartbeat-map-status-tabs {
+  border-color: rgba(17, 32, 58, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+:root[data-theme="light"] .device-heartbeat-map-layer-tabs button,
+:root[data-theme="light"] .device-heartbeat-map-status-tab {
+  border: 1px solid rgba(17, 32, 58, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 252, 0.96));
+  color: #33415d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 10px 18px rgba(65, 84, 112, 0.12);
+}
+
+:root[data-theme="light"] .device-heartbeat-map-layer-tabs button.is-active {
+  border-color: rgba(93, 176, 108, 0.76);
+  background: linear-gradient(180deg, rgba(95, 178, 111, 0.98), rgba(69, 143, 81, 0.98));
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .device-heartbeat-map-status-tab--all.is-active {
+  border-color: rgba(91, 127, 181, 0.44);
+  background: linear-gradient(180deg, rgba(219, 229, 243, 0.98), rgba(201, 214, 232, 0.98));
+  color: #314763;
+}
+
+:root[data-theme="light"] .device-heartbeat-map-status-tab--online.is-active {
+  border-color: rgba(93, 176, 108, 0.76);
+  background: linear-gradient(180deg, rgba(95, 178, 111, 0.96), rgba(69, 143, 81, 0.98));
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .device-heartbeat-map-status-tab--offline.is-active {
+  border-color: rgba(205, 101, 101, 0.64);
+  background: linear-gradient(180deg, rgba(245, 226, 226, 0.98), rgba(235, 210, 210, 0.98));
+  color: #8b3e3e;
+}
+
+:root[data-theme="light"] .device-heartbeat-map-status-tab--pending.is-active {
+  border-color: rgba(212, 188, 96, 0.64);
+  background: linear-gradient(180deg, rgba(246, 238, 214, 0.98), rgba(236, 227, 197, 0.98));
+  color: #826717;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-layer-tabs,
+:root[data-theme="dark"] .device-heartbeat-map-status-tabs {
+  background: rgba(15, 23, 42, 0.84);
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-layer-tabs button,
+:root[data-theme="dark"] .device-heartbeat-map-status-tab {
+  border: 1px solid rgba(170, 192, 216, 0.18);
+  background: linear-gradient(180deg, rgba(63, 82, 105, 0.95), rgba(44, 59, 79, 0.98));
+  color: #f2f7fb;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 18px rgba(8, 18, 34, 0.16);
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-layer-tabs button.is-active {
+  border-color: rgba(111, 212, 125, 0.7);
+  background: linear-gradient(180deg, rgba(83, 156, 91, 0.98), rgba(57, 126, 64, 0.98));
+  color: #f8fff8;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-status-tab--all.is-active {
+  border-color: rgba(110, 146, 196, 0.48);
+  background: linear-gradient(180deg, rgba(70, 87, 110, 0.98), rgba(47, 60, 79, 0.98));
+  color: #f8fbff;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-status-tab--online.is-active {
+  border-color: rgba(111, 212, 125, 0.7);
+  background: linear-gradient(180deg, rgba(80, 123, 88, 0.98), rgba(60, 104, 67, 0.98));
+  color: #f3fff4;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-status-tab--offline.is-active {
+  border-color: rgba(197, 105, 105, 0.54);
+  background: linear-gradient(180deg, rgba(112, 73, 80, 0.98), rgba(87, 54, 61, 0.98));
+  color: #fff2f2;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-status-tab--pending.is-active {
+  border-color: rgba(203, 185, 103, 0.54);
+  background: linear-gradient(180deg, rgba(120, 109, 69, 0.98), rgba(94, 84, 50, 0.98));
+  color: #fffbe8;
+}
+
+.device-heartbeat-map {
+  width: 100%;
+  height: 100%;
+  min-height: 620px;
+  position: relative;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(227, 235, 247, 0.45), rgba(211, 222, 238, 0.34)),
+    #eef3fa;
+}
+
+.device-heartbeat-map .leaflet-pane,
+.device-heartbeat-map .leaflet-top,
+.device-heartbeat-map .leaflet-bottom,
+.device-heartbeat-map .leaflet-control {
+  z-index: 1 !important;
+}
+
+.device-heartbeat-map .leaflet-control-zoom {
+  border: 1px solid rgba(17, 32, 58, 0.18);
+  box-shadow: 0 16px 30px rgba(9, 20, 38, 0.18);
+}
+
+.device-heartbeat-leaflet-popup .leaflet-popup-content-wrapper {
+  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--border-color));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 94%, white 6%);
+  color: #111111;
+  box-shadow:
+    0 18px 38px rgb(15 23 42 / 22%),
+    0 4px 12px rgb(15 23 42 / 12%);
+  backdrop-filter: blur(12px) saturate(135%);
+  -webkit-backdrop-filter: blur(12px) saturate(135%);
+  pointer-events: auto;
+}
+
+.device-heartbeat-leaflet-popup .leaflet-popup-content {
+  margin: 12px 14px;
+  pointer-events: auto;
+}
+
+.device-heartbeat-leaflet-popup .leaflet-popup-tip {
+  background: color-mix(in srgb, var(--surface) 94%, white 6%);
+  pointer-events: auto;
+}
+
+.device-heartbeat-leaflet-popup .leaflet-popup-close-button {
+  top: 6px;
+  right: 8px;
+  color: #111111;
+  display: none;
+}
+
+.device-heartbeat-map-popup {
+  display: grid;
+  gap: 5px;
+  min-width: 190px;
+  max-width: 300px;
+}
+
+.device-heartbeat-map-popup strong,
+.device-heartbeat-map-popup span,
+.device-heartbeat-map-popup small {
+  overflow-wrap: anywhere;
+}
+
+.device-heartbeat-map-popup strong {
+  color: #111111;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.device-heartbeat-map-popup span,
+.device-heartbeat-map-popup small {
+  color: #111111;
+  font-weight: 700;
+}
+
+.device-heartbeat-map-popup span {
+  font-size: 0.82rem;
+}
+
+.device-heartbeat-map-popup small {
+  font-size: 0.76rem;
+  color: color-mix(in srgb, #111111 72%, white);
+}
+
+.device-heartbeat-map-popup__headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.device-heartbeat-map-popup__message {
+  color: color-mix(in srgb, #111111 82%, white);
+  font-size: 0.78rem;
+}
+
+.device-heartbeat-map-popup__status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.device-heartbeat-map-popup__status-pill--ok {
+  color: #127a46;
+  background: color-mix(in srgb, #18b968 16%, white);
+}
+
+.device-heartbeat-map-popup__status-pill--error {
+  color: #b43535;
+  background: color-mix(in srgb, #e14c4c 14%, white);
+}
+
+.device-heartbeat-map-popup__status-pill--syncing {
+  color: #8a6500;
+  background: color-mix(in srgb, #f1c94a 28%, white);
+}
+
+:root[data-theme="dark"] .device-heartbeat-leaflet-popup .leaflet-popup-content-wrapper {
+  border-color: color-mix(in srgb, var(--primary-color) 34%, rgb(255 255 255 / 18%));
+  background: color-mix(in srgb, #111827 92%, transparent);
+  color: #f8fafc;
+  box-shadow:
+    0 18px 44px rgb(0 0 0 / 44%),
+    inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+
+:root[data-theme="dark"] .device-heartbeat-leaflet-popup .leaflet-popup-tip {
+  background: color-mix(in srgb, #111827 92%, transparent);
+}
+
+:root[data-theme="dark"] .device-heartbeat-leaflet-popup .leaflet-popup-close-button,
+:root[data-theme="dark"] .device-heartbeat-map-popup strong,
+:root[data-theme="dark"] .device-heartbeat-map-popup span,
+:root[data-theme="dark"] .device-heartbeat-map-popup small {
+  color: #f8fafc;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-popup small,
+:root[data-theme="dark"] .device-heartbeat-map-popup__message {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-popup__status-pill--ok {
+  color: #dcfce7;
+  background: rgb(24 185 104 / 24%);
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-popup__status-pill--error {
+  color: #fee2e2;
+  background: rgb(225 76 76 / 26%);
+}
+
+:root[data-theme="dark"] .device-heartbeat-map-popup__status-pill--syncing {
+  color: #fef3c7;
+  background: rgb(241 201 74 / 26%);
+}
+
+.device-heartbeat-map-legend {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(17, 32, 58, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 34px rgba(10, 22, 40, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.device-heartbeat-map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #33415d;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.device-heartbeat-map-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.device-heartbeat-map-legend .is-online {
   background: #1f9d63;
 }
 
-.device-heartbeat-card.is-offline::before {
+.device-heartbeat-map-legend .is-offline {
   background: #c44747;
 }
 
-.device-heartbeat-card.is-pending::before {
+.device-heartbeat-map-legend .is-pending {
   background: #d59b28;
 }
 
-.device-heartbeat-card header {
+.device-heartbeat-map-marker-wrap {
+  background: transparent;
+  border: 0;
+}
+
+.device-heartbeat-map-marker {
+  position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--marker-tone);
+  border: 4px solid rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 12px 28px rgba(8, 18, 36, 0.28),
+    0 0 0 4px color-mix(in srgb, var(--marker-tone) 24%, transparent);
+  z-index: 12;
+}
+
+.device-heartbeat-map-marker.is-compact {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+.device-heartbeat-map-marker > span {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(12, 24, 42, 0.12);
+}
+
+.device-heartbeat-workspace {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.device-heartbeat-projects-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.device-heartbeat-projects-toolbar div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.device-heartbeat-projects-toolbar span {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.device-heartbeat-projects-toolbar strong {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.device-heartbeat-projects-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.device-heartbeat-projects-actions button {
+  min-height: 34px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-2) 86%, transparent);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.device-heartbeat-project {
+  display: grid;
+  gap: 0;
+  border: 1px solid color-mix(in srgb, var(--border-color) 86%, transparent);
+  background: color-mix(in srgb, var(--card-background) 90%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.device-heartbeat-project__toggle {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.device-heartbeat-project__toggle:hover {
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+}
+
+.device-heartbeat-project__header {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
   align-items: center;
   gap: 12px;
 }
 
-.device-heartbeat-card__icon {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
-  color: var(--primary-color);
-  font-size: 1.18rem;
-}
-
-.device-heartbeat-card h2 {
+.device-heartbeat-project__header h2 {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1rem;
   color: var(--text-primary);
 }
 
-.device-heartbeat-card header p {
+.device-heartbeat-project__header p {
   margin: 3px 0 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+}
+
+.device-heartbeat-project__summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.device-heartbeat-project__summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.device-heartbeat-project__summary .is-online {
+  background: color-mix(in srgb, #1f9d63 16%, transparent);
+  color: #1f9d63;
+}
+
+.device-heartbeat-project__summary .is-offline {
+  background: color-mix(in srgb, #c44747 14%, transparent);
+  color: #c44747;
+}
+
+.device-heartbeat-project__summary .is-pending {
+  background: color-mix(in srgb, #d59b28 16%, transparent);
+  color: #a56808;
+}
+
+.device-heartbeat-project__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+  color: var(--text-muted);
+}
+
+.device-heartbeat-project.is-expanded .device-heartbeat-project__toggle {
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 86%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 5%, transparent);
+}
+
+.device-heartbeat-project__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  padding: 12px;
+}
+
+.device-heartbeat-empty--workspace {
+  min-height: 220px;
+}
+
+.device-heartbeat-projects-toolbar strong,
+.device-heartbeat-project__header h2,
+.device-heartbeat-project__summary,
+.device-heartbeat-project__toggle,
+.device-heartbeat-device-card h2,
+.device-heartbeat-sidebar__header strong {
+  color: var(--text-primary);
+}
+
+.device-heartbeat-device-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 132px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 253, 0.94));
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.device-heartbeat-device-card:hover,
+.device-heartbeat-device-card.is-selected {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(12, 23, 42, 0.08);
+}
+
+.device-heartbeat-device-card.is-selected {
+  border-color: color-mix(in srgb, var(--primary-color) 38%, var(--border-color));
+}
+
+.device-heartbeat-device-card header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.device-heartbeat-device-card__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.device-heartbeat-device-card h2 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.device-heartbeat-device-card header p {
+  margin: 2px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.79rem;
+  line-height: 1.2;
+}
+
+.device-heartbeat-device-card__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.device-heartbeat-device-card__meta-row small {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.device-heartbeat-device-card__summary {
+  display: grid;
+  gap: 2px;
+  margin-top: auto;
+}
+
+.device-heartbeat-device-card__summary strong {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.device-heartbeat-device-card__summary span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.device-heartbeat-device-card .device-heartbeat-pill {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 0.68rem;
+}
+
+.device-heartbeat-device-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.device-heartbeat-device-card__action {
+  flex: 1 1 0;
+  min-height: 34px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+  color: var(--text-primary);
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.device-heartbeat-device-card__action:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--primary-color) 34%, var(--border-color));
+}
+
+.device-heartbeat-device-card__action--primary {
+  background: color-mix(in srgb, var(--primary-color) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--primary-color) 34%, var(--border-color));
+  color: var(--primary-color);
 }
 
 .device-heartbeat-pill {
@@ -286,127 +936,159 @@
   color: #a56808;
 }
 
-.device-heartbeat-card__runtime {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+.device-heartbeat-detail-modal .modal-form-actions {
+  display: none;
 }
 
-.device-heartbeat-card__runtime span {
+.device-heartbeat-detail-hero {
   display: grid;
-  gap: 5px;
-  min-width: 0;
-  padding: 12px;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.device-heartbeat-detail-hero__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  color: var(--primary-color);
+  font-size: 1.3rem;
+}
+
+.device-heartbeat-detail-hero h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.08rem;
+}
+
+.device-heartbeat-detail-hero p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+}
+
+.device-heartbeat-detail-copy {
+  margin-top: 14px;
+}
+
+.device-heartbeat-detail-subdevices {
+  display: grid;
+  gap: 12px;
+}
+
+.device-heartbeat-detail-subdevice {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
 }
 
-.device-heartbeat-card__runtime strong {
-  overflow: hidden;
+.device-heartbeat-detail-subdevice strong {
   color: var(--text-primary);
-  font-size: 0.94rem;
-  text-overflow: ellipsis;
-  text-transform: none;
-  white-space: nowrap;
 }
 
-.device-heartbeat-card__message {
-  margin: 0;
+.device-heartbeat-detail-subdevice span {
+  display: block;
+  margin-top: 4px;
   color: var(--text-secondary);
-  line-height: 1.45;
+  font-size: 0.85rem;
 }
 
-.device-heartbeat-card__meta {
+.device-heartbeat-detail-subdevice__meta {
   display: grid;
-  gap: 5px;
-  padding-top: 2px;
-  text-transform: none;
+  gap: 6px;
 }
 
-.device-heartbeat-submodules {
-  display: grid;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-color);
-}
-
-.device-heartbeat-submodules__title {
+.device-heartbeat-detail-subdevice__meta small {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-
-.device-heartbeat-submodules__list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.device-heartbeat-submodules__list span {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 7px;
-  max-width: 100%;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--text-primary);
-  font-size: 0.84rem;
-  font-weight: 800;
-}
-
-.device-heartbeat-submodules__copy {
-  display: grid;
-  gap: 0.1rem;
-}
-
-.device-heartbeat-submodules__copy strong {
-  color: var(--text-primary);
-  font-size: 0.84rem;
-}
-
-.device-heartbeat-submodules__list span.is-inactive {
-  opacity: 0.54;
-}
-
-.device-heartbeat-submodules__list small {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.device-heartbeat-submodules p {
-  margin: 0;
   color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
-@media (max-width: 980px) {
-  .device-heartbeat-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@keyframes device-heartbeat-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1280px) {
+  .device-heartbeat-project__header {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .device-heartbeat-map-topbar {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .device-heartbeat-toolbar,
-  .device-heartbeat-hero {
-    align-items: stretch;
+  .device-heartbeat-projects-toolbar,
+  .device-heartbeat-project__header {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .device-heartbeat-island__filters {
+    flex-wrap: wrap;
+  }
+
+  .device-heartbeat-map-topbar__stats,
+  .device-heartbeat-device-card__actions {
+    width: 100%;
+  }
+
+  .device-heartbeat-map-panel,
+  .device-heartbeat-map {
+    min-height: 500px;
   }
 }
 
 @media (max-width: 640px) {
-  .device-heartbeat-grid,
-  .device-heartbeat-card__runtime,
-  .device-heartbeat-stats {
-    grid-template-columns: 1fr;
+  .device-heartbeat-map-topbar,
+  .device-heartbeat-workspace,
+  .device-heartbeat-project__grid {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
-  .device-heartbeat-filters {
-    flex-wrap: wrap;
-    border-radius: 18px;
+  .device-heartbeat-project__grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .device-heartbeat-map-legend {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .device-heartbeat-map-overlay {
+    width: calc(100% - 24px);
+    left: 12px;
+    top: 12px;
+  }
+
+  .device-heartbeat-map-panel,
+  .device-heartbeat-map {
+    min-height: 420px;
+  }
+
+  .device-heartbeat-island__filters {
+    width: 100%;
+  }
+
+  .device-heartbeat-detail-hero {
+    grid-template-columns: 1fr;
   }
 }

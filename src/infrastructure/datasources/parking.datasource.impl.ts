@@ -5,43 +5,22 @@ import type {
 } from "../../domain/datasources/parking.datasource";
 import { ParkingEntity } from "../../domain/entities/parking.entity";
 import { api } from "../http/axios.instance";
+import { getApiErrorMessage } from "../http/api-contracts";
 import { CreateParkingDto } from "../dtos/parking/create-parking.dto";
 import { UpdateParkingDto } from "../dtos/parking/update-parking.dto";
-
-type ApiErrorPayload = {
-    response?: {
-        data?: {
-            error?: string;
-            message?: string;
-        };
-    };
-};
-
-const getApiErrorMessage = (error: unknown): string | undefined => {
-    if (typeof error !== "object" || error === null) return undefined;
-    const parsedError = error as ApiErrorPayload;
-    return parsedError.response?.data?.error || parsedError.response?.data?.message;
-};
-
-const resolveParkingPayload = (data: { proyecto?: unknown } | unknown): Record<string, unknown> => {
-    const source =
-        typeof data === "object" && data !== null && "proyecto" in data
-            ? (data as { proyecto?: unknown }).proyecto ?? data
-            : data;
-
-    if (typeof source === "object" && source !== null) {
-        return source as Record<string, unknown>;
-    }
-
-    throw new Error("Respuesta de proyecto invalida");
-};
+import {
+    normalizeProjectCollection,
+    normalizeProjectPage,
+    normalizeProjectRecord,
+} from "./parking.contract";
 
 export class ParkingDatasourceImpl implements ParkingDatasource {
     async getAll(): Promise<ParkingEntity[]> {
         try {
             const { data } = await api.get<{ proyectos?: unknown[] } | unknown[]>("/api/proyectos");
-            const parkingsList = Array.isArray(data) ? data : (data.proyectos ?? []);
-            return parkingsList.map((parking) => ParkingEntity.fromObject(resolveParkingPayload(parking)));
+            return normalizeProjectCollection(data).map((parking) =>
+                ParkingEntity.fromObject(parking),
+            );
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -66,18 +45,21 @@ export class ParkingDatasourceImpl implements ParkingDatasource {
                 },
             });
 
-            const items = Array.isArray(data.proyectos)
-                ? data.proyectos.map((parking) =>
-                      ParkingEntity.fromObject(resolveParkingPayload(parking)),
-                  )
-                : [];
+            const pageResult = normalizeProjectPage(
+                data,
+                params.page ?? 1,
+                params.limit ?? 20,
+            );
+            const items = pageResult.items.map((parking) =>
+                ParkingEntity.fromObject(parking),
+            );
 
             return {
                 items,
-                total: Number(data.total ?? items.length),
-                page: Number(data.page ?? params.page ?? 1),
-                limit: Number(data.limit ?? params.limit ?? Math.max(items.length, 1)),
-                totalPages: Number(data.totalPages ?? 1),
+                total: pageResult.total,
+                page: pageResult.page,
+                limit: pageResult.limit,
+                totalPages: pageResult.totalPages,
             };
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
@@ -91,7 +73,7 @@ export class ParkingDatasourceImpl implements ParkingDatasource {
     async create(createParkingDto: CreateParkingDto): Promise<ParkingEntity> {
         try {
             const { data } = await api.post<{ proyecto?: unknown } | unknown>("/api/proyectos", createParkingDto);
-            return ParkingEntity.fromObject(resolveParkingPayload(data));
+            return ParkingEntity.fromObject(normalizeProjectRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {
@@ -105,7 +87,7 @@ export class ParkingDatasourceImpl implements ParkingDatasource {
         try {
             const { id, ...rest } = updateParkingDto;
             const { data } = await api.patch<{ proyecto?: unknown } | unknown>(`/api/proyectos/${id}`, rest);
-            return ParkingEntity.fromObject(resolveParkingPayload(data));
+            return ParkingEntity.fromObject(normalizeProjectRecord(data));
         } catch (error: unknown) {
             const errorMessage = getApiErrorMessage(error);
             if (errorMessage) {

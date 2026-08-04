@@ -1,4 +1,10 @@
 import { api } from "../../../infrastructure/http/axios.instance";
+import {
+  buildInstallationRequestPayload,
+  normalizeInstallationCloudProjects,
+  normalizeLocalInstallation,
+  type InstallationCloudProject,
+} from "./installation.contract";
 
 export type LocalInstallationStatus =
   | "pending"
@@ -30,18 +36,14 @@ export type LocalInstallation = {
   updatedAt: number | null;
 };
 
-type InstallationResponse = {
-  installation: LocalInstallation;
-};
-
 export const getLocalInstallation = async (): Promise<LocalInstallation> => {
-  const { data } = await api.get<InstallationResponse>("/api/installation/status");
-  return data.installation;
+  const { data } = await api.get("/api/installation/status");
+  return normalizeLocalInstallation(data);
 };
 
-export const getInstallationCloudProjects = async (): Promise<unknown[]> => {
-  const { data } = await api.get<{ proyectos?: unknown[] }>("/api/installation/cloud-projects");
-  return Array.isArray(data.proyectos) ? data.proyectos : [];
+export const getInstallationCloudProjects = async (): Promise<InstallationCloudProject[]> => {
+  const { data } = await api.get("/api/installation/cloud-projects");
+  return normalizeInstallationCloudProjects(data);
 };
 
 export const requestLocalInstallationProject = async (
@@ -49,12 +51,9 @@ export const requestLocalInstallationProject = async (
   installationLinkToken: string,
   browserLocation?: BrowserInstallationLocation,
 ): Promise<LocalInstallation> => {
-  const { data } = await api.post<InstallationResponse>("/api/installation/project-request", {
-    proyectoId,
-    installationLinkToken,
-    browserCoordinates: browserLocation?.coordinates,
-    browserLocationAccuracy: browserLocation?.accuracy,
-    browserLocationCapturedAt: browserLocation?.capturedAt,
-  });
-  return data.installation;
+  const { data } = await api.post(
+    "/api/installation/project-request",
+    buildInstallationRequestPayload(proyectoId, installationLinkToken, browserLocation),
+  );
+  return normalizeLocalInstallation(data);
 };

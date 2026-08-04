@@ -1,0 +1,85 @@
+.operational-log-detail-modal__hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.operational-log-detail-modal__hero-icon {
+  width: 78px;
+  height: 78px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(81, 105, 166, 0.16), rgba(81, 105, 166, 0.08));
+  color: #42599c;
+  font-size: 1.6rem;
+}
+
+.operational-log-detail-modal__hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.operational-log-detail-modal__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(28, 42, 88, 0.08);
+  color: #54617d;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.operational-log-detail-modal__pill.is-incident {
+  background: rgba(255, 239, 207, 0.92);
+  color: #9a680e;
+}
+
+.operational-log-detail-modal__pill.is-event {
+  background: rgba(226, 236, 255, 0.92);
+  color: #315495;
+}
+
+.operational-log-detail-modal__hero-copyable {
+  margin-top: 12px;
+}
+
+.operational-log-detail-modal__item p,
+.operational-log-detail-modal__json {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(245, 247, 251, 0.92);
+  color: #243252;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.operational-log-detail-modal__json {
+  overflow-x: auto;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.operational-log-detail-modal__metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.operational-log-detail-modal__empty {
+  margin: 0;
+  color: #72809c;
+}
+
+@media (max-width: 900px) {
+  .operational-log-detail-modal__hero,
+  .operational-log-detail-modal__metadata {
+    grid-template-columns: 1fr;
+  }
+}

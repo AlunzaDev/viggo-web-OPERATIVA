@@ -6,19 +6,22 @@ import type {
   CashSession,
 } from "../../types/cashPayments/cash-payments.types";
 import {
-  asRecord,
-  getNumber,
-  getDenominationCountPayload,
-  mapCutPreview,
-  mapShiftAggregate,
-  mapShiftDetail,
-  mapSession,
-  mapTicket,
 } from "../../utils/cashPayments/cash-payments.formatters";
 import type {
   CashRegisterCutPreview,
   TicketView,
 } from "../../types/cashPayments/cash-payments.types";
+import {
+  buildCashCountPayload,
+  normalizeActiveCashShiftResponse,
+  normalizeCashCutPreviewResponse,
+  normalizeCashMovementDetailResponse,
+  normalizeCashSessionResponse,
+  normalizeCashShiftAggregateResponse,
+  normalizeCashShiftDetailResponse,
+  normalizeCashShiftListResponse,
+  normalizeResolveQrResponse,
+} from "./cash-payments.contract";
 
 export type ResolveQrResult = {
   ticket: TicketView;
@@ -43,12 +46,7 @@ export const listCashRegisterShiftSummaries = async (
   params: CashRegisterShiftFilters,
 ): Promise<CashRegisterShiftListResult> => {
   const { data } = await api.get("/api/cash-register/shifts", { params });
-  const payload = asRecord(data);
-
-  return {
-    items: Array.isArray(payload.items) ? payload.items.map(mapShiftDetail) : [],
-    total: getNumber(payload.total),
-  };
+  return normalizeCashShiftListResponse(data);
 };
 
 export const getCashRegisterShiftStats = async (
@@ -57,22 +55,21 @@ export const getCashRegisterShiftStats = async (
   const { data } = await api.get("/api/cash-register/shifts/stats/summary", {
     params,
   });
-  return mapShiftAggregate(data);
+  return normalizeCashShiftAggregateResponse(data);
 };
 
 export const getCashRegisterShiftDetail = async (
   shiftId: string,
 ): Promise<CashRegisterShiftDetail> => {
   const { data } = await api.get(`/api/cash-register/shifts/${shiftId}`);
-  return mapShiftDetail(data);
+  return normalizeCashShiftDetailResponse(data);
 };
 
 export const getActiveCashRegisterShift = async (
   cashierId: string,
 ): Promise<CashRegisterShiftDetail | null> => {
   const { data } = await api.get(`/api/cash-register/shifts/active/${cashierId}`);
-  const detail = asRecord(data).detail;
-  return detail ? mapShiftDetail(detail) : null;
+  return normalizeActiveCashShiftResponse(data);
 };
 
 export const resolveCashTicketQr = async (
@@ -81,12 +78,7 @@ export const resolveCashTicketQr = async (
   const { data } = await api.post("/api/cash-payments/tickets/resolve-qr", {
     qrValue,
   });
-  const payload = asRecord(data);
-
-  return {
-    ticket: mapTicket(payload.ticket),
-    activeSession: payload.activeSession ? mapSession(payload.activeSession) : null,
-  };
+  return normalizeResolveQrResponse(data);
 };
 
 export const startCashTicketSession = async (
@@ -96,7 +88,7 @@ export const startCashTicketSession = async (
   const { data } = await api.post(`/api/cash-payments/tickets/${ticketId}/start`, {
     moduloId,
   });
-  return mapSession(asRecord(data).session);
+  return normalizeCashSessionResponse(data);
 };
 
 export const insertCashIntoSession = async (
@@ -108,7 +100,7 @@ export const insertCashIntoSession = async (
     amount,
     rawEvent,
   });
-  return mapSession(asRecord(data).session);
+  return normalizeCashSessionResponse(data);
 };
 
 export const cancelCashTicketSession = async (
@@ -118,7 +110,7 @@ export const cancelCashTicketSession = async (
   const { data } = await api.post(`/api/cash-payments/sessions/${sessionId}/cancel`, {
     cancellationReason,
   });
-  return mapSession(asRecord(data).session);
+  return normalizeCashSessionResponse(data);
 };
 
 export const openCashRegisterShift = async (input: {
@@ -127,7 +119,7 @@ export const openCashRegisterShift = async (input: {
   notes?: string;
 }): Promise<CashRegisterShiftDetail> => {
   const { data } = await api.post("/api/cash-register/shifts/open", input);
-  return mapShiftDetail(data);
+  return normalizeCashShiftDetailResponse(data);
 };
 
 export const registerCashRegisterMovement = async (
@@ -142,8 +134,7 @@ export const registerCashRegisterMovement = async (
     `/api/cash-register/shifts/${shiftId}/movements`,
     input,
   );
-  const detail = asRecord(data).detail;
-  return detail ? mapShiftDetail(detail) : null;
+  return normalizeCashMovementDetailResponse(data);
 };
 
 export const saveCashRegisterCount = async (
@@ -152,8 +143,7 @@ export const saveCashRegisterCount = async (
   notes?: string,
 ) => {
   await api.post(`/api/cash-register/shifts/${shiftId}/counts`, {
-    denominations: getDenominationCountPayload(denominationLines),
-    notes,
+    ...buildCashCountPayload(denominationLines, notes),
   });
 };
 
@@ -161,7 +151,7 @@ export const getCashRegisterCutPreview = async (
   shiftId: string,
 ): Promise<CashRegisterCutPreview> => {
   const { data } = await api.get(`/api/cash-register/shifts/${shiftId}/cut-preview`);
-  return mapCutPreview(asRecord(data).preview);
+  return normalizeCashCutPreviewResponse(data);
 };
 
 export const closeCashRegisterShift = async (
@@ -170,7 +160,6 @@ export const closeCashRegisterShift = async (
   notes?: string,
 ) => {
   await api.post(`/api/cash-register/shifts/${shiftId}/close`, {
-    denominations: getDenominationCountPayload(denominationLines),
-    notes,
+    ...buildCashCountPayload(denominationLines, notes),
   });
 };

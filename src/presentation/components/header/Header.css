@@ -7,6 +7,7 @@
   gap: 12px;
   height: var(--header-h, 50px);
   position: fixed;
+  isolation: isolate;
   top: 0;
   left: 0;
   right: 0;

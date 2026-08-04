@@ -7,7 +7,6 @@ import {
   FaProjectDiagram,
   FaShieldAlt,
   FaUnlink,
-  FaMicrochip,
 } from "react-icons/fa";
 import {
   ModuleEntity,
@@ -22,7 +21,6 @@ import {
   getBindingStatusClassName,
   getBindingStatusLabel,
   getRequestStatusClassName,
-  getRuntimeStatusClassName,
 } from "../../utils/modules/moduleDetail.utils";
 
 type ModuleDetailModalProps = {
@@ -51,6 +49,16 @@ export function ModuleDetailModal({
   onClose,
 }: ModuleDetailModalProps) {
   const currentBinding = item?.deviceBinding ?? null;
+  const bindingRequests = item?.deviceBindingRequests ?? [];
+  const hasBindingData = Boolean(
+    currentBinding?.fingerprint ||
+      currentBinding?.primaryMac ||
+      currentBinding?.cpuSerial ||
+      currentBinding?.machineId ||
+      currentBinding?.boundAt ||
+      currentBinding?.lastSeenAt,
+  );
+  const hasPendingRequests = bindingRequests.length > 0;
 
   return (
     <UniqueModalBase
@@ -156,145 +164,64 @@ export function ModuleDetailModal({
         </div>
       </section>
 
-      <section className="modal-form-section">
-        <div className="modal-section-header">
-          <FaMicrochip className="modal-section-icon" />
-          <h3 className="modal-section-title">Submodulos</h3>
-        </div>
-        {item?.submodulos.length ? (
-          <div className="admin-crud-request-list">
-            {item.submodulos.map((submodulo) => (
-              <article key={submodulo.submoduloId} className="admin-crud-request-card">
-                <div className="admin-crud-request-card__header">
-                  <span className="admin-crud-pill">{submodulo.tipo}</span>
-                  <span className={submodulo.estado ? "admin-crud-status admin-crud-status--active" : "admin-crud-status admin-crud-status--inactive"}>
-                    {submodulo.estado ? "Activo" : "Inactivo"}
-                  </span>
-                </div>
-                <div className="admin-crud-request-card__body">
-                  <strong>{submodulo.nombre}</strong>
-                  <span>ID: {submodulo.identificador || submodulo.submoduloId}</span>
-                  <span>IP: {submodulo.ip || "Sin IP"}</span>
-                  <span>MAC: {submodulo.mac || "Sin MAC"}</span>
-                </div>
+      {hasBindingData ? (
+        <section className="modal-form-section">
+          <div className="modal-section-header">
+            <FaLink className="modal-section-icon" />
+            <h3 className="modal-section-title">Equipo vinculado</h3>
+          </div>
+          <div className="modal-section-grid">
+            {buildBindingSummary(currentBinding, {
+              maskFingerprint: true,
+            }).map((field) => (
+              <article
+                key={field.label}
+                className="form-group admin-crud-detail-item"
+              >
+                <label>{field.label}</label>
+                <p>{field.value}</p>
               </article>
             ))}
+            <article className="form-group admin-crud-detail-item">
+              <label>Vinculado desde</label>
+              <p>{formatDateTime(currentBinding?.boundAt)}</p>
+            </article>
+            <article className="form-group admin-crud-detail-item">
+              <label>Ultima conexion</label>
+              <p>{formatDateTime(currentBinding?.lastSeenAt)}</p>
+            </article>
           </div>
-        ) : (
+        </section>
+      ) : (
+        <section className="modal-form-section">
+          <div className="modal-section-header">
+            <FaLink className="modal-section-icon" />
+            <h3 className="modal-section-title">Equipo vinculado</h3>
+          </div>
           <div className="admin-crud-detail-item">
-            <p className="admin-crud-detail-muted">Sin submodulos registrados</p>
+            <p className="admin-crud-detail-muted">
+              Aun no hay un equipo vinculado a este modulo.
+            </p>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className="modal-form-section">
-        <div className="modal-section-header">
-          <FaLink className="modal-section-icon" />
-          <h3 className="modal-section-title">Huella autorizada</h3>
-        </div>
-        <div className="modal-section-grid">
-          {buildBindingSummary(currentBinding, {
-            maskFingerprint: true,
-          }).map((field) => (
-            <article
-              key={field.label}
-              className="form-group admin-crud-detail-item"
-            >
-              <label>{field.label}</label>
-              <p>{field.value}</p>
-            </article>
-          ))}
-          <article className="form-group admin-crud-detail-item">
-            <label>Vinculado desde</label>
-            <p>{formatDateTime(currentBinding?.boundAt)}</p>
-          </article>
-          <article className="form-group admin-crud-detail-item">
-            <label>Ultima conexion</label>
-            <p>{formatDateTime(currentBinding?.lastSeenAt)}</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="modal-form-section">
-        <div className="modal-section-header">
-          <FaShieldAlt className="modal-section-icon" />
-          <h3 className="modal-section-title">Estado vivo del dispositivo</h3>
-        </div>
-        {item?.deviceRuntime ? (
-          <div className="modal-section-grid">
-            <article className="form-group admin-crud-detail-item">
-              <label>Estado vivo</label>
-              <p>
-                <span className={getRuntimeStatusClassName(item.deviceRuntime.connectionStatus)}>
-                  {item.deviceRuntime.connectionStatus}
-                </span>
-              </p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Conectado ahora</label>
-              <p>{item.deviceRuntime.isConnected ? "Si" : "No"}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Sesion autorizada</label>
-              <p>{item.deviceRuntime.isAuthorized ? "Si" : "No"}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Socket activo</label>
-              <p>{item.deviceRuntime.socketId || "Sin dato"}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Conectado desde</label>
-              <p>{formatDateTime(item.deviceRuntime.connectedAt)}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Ultimo heartbeat</label>
-              <p>{formatDateTime(item.deviceRuntime.lastHeartbeatAt)}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Ultima desconexion</label>
-              <p>{formatDateTime(item.deviceRuntime.lastDisconnectAt)}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Huella viva</label>
-              <p>{formatFingerprintPreview(item.deviceRuntime.fingerprint)}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>IP viva</label>
-              <p>{item.deviceRuntime.ipAddress || "Sin dato"}</p>
-            </article>
-            <article className="form-group admin-crud-detail-item">
-              <label>Ubicacion viva</label>
-              <p>{item.deviceRuntime.locationLabel || "Sin dato"}</p>
-            </article>
-            <article className="form-group modal-field-full admin-crud-detail-item">
-              <label>Mensaje</label>
-              <p>
-                {item.deviceRuntime.message || (
-                  <span className="admin-crud-detail-muted">Sin mensaje</span>
-                )}
-              </p>
-            </article>
+      {hasPendingRequests ? (
+        <section className="modal-form-section">
+          <div className="modal-section-header">
+            <FaShieldAlt className="modal-section-icon" />
+            <h3 className="modal-section-title">Solicitudes de vinculacion</h3>
           </div>
-        ) : (
-          <div className="admin-crud-detail-item">
-            <p className="admin-crud-detail-muted">Sin estado vivo registrado</p>
-          </div>
-        )}
-      </section>
-
-      <section className="modal-form-section">
-        <div className="modal-section-header">
-          <FaShieldAlt className="modal-section-icon" />
-          <h3 className="modal-section-title">Solicitudes</h3>
-        </div>
-        {item?.deviceBindingRequests.length ? (
           <div className="admin-crud-request-list">
-            {item.deviceBindingRequests.map((request, index) => (
+            {bindingRequests.map((request, index) => (
               <button
                 key={`${request.fingerprint}-${request.requestedAt.toISOString()}-${index}`}
                 type="button"
                 className="admin-crud-request-card"
-                onClick={() => onOpenRequest(item, request)}
+                onClick={() => {
+                  if (!item) return;
+                  onOpenRequest(item, request);
+                }}
               >
                 <div className="admin-crud-request-card__header">
                   <span className={getRequestStatusClassName(request.status)}>
@@ -312,12 +239,8 @@ export function ModuleDetailModal({
               </button>
             ))}
           </div>
-        ) : (
-          <div className="admin-crud-detail-item">
-            <p className="admin-crud-detail-muted">Sin solicitudes registradas</p>
-          </div>
-        )}
-      </section>
+        </section>
+      ) : null}
     </UniqueModalBase>
   );
 }

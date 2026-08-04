@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FaBuilding,
   FaCloudDownloadAlt,
+  FaHistory,
   FaMoon,
   FaShieldAlt,
   FaSignOutAlt,
@@ -21,21 +22,33 @@ import {
 } from "../../../config/theme-mode";
 import { useAuth } from "../../context/auth/useAuth";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
+import { buildInitials } from "../../utils/identity";
 import {
-  getLocalConfigStatus,
-  syncLocalConfiguration,
   type LocalConfigStatus,
   type LocalConfigSyncResult,
 } from "../../services/config/config.api";
+import {
+  loadLocalConfigFlowState,
+  runLocalConfigSyncFlow,
+} from "../../services/config/config.flow";
+import {
+  formatConfigStatusDate,
+  formatConfigSyncSuccess,
+  normalizeConfigSyncError,
+  getConfigSyncIssueLabel,
+  getConfigSyncStatusLabel,
+} from "../../services/config/config-status.presenter";
+import {
+  type MonthlyFlushStatus,
+} from "../../services/monthlyFlush/monthlyFlush.api";
+import {
+  createMonthlyFlushFormFromStatus,
+  loadMonthlyFlushFlow,
+  runMonthlyFlushFlow,
+  saveMonthlyFlushFlow,
+} from "../../services/monthlyFlush/monthlyFlush.flow";
+import { MonthlyFlushModal } from "./MonthlyFlushModal";
 import "../../styles/settings/SettingsPage.css";
-
-const formatDate = (value?: number | null) => {
-  if (!value) return "Sin registro";
-  return new Intl.DateTimeFormat("es-MX", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-};
 
 export function SettingsPage() {
   usePageTitle("Cuenta");
@@ -48,6 +61,21 @@ export function SettingsPage() {
   const [configLoading, setConfigLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [configError, setConfigError] = useState<string | null>(null);
+  const [isMonthlyFlushOpen, setIsMonthlyFlushOpen] = useState(false);
+  const [monthlyFlushStatus, setMonthlyFlushStatus] = useState<MonthlyFlushStatus | null>(null);
+  const [monthlyFlushLoading, setMonthlyFlushLoading] = useState(false);
+  const [monthlyFlushSaving, setMonthlyFlushSaving] = useState(false);
+  const [monthlyFlushRunning, setMonthlyFlushRunning] = useState(false);
+  const [monthlyFlushError, setMonthlyFlushError] = useState<string | null>(null);
+  const [monthlyFlushEnabled, setMonthlyFlushEnabled] = useState(false);
+  const [monthlyFlushPartialEnabled, setMonthlyFlushPartialEnabled] = useState(false);
+  const [monthlyFlushPartialDays, setMonthlyFlushPartialDays] = useState<number[]>([]);
+  const [monthlyFlushHour, setMonthlyFlushHour] = useState("02");
+  const [monthlyFlushMinute, setMonthlyFlushMinute] = useState("00");
+  const [manualMonth, setManualMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()).padStart(2, "0")}`;
+  });
 
   const runtimeTheme = resolveThemeForRuntime(theme);
   const ThemeIcon = runtimeTheme === "dark" ? FaMoon : FaSun;
@@ -56,25 +84,16 @@ export function SettingsPage() {
     : runtimeTheme === "dark"
       ? "Oscuro"
       : "Claro";
+  const userInitials = buildInitials(user?.name || "UV");
   const canManageLocalConfig =
     user?.role === "superRole" || user?.role === "adminRole";
 
   const loadConfigStatus = async () => {
-    if (!canManageLocalConfig) {
-      setConfigLoading(false);
-      return;
-    }
-
     setConfigLoading(true);
-    setConfigError(null);
     try {
-      setConfigStatus(await getLocalConfigStatus());
-    } catch (error) {
-      setConfigError(
-        error instanceof Error
-          ? error.message
-          : "No se pudo cargar la configuracion local",
-      );
+      const state = await loadLocalConfigFlowState(canManageLocalConfig);
+      setConfigStatus(state.status);
+      setConfigError(state.error);
     } finally {
       setConfigLoading(false);
     }
@@ -83,6 +102,22 @@ export function SettingsPage() {
   useEffect(() => {
     void loadConfigStatus();
   }, [canManageLocalConfig]);
+
+  const loadMonthlyFlushStatus = async () => {
+    if (!canManageLocalConfig) return;
+    setMonthlyFlushLoading(true);
+    setMonthlyFlushError(null);
+
+    const result = await loadMonthlyFlushFlow();
+    setMonthlyFlushStatus(result.status);
+    setMonthlyFlushEnabled(result.form.enabled);
+    setMonthlyFlushPartialEnabled(result.form.partialCurrentMonthEnabled);
+    setMonthlyFlushPartialDays(result.form.partialDays);
+    setMonthlyFlushHour(result.form.hour);
+    setMonthlyFlushMinute(result.form.minute);
+    setMonthlyFlushError(result.error);
+    setMonthlyFlushLoading(false);
+  };
 
   const toggleTheme = () => {
     if (isThemeLockedByEnv) return;
@@ -120,15 +155,109 @@ export function SettingsPage() {
     setConfigError(null);
     setSyncResult(null);
     try {
-      const result = await syncLocalConfiguration();
-      setSyncResult(result);
-      await loadConfigStatus();
+      const flow = await runLocalConfigSyncFlow();
+      setConfigStatus(flow.status);
+      setSyncResult(flow.result);
     } catch (error) {
-      setConfigError(error instanceof Error ? error.message : "No se pudo sincronizar");
+      setConfigError(
+        error instanceof Error
+          ? normalizeConfigSyncError(error.message, "sync")
+          : "No pudimos sincronizar en este momento. Intenta nuevamente mas tarde.",
+      );
     } finally {
       setSyncing(false);
     }
   };
+
+  const handleOpenMonthlyFlush = async () => {
+    setIsMonthlyFlushOpen(true);
+    if (!monthlyFlushStatus && !monthlyFlushLoading) {
+      await loadMonthlyFlushStatus();
+    }
+  };
+
+  const handleSaveMonthlyFlush = async () => {
+    setMonthlyFlushSaving(true);
+    setMonthlyFlushError(null);
+    try {
+      const status = await saveMonthlyFlushFlow({
+        enabled: monthlyFlushEnabled,
+        partialCurrentMonthEnabled: monthlyFlushPartialEnabled,
+        partialDays: monthlyFlushPartialDays,
+        hour: monthlyFlushHour,
+        minute: monthlyFlushMinute,
+      });
+      setMonthlyFlushStatus(status);
+      const form = createMonthlyFlushFormFromStatus(status);
+      setMonthlyFlushEnabled(form.enabled);
+      setMonthlyFlushPartialEnabled(form.partialCurrentMonthEnabled);
+      setMonthlyFlushPartialDays(form.partialDays);
+      setMonthlyFlushHour(form.hour);
+      setMonthlyFlushMinute(form.minute);
+    } catch (error) {
+      setMonthlyFlushError(
+        error instanceof Error ? error.message : "No se pudo guardar el flush mensual",
+      );
+    } finally {
+      setMonthlyFlushSaving(false);
+    }
+  };
+
+  const handleRunManualMonthlyFlush = async () => {
+    setMonthlyFlushRunning(true);
+    setMonthlyFlushError(null);
+    try {
+      const status = await runMonthlyFlushFlow(manualMonth);
+      setMonthlyFlushStatus(status);
+      const form = createMonthlyFlushFormFromStatus(status);
+      setMonthlyFlushEnabled(form.enabled);
+      setMonthlyFlushPartialEnabled(form.partialCurrentMonthEnabled);
+      setMonthlyFlushPartialDays(form.partialDays);
+      setMonthlyFlushHour(form.hour);
+      setMonthlyFlushMinute(form.minute);
+    } catch (error) {
+      setMonthlyFlushError(
+        error instanceof Error ? error.message : "No se pudo ejecutar el flush mensual",
+      );
+    } finally {
+      setMonthlyFlushRunning(false);
+    }
+  };
+
+  const handleTogglePartialDay = (day: number) => {
+    setMonthlyFlushPartialDays((current) =>
+      current.includes(day) ? current.filter((item) => item !== day) : [...current, day].sort((a, b) => a - b),
+    );
+  };
+
+  const handleAddPartialDay = () => {
+    setMonthlyFlushPartialDays((current) => {
+      const candidate = Array.from({ length: 30 }, (_, index) => index + 2).find(
+        (day) => !current.includes(day),
+      );
+      if (!candidate) return current;
+      return [...current, candidate].sort((a, b) => a - b);
+    });
+  };
+
+  const handleRemovePartialDay = (day: number) => {
+    setMonthlyFlushPartialDays((current) => current.filter((item) => item !== day));
+  };
+
+  const handleUpdatePartialDay = (previousDay: number, nextValue: string) => {
+    const nextDay = Number(nextValue);
+    if (!Number.isInteger(nextDay) || nextDay < 2 || nextDay > 31) return;
+    setMonthlyFlushPartialDays((current) =>
+      Array.from(new Set(current.map((item) => (item === previousDay ? nextDay : item)))).sort(
+        (a, b) => a - b,
+      ),
+    );
+  };
+
+  const manualMonthMax = (() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  })();
 
   return (
     <div className="settings-page">
@@ -146,7 +275,7 @@ export function SettingsPage() {
           <div className="profile-summary">
             <div className="profile-avatar-container" style={{ cursor: "default" }}>
               <div className="profile-avatar-large profile-avatar-fallback">
-                <FaUserCog />
+                {userInitials}
               </div>
             </div>
 
@@ -181,19 +310,11 @@ export function SettingsPage() {
                 </span>
                 <span>
                   Ultimo sync
-                  <strong>{formatDate(configStatus?.lastSyncAt)}</strong>
+                  <strong>{formatConfigStatusDate(configStatus?.lastSyncAt)}</strong>
                 </span>
                 <span>
                   Estado sync
-                  <strong>
-                    {configStatus?.lastSyncStatus === "success"
-                      ? "Correcto"
-                      : configStatus?.lastSyncStatus === "success_with_warnings"
-                        ? "Con alertas"
-                      : configStatus?.lastSyncStatus === "failed"
-                        ? "Fallido"
-                        : "Sin registro"}
-                  </strong>
+                  <strong>{getConfigSyncStatusLabel(configStatus?.lastSyncStatus)}</strong>
                 </span>
                 <span>
                   Version config
@@ -213,22 +334,13 @@ export function SettingsPage() {
                 configStatus?.lastSyncStatus === "success_with_warnings") &&
               configStatus.lastSyncError ? (
                 <p className="settings-sync__error">
-                  {configStatus.lastSyncStatus === "failed" ? "Ultimo error" : "Ultima alerta"}:{" "}
-                  {configStatus.lastSyncError}
+                  {getConfigSyncIssueLabel(configStatus.lastSyncStatus)}:{" "}
+                  {normalizeConfigSyncError(configStatus.lastSyncError, "sync")}
                 </p>
               ) : null}
 
               {syncResult ? (
-                <p className="settings-sync__success">
-                  Aplicado: {syncResult.configuration.modulos} modulos,{" "}
-                  {syncResult.configuration.pensiones} pensiones,{" "}
-                  {syncResult.configuration.pensionPasses} pension pass,{" "}
-                  {syncResult.access.users} usuarios y{" "}
-                  {syncResult.access.permissionProfiles} perfiles.
-                  {syncResult.integrity?.warnings?.length
-                    ? ` Alertas: ${syncResult.integrity.warnings.length}.`
-                    : ""}
-                </p>
+                <p className="settings-sync__success">{formatConfigSyncSuccess(syncResult)}</p>
               ) : null}
 
               <button
@@ -287,6 +399,12 @@ export function SettingsPage() {
             <button className="btn-setting-action" onClick={() => navigate("/projects")}>
               <FaBuilding /> Gestionar Proyectos
             </button>
+
+            {canManageLocalConfig ? (
+              <button className="btn-setting-action" onClick={() => void handleOpenMonthlyFlush()}>
+                <FaHistory /> Flush mensual
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -301,6 +419,39 @@ export function SettingsPage() {
           </button>
         </div>
       </div>
+
+      <MonthlyFlushModal
+        open={isMonthlyFlushOpen}
+        onClose={() => setIsMonthlyFlushOpen(false)}
+        error={monthlyFlushError}
+        isLoading={monthlyFlushLoading}
+        isSaving={monthlyFlushSaving}
+        enabled={monthlyFlushEnabled}
+        onEnabledChange={setMonthlyFlushEnabled}
+        partialCurrentMonthEnabled={monthlyFlushPartialEnabled}
+        onPartialCurrentMonthEnabledChange={setMonthlyFlushPartialEnabled}
+        closeDay={monthlyFlushStatus?.closeDay ?? 1}
+        partialDays={monthlyFlushPartialDays}
+        onToggleDay={handleTogglePartialDay}
+        onAddDay={handleAddPartialDay}
+        onRemoveDay={handleRemovePartialDay}
+        onUpdateDay={handleUpdatePartialDay}
+        hour={monthlyFlushHour}
+        minute={monthlyFlushMinute}
+        onHourChange={setMonthlyFlushHour}
+        onMinuteChange={setMonthlyFlushMinute}
+        updatedAt={monthlyFlushStatus?.updatedAt ?? null}
+        updatedBy={monthlyFlushStatus?.updatedBy ?? null}
+        history={monthlyFlushStatus?.history ?? []}
+        manualMonth={manualMonth}
+        manualMonthMax={manualMonthMax}
+        manualRunDisabled={!manualMonth}
+        manualRunHint="El mes seleccionado se consolida sobre la bitacora local."
+        onManualMonthChange={setManualMonth}
+        isRunningManual={monthlyFlushRunning}
+        onRunManual={handleRunManualMonthlyFlush}
+        onSave={handleSaveMonthlyFlush}
+      />
     </div>
   );
 }

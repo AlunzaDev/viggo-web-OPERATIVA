@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaCashRegister, FaEye, FaFilter, FaSyncAlt } from "react-icons/fa";
+import { FaCashRegister, FaEye, FaSyncAlt } from "react-icons/fa";
+import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
+import { FilterSidebar } from "../../components/shared/FilterSidebar";
+import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import {
   formatCutStatus,
@@ -8,65 +11,23 @@ import {
   formatMovementType,
   formatShiftStatus,
   getErrorMessage,
-  getNumber,
 } from "../../utils/cashPayments/cash-payments.formatters";
 import {
-  getCashRegisterShiftDetail,
-  getCashRegisterShiftStats,
-  listCashRegisterShiftSummaries,
-  type CashRegisterShiftFilters,
-} from "../../services/cashPayments/cash-payments.api";
+  buildCashHistoryFilters,
+  defaultCashShiftAggregate,
+  getCashHistoryActiveFiltersCount,
+  getCashierLabel,
+  getMovementDetail,
+  loadCashHistoryDetailFlow,
+  loadCashHistoryFlow,
+  resolveSelectedCashHistoryDetail,
+  type ShiftStatusFilter,
+} from "../../services/cashPayments/cash-history.flow";
 import type {
   CashRegisterShiftAggregate,
   CashRegisterShiftDetail,
 } from "../../types/cashPayments/cash-payments.types";
 import "../../styles/cashPayments/CashHistoryPage.css";
-
-type ShiftStatusFilter = "all" | "open" | "closed" | "reconciled" | "cancelled";
-
-const PAGE_SIZE = 20;
-
-const defaultAggregate: CashRegisterShiftAggregate = {
-  totalShifts: 0,
-  openShifts: 0,
-  closedShifts: 0,
-  openingAmount: 0,
-  totalIn: 0,
-  totalOut: 0,
-  expectedAmount: 0,
-  countedAmount: 0,
-  differenceAmount: 0,
-};
-
-const toStartOfDay = (date: string) => {
-  if (!date) return undefined;
-  const parsed = new Date(`${date}T00:00:00`);
-  return Number.isFinite(parsed.getTime()) ? parsed.getTime() : undefined;
-};
-
-const toEndOfDay = (date: string) => {
-  if (!date) return undefined;
-  const parsed = new Date(`${date}T23:59:59.999`);
-  return Number.isFinite(parsed.getTime()) ? parsed.getTime() : undefined;
-};
-
-const getCashierLabel = (detail: CashRegisterShiftDetail) =>
-  [detail.shift.moduloIdentificador, detail.shift.moduloNombre]
-    .filter(Boolean)
-    .join(" - ") || detail.shift.moduloId;
-
-const getMovementDetail = (movement: CashRegisterShiftDetail["movements"][number]) => {
-  const received = getNumber(movement.metadata?.amountReceived, NaN);
-  const change = getNumber(movement.metadata?.changeAmount, NaN);
-
-  if (Number.isFinite(received)) {
-    return `Recibido ${formatMoney(received)}${
-      Number.isFinite(change) ? ` · Cambio ${formatMoney(change)}` : ""
-    }`;
-  }
-
-  return movement.notes || movement.concept;
-};
 
 export function CashHistoryPage() {
   usePageTitle("Historial de Caja");
@@ -74,9 +35,13 @@ export function CashHistoryPage() {
   const [status, setStatus] = useState<ShiftStatusFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [draftStatus, setDraftStatus] = useState<ShiftStatusFilter>("all");
+  const [draftDateFrom, setDraftDateFrom] = useState("");
+  const [draftDateTo, setDraftDateTo] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [items, setItems] = useState<CashRegisterShiftDetail[]>([]);
   const [aggregate, setAggregate] =
-    useState<CashRegisterShiftAggregate>(defaultAggregate);
+    useState<CashRegisterShiftAggregate>(defaultCashShiftAggregate);
   const [selectedDetail, setSelectedDetail] =
     useState<CashRegisterShiftDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -84,42 +49,31 @@ export function CashHistoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
 
-  const queryParams = useMemo((): CashRegisterShiftFilters => {
-    const params: CashRegisterShiftFilters = {
-      includeSummary: true,
-      page: 1,
-      limit: PAGE_SIZE,
-    };
+  const activeFiltersCount = useMemo(
+    () => getCashHistoryActiveFiltersCount({ status, dateFrom, dateTo }),
+    [dateFrom, dateTo, status],
+  );
 
-    if (status !== "all") params.status = status;
-    const from = toStartOfDay(dateFrom);
-    const to = toEndOfDay(dateTo);
-    if (from) params.dateFrom = from;
-    if (to) params.dateTo = to;
-
-    return params;
-  }, [dateFrom, dateTo, status]);
+  const queryParams = useMemo(
+    () => buildCashHistoryFilters({ status, dateFrom, dateTo }),
+    [dateFrom, dateTo, status],
+  );
 
   const loadHistory = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const [listResponse, summaryResponse] = await Promise.all([
-        listCashRegisterShiftSummaries(queryParams),
-        getCashRegisterShiftStats(queryParams),
-      ]);
-
-      setItems(listResponse.items);
-      setTotal(listResponse.total);
-      setAggregate(summaryResponse);
-      setSelectedDetail((current) => {
-        if (!current) return listResponse.items[0] ?? null;
-        return (
-          listResponse.items.find((item) => item.shift.id === current.shift.id) ??
-          null
-        );
-      });
+      const history = await loadCashHistoryFlow(queryParams);
+      setItems(history.items);
+      setTotal(history.total);
+      setAggregate(history.aggregate);
+      setSelectedDetail((current) =>
+        resolveSelectedCashHistoryDetail({
+          current,
+          items: history.items,
+        }),
+      );
     } catch (requestError) {
       setError(getErrorMessage(requestError, "No se pudo cargar el historial."));
     } finally {
@@ -132,7 +86,7 @@ export function CashHistoryPage() {
     setError(null);
 
     try {
-      setSelectedDetail(await getCashRegisterShiftDetail(shiftId));
+      setSelectedDetail(await loadCashHistoryDetailFlow(shiftId));
     } catch (requestError) {
       setError(getErrorMessage(requestError, "No se pudo cargar el detalle."));
     } finally {
@@ -154,10 +108,42 @@ export function CashHistoryPage() {
             Revisa aperturas, cobros, movimientos, conteos y diferencias por caja.
           </p>
         </div>
-        <button type="button" onClick={loadHistory} disabled={loading}>
-          <FaSyncAlt /> Actualizar
-        </button>
       </section>
+
+      <CrudActionsIsland
+        showSearch={false}
+        searchValue=""
+        onSearchChange={() => undefined}
+        showFilter
+        isFilterOpen={isFilterOpen}
+        onToggleFilter={() => {
+          setDraftStatus(status);
+          setDraftDateFrom(dateFrom);
+          setDraftDateTo(dateTo);
+          setIsFilterOpen((prev) => !prev);
+        }}
+        activeFiltersCount={activeFiltersCount}
+        onClearFilters={() => {
+          setStatus("all");
+          setDateFrom("");
+          setDateTo("");
+          setDraftStatus("all");
+          setDraftDateFrom("");
+          setDraftDateTo("");
+        }}
+        className="cash-history-island"
+        middleActions={(
+          <button
+            type="button"
+            className="crud-actions-island__action-btn crud-actions-island__action-btn--mobile-label"
+            onClick={loadHistory}
+            disabled={loading}
+          >
+            <FaSyncAlt />
+            <span>Actualizar</span>
+          </button>
+        )}
+      />
 
       <section className="cash-history-kpis" aria-label="Resumen de caja">
         <article>
@@ -180,41 +166,6 @@ export function CashHistoryPage() {
           <strong>{formatMoney(aggregate.differenceAmount)}</strong>
           <small>Conteo contra esperado</small>
         </article>
-      </section>
-
-      <section className="cash-history-filters">
-        <span>
-          <FaFilter /> Filtros
-        </span>
-        <label>
-          Estado
-          <select
-            value={status}
-            onChange={(event) => setStatus(event.target.value as ShiftStatusFilter)}
-          >
-            <option value="all">Todos</option>
-            <option value="open">Abiertos</option>
-            <option value="closed">Cerrados</option>
-            <option value="reconciled">Conciliados</option>
-            <option value="cancelled">Cancelados</option>
-          </select>
-        </label>
-        <label>
-          Desde
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(event) => setDateFrom(event.target.value)}
-          />
-        </label>
-        <label>
-          Hasta
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(event) => setDateTo(event.target.value)}
-          />
-        </label>
       </section>
 
       {error ? <div className="cash-history-alert">{error}</div> : null}
@@ -250,7 +201,7 @@ export function CashHistoryPage() {
                     selectedDetail?.shift.id === item.shift.id ? " is-active" : ""
                   }`}
                   key={item.shift.id}
-                  onClick={() => loadDetail(item.shift.id)}
+                  onClick={() => void loadDetail(item.shift.id)}
                   role="row"
                 >
                   <span>{getCashierLabel(item)}</span>
@@ -354,6 +305,57 @@ export function CashHistoryPage() {
           )}
         </aside>
       </section>
+
+      <FilterSidebar
+        open={isFilterOpen}
+        title="Filtros de historial de caja"
+        onClose={() => setIsFilterOpen(false)}
+        onApply={() => {
+          setStatus(draftStatus);
+          setDateFrom(draftDateFrom);
+          setDateTo(draftDateTo);
+          setIsFilterOpen(false);
+        }}
+        onReset={() => {
+          setDraftStatus("all");
+          setDraftDateFrom("");
+          setDraftDateTo("");
+        }}
+      >
+        <SidebarFilterForm>
+          <SidebarFilterField label="Estado" htmlFor="cash-history-status-filter">
+            <select
+              id="cash-history-status-filter"
+              value={draftStatus}
+              onChange={(event) => setDraftStatus(event.target.value as ShiftStatusFilter)}
+            >
+              <option value="all">Todos</option>
+              <option value="open">Abiertos</option>
+              <option value="closed">Cerrados</option>
+              <option value="reconciled">Conciliados</option>
+              <option value="cancelled">Cancelados</option>
+            </select>
+          </SidebarFilterField>
+
+          <SidebarFilterField label="Desde" htmlFor="cash-history-date-from">
+            <input
+              id="cash-history-date-from"
+              type="date"
+              value={draftDateFrom}
+              onChange={(event) => setDraftDateFrom(event.target.value)}
+            />
+          </SidebarFilterField>
+
+          <SidebarFilterField label="Hasta" htmlFor="cash-history-date-to">
+            <input
+              id="cash-history-date-to"
+              type="date"
+              value={draftDateTo}
+              onChange={(event) => setDraftDateTo(event.target.value)}
+            />
+          </SidebarFilterField>
+        </SidebarFilterForm>
+      </FilterSidebar>
     </main>
   );
 }

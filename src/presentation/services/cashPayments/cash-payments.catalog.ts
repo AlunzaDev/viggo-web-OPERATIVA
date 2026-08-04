@@ -1,4 +1,5 @@
 import { api } from "../../../infrastructure/http/axios.instance";
+import { extractNamedCollection } from "../../../infrastructure/http/api-contracts";
 import type {
   CashierOption,
   NamedOption,
@@ -23,9 +24,7 @@ export const loadCashPaymentsCatalog = async (): Promise<CashPaymentsCatalog> =>
     api.get<{ proyectos?: unknown[] } | unknown[]>("/api/proyectos"),
   ]);
 
-  const modules = Array.isArray(modulesResponse.data)
-    ? modulesResponse.data
-    : (modulesResponse.data.modulos ?? []);
+  const modules = extractNamedCollection(modulesResponse.data, "modulos");
 
   const cashiers = modules
     .map((item) => {
@@ -42,9 +41,7 @@ export const loadCashPaymentsCatalog = async (): Promise<CashPaymentsCatalog> =>
         cashier.id.trim().length > 0 && cashier.identificador.trim().length > 0,
     );
 
-  const projectsRaw = Array.isArray(projectsResponse.data)
-    ? projectsResponse.data
-    : (projectsResponse.data.proyectos ?? []);
+  const projectsRaw = extractNamedCollection(projectsResponse.data, "proyectos");
 
   const projects = projectsRaw
     .map((item) => {

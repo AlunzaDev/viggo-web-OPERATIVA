@@ -1,33 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaCalendarAlt, FaCheckCircle, FaEdit, FaIdCard, FaInfoCircle, FaParking, FaPlus, FaPowerOff, FaTicketAlt, FaUser } from "react-icons/fa";
+import { FaCalendarAlt, FaCheckCircle, FaIdCard, FaParking, FaPlus, FaPowerOff, FaTicketAlt, FaUser } from "react-icons/fa";
 import { api } from "../../../infrastructure/http/axios.instance";
+import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
+import { loadPensionOptions, loadUserOptions } from "../../services/catalogs/catalog-options";
+import { CrudRowActions } from "../../components/shared/CrudRowActions";
+import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { CopyableId } from "../../components/shared/CopyableId";
 import { CreateModalBase } from "../../components/shared/modals/CreateModalBase";
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { TableBase } from "../../components/shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
+import { buildPensionPassForm, buildPensionPassPayload, createInitialPensionPassForm, normalizePensionPassCollection, type PensionPassForm, type PensionPassRecord } from "../../services/pensionPasses/pension-passes.contract";
 import "../../styles/adminCrud/AdminCrud.css";
 
-type PensionPass = { id: string; usuario?: string; name: string; pension: string; idPass: string; vigent: boolean; antiPassback: boolean; inParking: boolean; created: number; from: number; to: number; estado: boolean };
+type PensionPass = PensionPassRecord;
 type Option = { id: string; nombre: string };
-type PensionPassForm = { name: string; pension: string; idPass: string; vigent: boolean; antiPassback: boolean; inParking: boolean; created: string; from: string; to: string; estado: boolean; usuario: string };
 
-const INITIAL_FORM: PensionPassForm = { name: "", pension: "", idPass: "", vigent: false, antiPassback: true, inParking: false, created: String(Date.now()), from: "-1", to: "-1", estado: true, usuario: "" };
+const INITIAL_FORM: PensionPassForm = createInitialPensionPassForm();
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
-const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
-const getErrorMessage = (error: unknown, fallback: string) => { const data = asRecord(asRecord(asRecord(error).response).data); return String(data.error ?? data.message ?? fallback); };
-const normalizePensionPass = (value: unknown): PensionPass => {
-  const item = asRecord(value);
-  return { id: String(item.id ?? item._id ?? ""), usuario: typeof item.usuario === "string" ? item.usuario : undefined, name: String(item.name ?? ""), pension: String(item.pension ?? ""), idPass: String(item.idPass ?? ""), vigent: Boolean(item.vigent), antiPassback: Boolean(item.antiPassback), inParking: Boolean(item.inParking), created: Number(item.created ?? 0), from: Number(item.from ?? -1), to: Number(item.to ?? -1), estado: Boolean(item.estado ?? true) };
-};
-const normalizePension = (value: unknown): Option => { const item = asRecord(value); return { id: String(item.id ?? item._id ?? ""), nombre: String(item.nombre ?? "") }; };
-const normalizeUser = (value: unknown): Option => {
-  const item = asRecord(value);
-  const nombre = [item.nombre, item.apellido].map((part) => String(part ?? "").trim()).filter(Boolean).join(" ");
-  return { id: String(item.id ?? item._id ?? ""), nombre: nombre || String(item.correo ?? "") };
-};
-const buildPayload = (form: PensionPassForm) => ({ name: form.name.trim(), pension: form.pension, idPass: form.idPass.trim(), vigent: form.vigent, antiPassback: form.antiPassback, inParking: form.inParking, created: Number(form.created), from: Number(form.from), to: Number(form.to), estado: form.estado, usuario: form.usuario || undefined });
+const getErrorMessage = (error: unknown, fallback: string) => getApiErrorMessage(error) ?? fallback;
 const formatUnixDate = (value: number) => {
   if (!Number.isFinite(value) || value < 0) return "Sin limite";
   return new Date(value).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" });
@@ -206,24 +198,21 @@ export function PensionPassesPage() {
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [passesResponse, pensionsResponse, usersResponse] = await Promise.all([api.get("/api/pension-pass"), api.get("/api/pensiones"), api.get("/api/usuarios")]);
-      const passesData = asRecord(passesResponse.data).pensionPasses;
-      const pensionsData = asRecord(pensionsResponse.data).pensiones;
-      const usersData = asRecord(usersResponse.data).usuarios;
-      setItems(Array.isArray(passesData) ? passesData.map(normalizePensionPass) : []);
-      setPensions(Array.isArray(pensionsData) ? pensionsData.map(normalizePension) : []);
-      setUsers(Array.isArray(usersData) ? usersData.map(normalizeUser) : []);
+      const [passesResponse, pensionsData, usersData] = await Promise.all([api.get("/api/pension-pass"), loadPensionOptions(), loadUserOptions()]);
+      setItems(normalizePensionPassCollection(passesResponse.data));
+      setPensions(pensionsData);
+      setUsers(usersData);
     } catch (loadError) { setError(getErrorMessage(loadError, "No se pudieron cargar los pension-pass")); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void loadData(); }, [loadData]);
   useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
 
-  const openCreate = () => { setEditingId(null); setForm({ ...INITIAL_FORM, created: String(Date.now()), pension: pensions[0]?.id ?? "" }); setIsModalOpen(true); };
-  const openEdit = (item: PensionPass) => { setSelectedItem(null); setEditingId(item.id); setForm({ name: item.name, pension: item.pension, idPass: item.idPass, vigent: item.vigent, antiPassback: item.antiPassback, inParking: item.inParking, created: String(item.created), from: String(item.from), to: String(item.to), estado: item.estado, usuario: item.usuario ?? "" }); setIsModalOpen(true); };
+  const openCreate = () => { setEditingId(null); setForm({ ...createInitialPensionPassForm(), created: String(Date.now()), pension: pensions[0]?.id ?? "" }); setIsModalOpen(true); };
+  const openEdit = (item: PensionPass) => { setSelectedItem(null); setEditingId(item.id); setForm(buildPensionPassForm(item)); setIsModalOpen(true); };
   const save = async () => {
     setSaving(true); setError(null);
-    try { if (editingId) await api.patch(`/api/pension-pass/${editingId}`, buildPayload(form)); else await api.post("/api/pension-pass", buildPayload(form)); setIsModalOpen(false); await loadData(); }
+    try { if (editingId) await api.patch(`/api/pension-pass/${editingId}`, buildPensionPassPayload(form)); else await api.post("/api/pension-pass", buildPensionPassPayload(form)); setIsModalOpen(false); await loadData(); }
     catch (saveError) { const message = getErrorMessage(saveError, "No se pudo guardar el pension-pass"); setError(message); throw new Error(message); }
     finally { setSaving(false); }
   };
@@ -231,21 +220,7 @@ export function PensionPassesPage() {
     setSaving(true);
     setError(null);
     try {
-      await api.patch(`/api/pension-pass/${item.id}`, {
-        ...buildPayload({
-          name: item.name,
-          pension: item.pension,
-          idPass: item.idPass,
-          vigent: item.vigent,
-          antiPassback: item.antiPassback,
-          inParking: item.inParking,
-          created: String(item.created),
-          from: String(item.from),
-          to: String(item.to),
-          estado: !item.estado,
-          usuario: item.usuario ?? "",
-        }),
-      });
+      await api.patch(`/api/pension-pass/${item.id}`, buildPensionPassPayload({ ...buildPensionPassForm(item), estado: !item.estado }));
       await loadData();
       setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
     } catch (toggleError) {
@@ -260,7 +235,7 @@ export function PensionPassesPage() {
       <CrudActionsIsland searchValue={search} onSearchChange={(event) => { setSearch(event.target.value); setPage(1); }} onSearchClear={() => { setSearch(""); setPage(1); }} searchPlaceholder="Buscar pension-pass" showCreate createLabel="Crear pension-pass" createIcon={<FaPlus />} onCreate={openCreate} isBusy={loading || saving} />
       {error ? <p className="admin-crud-error">{error}</p> : null}
       <TableBase withCard={false} isLoading={loading} isEmpty={visible.length === 0} emptyMessage="No se encontraron pension-pass." page={page} pageSize={pageSize} totalItems={filtered.length} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>name</th><th>pension</th><th>usuario</th><th>idPass</th><th className="col-status">estado</th><th>acciones</th></tr>}>
-        {visible.map((item) => <tr key={item.id} className="base-table__row"><td>{item.name}</td><td>{pensionById.get(item.pension) ?? item.pension}</td><td>{item.usuario ? userById.get(item.usuario) ?? item.usuario : "Sin usuario"}</td><td>{item.idPass}</td><td className="col-status"><span className={`admin-crud-status ${item.estado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.estado ? "Activo" : "Inactivo"}</span></td><td><div className="admin-crud-row-actions"><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); setSelectedItem(item); }} aria-label={`Ver detalle de pension-pass ${item.name}`} title="Detalle"><FaInfoCircle /></button><button className="admin-crud-icon-button" type="button" onClick={(event) => { event.stopPropagation(); openEdit(item); }} aria-label={`Editar pension-pass ${item.name}`} title="Editar"><FaEdit /></button><button className="admin-crud-icon-button admin-crud-icon-button--warning" type="button" onClick={(event) => { event.stopPropagation(); void toggleItemState(item); }} aria-label={`${item.estado ? "Desactivar" : "Activar"} pension-pass ${item.name}`} title={item.estado ? "Desactivar" : "Activar"}><FaPowerOff /></button></div></td></tr>)}
+        {visible.map((item) => <tr key={item.id} className="base-table__row"><td>{item.name}</td><td>{pensionById.get(item.pension) ?? item.pension}</td><td>{item.usuario ? userById.get(item.usuario) ?? item.usuario : "Sin usuario"}</td><td>{item.idPass}</td><td className="col-status"><CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} /></td><td><CrudRowActions entityName={`pension-pass ${item.name}`} isActive={item.estado} onView={() => setSelectedItem(item)} onEdit={() => openEdit(item)} onToggleStatus={() => toggleItemState(item)} /></td></tr>)}
       </TableBase>
       <PensionPassDetailModal
         open={Boolean(selectedItem)}

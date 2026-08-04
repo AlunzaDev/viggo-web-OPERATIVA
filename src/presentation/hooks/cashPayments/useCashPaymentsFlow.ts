@@ -13,26 +13,26 @@ import {
   CLOSED_SESSION_STATUSES,
   createDefaultDenominationLines,
   getCashPaymentFlowStorageKey,
-  getDenominationCountTotal,
   getErrorMessage,
 } from "../../utils/cashPayments/cash-payments.formatters";
 import {
-  cancelCashTicketSession,
-  closeCashRegisterShift,
   getActiveCashRegisterShift,
-  getCashRegisterCutPreview,
-  insertCashIntoSession,
-  openCashRegisterShift,
-  registerCashRegisterMovement,
-  resolveCashTicketQr,
-  saveCashRegisterCount,
-  startCashTicketSession,
 } from "../../services/cashPayments/cash-payments.api";
 import {
   getInitialCashierId,
   loadCashPaymentsCatalog,
 } from "../../services/cashPayments/cash-payments.catalog";
-import { createManualCashDeviceEvent } from "../../utils/cashPayments/cash-payments.device-events";
+import {
+  cancelCashSessionFlow,
+  closeCashShiftFlow,
+  insertCashFlow,
+  openCashShiftFlow,
+  previewCashCutFlow,
+  registerCashMovementFlow,
+  resetCashCountState,
+  resolveQrFlow,
+  startCashSessionFlow,
+} from "../../services/cashPayments/cash-payments.flow";
 import {
   createEmptyScannerMeta,
   createEmptyScannerTypingState,
@@ -381,43 +381,15 @@ export const useCashPaymentsFlow = () => {
     clearScannerTimeout();
 
     try {
-      const { ticket, activeSession } = await resolveCashTicketQr(qrValue.trim());
+      const result = await resolveQrFlow({
+        qrValue,
+        selectedCashierId,
+        activeShiftDetail,
+      });
 
-      if (activeSession) {
-        setResolvedTicket(ticket);
-        setSession(activeSession);
-        setSuccessMessage("Se recupero un cobro activo para este boleto.");
-        setScannerMeta({
-          isScannerLikely: false,
-          lastCompletedInput: source,
-        });
-        return;
-      }
-
-      if (!ticket.pagado && selectedCashierId && activeShiftDetail) {
-        const startedSession = await startCashTicketSession(
-          ticket.id,
-          selectedCashierId,
-        );
-        setResolvedTicket(ticket);
-        setSession(startedSession);
-        setSuccessMessage("Boleto validado y cobro iniciado automaticamente.");
-        setScannerMeta({
-          isScannerLikely: false,
-          lastCompletedInput: source,
-        });
-        return;
-      }
-
-      setResolvedTicket(ticket);
-      setSession(null);
-      setSuccessMessage(
-        selectedCashierId
-          ? activeShiftDetail
-            ? "Boleto validado correctamente."
-            : "Boleto validado. Abre el turno de la caja para continuar."
-          : "Boleto validado. Ahora selecciona la caja para continuar.",
-      );
+      setResolvedTicket(result.ticket);
+      setSession(result.session);
+      setSuccessMessage(result.successMessage);
       setScannerMeta({
         isScannerLikely: false,
         lastCompletedInput: source,
@@ -437,32 +409,15 @@ export const useCashPaymentsFlow = () => {
   };
 
   const startSession = async () => {
-    if (!resolvedTicket) {
-      setError("Primero valida un boleto.");
-      setSuccessMessage(null);
-      return;
-    }
-
-    if (!selectedCashierId) {
-      setError("Selecciona una caja antes de iniciar el cobro.");
-      setSuccessMessage(null);
-      return;
-    }
-
-    if (!activeShiftDetail) {
-      setError("La caja seleccionada no tiene un turno abierto.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
-      const nextSession = await startCashTicketSession(
-        resolvedTicket.id,
+      const nextSession = await startCashSessionFlow({
+        ticket: resolvedTicket,
         selectedCashierId,
-      );
+        activeShiftDetail,
+      });
       setSession(nextSession);
       setSuccessMessage("Cobro iniciado.");
     } catch (requestError) {
@@ -473,28 +428,15 @@ export const useCashPaymentsFlow = () => {
   };
 
   const insertCash = async () => {
-    if (!session) {
-      setError("No hay un cobro activo.");
-      setSuccessMessage(null);
-      return;
-    }
-
-    const amount = Number(insertAmount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      setError("Captura un monto valido para registrar efectivo.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
-      const nextSession = await insertCashIntoSession(
-        session.id,
-        amount,
-        createManualCashDeviceEvent(session, selectedCashier),
-      );
+      const nextSession = await insertCashFlow({
+        session,
+        insertAmount,
+        selectedCashier,
+      });
       setSession(nextSession);
       await refreshActiveShift(nextSession.moduloId || selectedCashierId);
 
@@ -532,35 +474,23 @@ export const useCashPaymentsFlow = () => {
   };
 
   const cancelSession = async () => {
-    if (!session) {
-      setError("No hay un cobro activo para cancelar.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
       let cancellationReason: string | undefined;
-      if (session.amountReceived > 0) {
+      if (session && session.amountReceived > 0) {
         cancellationReason =
           window.prompt(
             "Este cobro ya tiene efectivo registrado. Captura el motivo de cancelacion:",
           )?.trim() || undefined;
 
-        if (!cancellationReason) {
-          setError("Captura un motivo para cancelar un cobro con efectivo registrado.");
-          setSuccessMessage(null);
-          setLoading(false);
-          return;
-        }
       }
 
-      const nextSession = await cancelCashTicketSession(
-        session.id,
+      const nextSession = await cancelCashSessionFlow({
+        session,
         cancellationReason,
-      );
+      });
       setSession(nextSession);
       setSuccessMessage("Cobro cancelado.");
     } catch (requestError) {
@@ -590,27 +520,14 @@ export const useCashPaymentsFlow = () => {
   };
 
   const openShift = async () => {
-    if (!selectedCashierId) {
-      setError("Selecciona una caja POS antes de abrir el turno.");
-      setSuccessMessage(null);
-      return;
-    }
-
-    const amount = Number(openingAmount);
-    if (!Number.isFinite(amount) || amount < 0) {
-      setError("Captura un fondo inicial valido para abrir la caja.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
-      const shiftDetail = await openCashRegisterShift({
-        moduloId: selectedCashierId,
-        openingAmount: amount,
-        notes: openingNotes.trim() || undefined,
+      const shiftDetail = await openCashShiftFlow({
+        selectedCashierId,
+        openingAmount,
+        openingNotes,
       });
 
       setActiveShiftDetail(shiftDetail);
@@ -626,37 +543,19 @@ export const useCashPaymentsFlow = () => {
   };
 
   const registerManualMovement = async () => {
-    if (!activeShiftDetail) {
-      setError("No hay un turno abierto para registrar movimientos.");
-      setSuccessMessage(null);
-      return;
-    }
-
-    const amount = Number(movementAmount);
-    if (!movementConcept.trim()) {
-      setError("Captura el concepto del movimiento.");
-      setSuccessMessage(null);
-      return;
-    }
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      setError("Captura un importe valido para el movimiento.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
-      const detail = await registerCashRegisterMovement(activeShiftDetail.shift.id, {
-        type: movementType,
-        concept: movementConcept.trim(),
-        amount,
+      const detail = await registerCashMovementFlow({
+        activeShiftDetail,
+        movementType,
+        movementConcept,
+        movementAmount,
       });
       if (detail) {
         setActiveShiftDetail(detail);
-      } else {
+      } else if (activeShiftDetail) {
         await refreshActiveShift(activeShiftDetail.shift.moduloId);
       }
 
@@ -680,24 +579,18 @@ export const useCashPaymentsFlow = () => {
   };
 
   const previewCut = async () => {
-    if (!activeShiftDetail) {
-      setError("No hay un turno abierto para previsualizar el corte.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
-      await saveCashRegisterCount(
-        activeShiftDetail.shift.id,
+      const nextCutPreview = await previewCashCutFlow({
+        activeShiftDetail,
         denominationLines,
-        countNotes.trim() || undefined,
-      );
-
-      const nextCutPreview = await getCashRegisterCutPreview(activeShiftDetail.shift.id);
-      await refreshActiveShift(activeShiftDetail.shift.moduloId);
+        countNotes,
+      });
+      if (activeShiftDetail) {
+        await refreshActiveShift(activeShiftDetail.shift.moduloId);
+      }
       setCutPreview(nextCutPreview);
       setSuccessMessage("Conteo guardado y corte calculado.");
     } catch (requestError) {
@@ -708,38 +601,24 @@ export const useCashPaymentsFlow = () => {
   };
 
   const closeShift = async () => {
-    if (!activeShiftDetail) {
-      setError("No hay un turno abierto para cerrar.");
-      setSuccessMessage(null);
-      return;
-    }
-
     setLoading(true);
     clearMessages();
 
     try {
-      const countedTotal = getDenominationCountTotal(denominationLines);
-      const expectedAmount = activeShiftDetail.summary.expectedAmount;
-      const differenceAmount = Number((countedTotal - expectedAmount).toFixed(2));
-
-      if (differenceAmount !== 0 && !countNotes.trim()) {
-        setError("Captura una nota explicando la diferencia antes de cerrar el turno.");
-        setSuccessMessage(null);
-        setLoading(false);
-        return;
-      }
-
-      await closeCashRegisterShift(
-        activeShiftDetail.shift.id,
+      await closeCashShiftFlow({
+        activeShiftDetail,
         denominationLines,
-        countNotes.trim() || undefined,
-      );
+        countNotes,
+      });
 
       setSuccessMessage("Turno cerrado correctamente.");
-      await refreshActiveShift(activeShiftDetail.shift.moduloId);
-      setCutPreview(null);
-      setDenominationLines(createDefaultDenominationLines());
-      setCountNotes("");
+      if (activeShiftDetail) {
+        await refreshActiveShift(activeShiftDetail.shift.moduloId);
+      }
+      const resetState = resetCashCountState();
+      setCutPreview(resetState.cutPreview);
+      setDenominationLines(resetState.denominationLines);
+      setCountNotes(resetState.countNotes);
     } catch (requestError) {
       setError(getErrorMessage(requestError, "No se pudo cerrar el turno."));
     } finally {

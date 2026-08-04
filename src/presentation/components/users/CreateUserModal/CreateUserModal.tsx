@@ -21,9 +21,11 @@ import {
   getDefaultUserModules,
   type AppModuleAccess,
 } from "../../../../domain/entities/module-access";
-import type { PermissionProfileEntity } from "../../../../domain/entities/permission-profile.entity";
 import type { UserEntity, UserRole } from "../../../../domain/entities/user.entity";
-import { api } from "../../../../infrastructure/http/axios.instance";
+import {
+  loadPermissionProfileOptions,
+  loadProjectOptions,
+} from "../../../services/catalogs/catalog-options";
 import {
   ProjectPicker,
   type ParkingOption,
@@ -62,43 +64,9 @@ type CreateUserModalProps = {
   onSubmit: (payload: CreateUserPayload) => Promise<void> | void;
 };
 
-type PermissionProfileOption = PermissionProfileEntity;
-
-type PermissionProfileResponseItem = {
-  id?: unknown;
-  _id?: unknown;
-  nombre?: unknown;
-  descripcion?: unknown;
-  estado?: unknown;
-  modules?: unknown;
-};
-
-const parseBooleanValue = (value: unknown, defaultValue: boolean): boolean => {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === "true") return true;
-    if (normalized === "false") return false;
-  }
-  return defaultValue;
-};
-
-const mapPermissionProfile = (
-  item: PermissionProfileResponseItem,
-): PermissionProfileOption => ({
-  id: String(item.id ?? item._id ?? "").trim(),
-  nombre: String(item.nombre ?? "").trim(),
-  descripcion:
-    typeof item.descripcion === "string" && item.descripcion.trim().length > 0
-      ? item.descripcion.trim()
-      : undefined,
-  estado: parseBooleanValue(item.estado, true),
-  modules: Array.isArray(item.modules)
-    ? item.modules
-        .map((module) => String(module ?? "").trim())
-        .filter((module): module is AppModuleAccess => module.length > 0)
-    : getDefaultUserModules(),
-});
+type PermissionProfileOption = Awaited<
+  ReturnType<typeof loadPermissionProfileOptions>
+>[number];
 
 const INITIAL_FORM: CreateUserPayload = {
   nombre: "",
@@ -140,14 +108,6 @@ const mapUserToForm = (user?: UserEntity | null): CreateUserPayload => ({
   permissionProfileId: user?.permissionProfileId,
   modules: user?.modules?.length ? user.modules : getDefaultUserModules(),
 });
-
-type ParkingResponseItem = {
-  id?: unknown;
-  uid?: unknown;
-  _id?: unknown;
-  name?: unknown;
-  nombre?: unknown;
-};
 
 export function CreateUserModal({
   open,
@@ -273,63 +233,19 @@ export function CreateUserModal({
     let cancelled = false;
     const loadCatalogs = async () => {
       try {
-        const [projectsResponse, profilesResponse] = await Promise.all([
-          api.get("/api/proyectos"),
-          api.get("/api/permission-profiles"),
+        const [mappedParkings, mappedProfiles] = await Promise.all([
+          loadProjectOptions(),
+          loadPermissionProfileOptions(),
         ]);
-
-        const parkingsRaw: unknown[] = Array.isArray(projectsResponse.data)
-          ? projectsResponse.data
-          : typeof projectsResponse.data === "object" &&
-              projectsResponse.data !== null &&
-              Array.isArray(
-                (projectsResponse.data as { proyectos?: unknown[] }).proyectos,
-              )
-            ? (projectsResponse.data as { proyectos?: unknown[] }).proyectos ?? []
-            : [];
-
-        const mappedParkings = parkingsRaw
-          .map((parking): ParkingOption => {
-            const parsedParking =
-              typeof parking === "object" && parking !== null
-                ? (parking as ParkingResponseItem)
-                : {};
-
-            return {
-              id: String(
-                parsedParking.id ?? parsedParking.uid ?? parsedParking._id ?? "",
-              ),
-              name: String(
-                parsedParking.name ?? parsedParking.nombre ?? "Proyecto",
-              ),
-            };
-          })
-          .filter((parking) => parking.id.trim().length > 0)
-          .sort((a, b) => a.name.localeCompare(b.name, "es"));
-
-        const rawProfiles = Array.isArray(profilesResponse.data)
-          ? profilesResponse.data
-          : typeof profilesResponse.data === "object" &&
-              profilesResponse.data !== null &&
-              Array.isArray(
-                (profilesResponse.data as { profiles?: unknown[] }).profiles,
-              )
-            ? (profilesResponse.data as { profiles?: unknown[] }).profiles ?? []
-            : [];
-
-        const mappedProfiles = rawProfiles
-          .map((item) =>
-            mapPermissionProfile(
-              typeof item === "object" && item !== null
-                ? (item as PermissionProfileResponseItem)
-                : {},
-            ),
-          )
-          .filter((profile) => profile.id.length > 0 && profile.estado);
 
         if (cancelled) return;
 
-        setParkingOptions(mappedParkings);
+        setParkingOptions(
+          mappedParkings.map((parking) => ({
+            id: parking.id,
+            name: parking.nombre,
+          })),
+        );
         setPermissionProfiles(mappedProfiles);
       } catch {
         if (cancelled) return;

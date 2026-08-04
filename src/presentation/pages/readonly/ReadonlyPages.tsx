@@ -1,25 +1,34 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCalendarAlt, FaCreditCard, FaExchangeAlt, FaParking, FaReceipt, FaTicketAlt, FaUser } from "react-icons/fa";
-import { api } from "../../../infrastructure/http/axios.instance";
+import {
+  getApiErrorMessage,
+} from "../../../infrastructure/http/api-contracts";
 import {
   ReadonlyTablePage as SharedReadonlyTablePage,
 } from "../../components/readonly/ReadonlyShared";
 import { FilterSidebar } from "../../components/shared/FilterSidebar";
 import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
+import {
+  loadReadonlyPaymentsData,
+  loadReadonlyPensionMovesData,
+  loadReadonlyTicketsData,
+  type ReadonlyPaymentRow as PaymentRow,
+  type ReadonlyPensionMoveRow as MoveRow,
+  type ReadonlyTicketRow as TicketRow,
+} from "../../services/readonly/readonly.api";
+import {
+  renderReadonlyBooleanStatus,
+  renderReadonlyStatusBadge,
+} from "../../services/readonly/readonly.presenters";
 import "../../styles/adminCrud/AdminCrud.css";
 
-type AnyRecord = Record<string, unknown>;
 type Option = { id: string; nombre: string };
 const ALL_FILTER_VALUE = "__all__";
 const toDateStartTimestamp = (value: string) => (value ? new Date(`${value}T00:00:00`).getTime() : undefined);
 const toDateEndTimestamp = (value: string) => (value ? new Date(`${value}T23:59:59.999`).getTime() : undefined);
-const asRecord = (value: unknown): AnyRecord => typeof value === "object" && value !== null && !Array.isArray(value) ? value as AnyRecord : {};
-const getId = (value: unknown) => String(asRecord(value).id ?? asRecord(value)._id ?? "");
 const getText = (value: unknown, fallback = "") => String(value ?? fallback);
-const getErrorMessage = (error: unknown, fallback: string) => {
-  const data = asRecord(asRecord(asRecord(error).response).data);
-  return String(data.error ?? data.message ?? fallback);
-};
+const getErrorMessage = (error: unknown, fallback: string) =>
+  getApiErrorMessage(error) ?? fallback;
 const formatDate = (value: unknown) => {
   const timestamp = Number(value);
   if (!Number.isFinite(timestamp) || timestamp < 0) return "Sin registro";
@@ -30,16 +39,7 @@ const formatMoney = (value: unknown, currency = "MXN") => {
   if (!Number.isFinite(amount)) return "0";
   return new Intl.NumberFormat("es-MX", { style: "currency", currency }).format(amount);
 };
-const normalizeOption = (value: unknown, nameKeys: string[] = ["nombre", "name", "correo"]): Option => {
-  const record = asRecord(value);
-  const nombre = nameKeys.map((key) => String(record[key] ?? "").trim()).filter(Boolean).join(" ");
-  return { id: getId(value), nombre: nombre || getId(value) };
-};
 const makeOptionMap = (values: Option[]) => new Map(values.map((item) => [item.id, item.nombre]));
-
-type TicketRow = {
-  id: string; proyecto: string; entrada: string; salida: string; usuario: string; idBoleto: string; horaInicio: number; horaConsulta: number; horaCobro: number; horaSalida: number; duracion: number; monto: number; pagado: boolean;
-};
 
 export function TicketsPage() {
   const [rows, setRows] = useState<TicketRow[]>([]);
@@ -73,23 +73,13 @@ export function TicketsPage() {
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [ticketsResponse, projectsResponse, modulesResponse, usersResponse] = await Promise.all([
-        api.get("/api/tickets", { params: { page, limit: pageSize, search: search.trim() || undefined, proyecto: projectFilter !== ALL_FILTER_VALUE ? projectFilter : undefined, status: statusFilter !== ALL_FILTER_VALUE ? statusFilter : undefined, pagado: paymentFilter !== ALL_FILTER_VALUE ? paymentFilter : undefined, from: toDateStartTimestamp(fromDate), to: toDateEndTimestamp(toDate) } }),
-        api.get("/api/proyectos"),
-        api.get("/api/modulos"),
-        api.get("/api/usuarios"),
-      ]);
-      const ticketsPayload = asRecord(ticketsResponse.data);
-      const tickets = ticketsPayload.tickets;
-      setRows(Array.isArray(tickets) ? tickets.map((value) => {
-        const item = asRecord(value);
-        return { id: getId(item), proyecto: getText(item.proyecto), entrada: getText(item.entrada), salida: getText(item.salida), usuario: getText(item.usuario), idBoleto: getText(item.idBoleto), horaInicio: Number(item.horaInicio ?? -1), horaConsulta: Number(item.horaConsulta ?? -1), horaCobro: Number(item.horaCobro ?? -1), horaSalida: Number(item.horaSalida ?? -1), duracion: Number(item.duracion ?? 0), monto: Number(item.monto ?? 0), pagado: Boolean(item.pagado) };
-      }) : []);
-      setProjects(Array.isArray(asRecord(projectsResponse.data).proyectos) ? (asRecord(projectsResponse.data).proyectos as unknown[]).map((item) => normalizeOption(item)) : []);
-      setModules(Array.isArray(asRecord(modulesResponse.data).modulos) ? (asRecord(modulesResponse.data).modulos as unknown[]).map((item) => normalizeOption(item)) : []);
-      setUsers(Array.isArray(asRecord(usersResponse.data).usuarios) ? (asRecord(usersResponse.data).usuarios as unknown[]).map((item) => normalizeOption(item, ["nombre", "apellido", "correo"])) : []);
-      setTotalItems(Number(ticketsPayload.total ?? 0));
-      setTotalPages(Math.max(1, Number(ticketsPayload.totalPages ?? 1)));
+      const result = await loadReadonlyTicketsData({ page, limit: pageSize, search: search.trim() || undefined, proyecto: projectFilter !== ALL_FILTER_VALUE ? projectFilter : undefined, status: statusFilter !== ALL_FILTER_VALUE ? statusFilter : undefined, pagado: paymentFilter !== ALL_FILTER_VALUE ? paymentFilter : undefined, from: toDateStartTimestamp(fromDate), to: toDateEndTimestamp(toDate) });
+      setRows(result.rows);
+      setProjects(result.projects);
+      setModules(result.modules);
+      setUsers(result.users);
+      setTotalItems(result.total);
+      setTotalPages(Math.max(1, result.totalPages));
     } catch (loadError) {
       setError(getErrorMessage(loadError, "No se pudieron cargar los tickets"));
     } finally { setLoading(false); }
@@ -137,7 +127,7 @@ export function TicketsPage() {
         setPage(1);
       }}
       columns={<tr><th>boleto</th><th>proyecto</th><th>usuario</th><th>inicio</th><th className="col-status">pago</th></tr>}
-      renderRow={(item) => <><td>{item.idBoleto}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{userById.get(item.usuario) ?? item.usuario}</td><td>{formatDate(item.horaInicio)}</td><td className="col-status"><span className={`admin-crud-status ${item.pagado ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.pagado ? "Pagado" : "Pendiente"}</span></td></>}
+      renderRow={(item) => <><td>{item.idBoleto}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{userById.get(item.usuario) ?? item.usuario}</td><td>{formatDate(item.horaInicio)}</td><td className="col-status">{renderReadonlyBooleanStatus(item.pagado, "Pagado", "Pendiente")}</td></>}
       getSearchText={(item) => [item.idBoleto, projectById.get(item.proyecto), userById.get(item.usuario)].join(" ")}
       selected={selected}
       detailTitle="Detalle del ticket"
@@ -213,8 +203,6 @@ export function TicketsPage() {
   </>;
 }
 
-type MoveRow = { id: string; modulo: string; proyecto: string; pensionPass: string; tipo: string; fecha: number };
-
 export function PensionMovesPage() {
   const [rows, setRows] = useState<MoveRow[]>([]);
   const [projects, setProjects] = useState<Option[]>([]);
@@ -245,20 +233,13 @@ export function PensionMovesPage() {
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [movesResponse, projectsResponse, modulesResponse, passesResponse] = await Promise.all([
-        api.get("/api/pension-moves", { params: { page, limit: pageSize, search: search.trim() || undefined, proyecto: projectFilter !== ALL_FILTER_VALUE ? projectFilter : undefined, tipo: typeFilter !== ALL_FILTER_VALUE ? typeFilter : undefined, from: toDateStartTimestamp(fromDate), to: toDateEndTimestamp(toDate) } }),
-        api.get("/api/proyectos"),
-        api.get("/api/modulos"),
-        api.get("/api/pension-pass"),
-      ]);
-      const movesPayload = asRecord(movesResponse.data);
-      const moves = movesPayload.pensionMoves;
-      setRows(Array.isArray(moves) ? moves.map((value) => { const item = asRecord(value); return { id: getId(item), modulo: getText(item.modulo), proyecto: getText(item.proyecto), pensionPass: getText(item.pensionPass), tipo: getText(item.tipo), fecha: Number(item.fecha ?? -1) }; }) : []);
-      setProjects(Array.isArray(asRecord(projectsResponse.data).proyectos) ? (asRecord(projectsResponse.data).proyectos as unknown[]).map((item) => normalizeOption(item)) : []);
-      setModules(Array.isArray(asRecord(modulesResponse.data).modulos) ? (asRecord(modulesResponse.data).modulos as unknown[]).map((item) => normalizeOption(item)) : []);
-      setPasses(Array.isArray(asRecord(passesResponse.data).pensionPasses) ? (asRecord(passesResponse.data).pensionPasses as unknown[]).map((item) => normalizeOption(item, ["name", "idPass"])) : []);
-      setTotalItems(Number(movesPayload.total ?? 0));
-      setTotalPages(Math.max(1, Number(movesPayload.totalPages ?? 1)));
+      const result = await loadReadonlyPensionMovesData({ page, limit: pageSize, search: search.trim() || undefined, proyecto: projectFilter !== ALL_FILTER_VALUE ? projectFilter : undefined, tipo: typeFilter !== ALL_FILTER_VALUE ? typeFilter : undefined, from: toDateStartTimestamp(fromDate), to: toDateEndTimestamp(toDate) });
+      setRows(result.rows);
+      setProjects(result.projects);
+      setModules(result.modules);
+      setPasses(result.passes);
+      setTotalItems(result.total);
+      setTotalPages(Math.max(1, result.totalPages));
     } catch (loadError) { setError(getErrorMessage(loadError, "No se pudieron cargar los movimientos")); }
     finally { setLoading(false); }
   }, [fromDate, page, pageSize, projectFilter, search, toDate, typeFilter]);
@@ -361,8 +342,6 @@ export function PensionMovesPage() {
   </>;
 }
 
-type PaymentRow = { id: string; type: string; concept: string; amount: number; currency: string; status: string; paidAt: number; reference?: AnyRecord; parking?: AnyRecord; paymentMethod?: AnyRecord };
-
 export function PaymentsPage() {
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [selected, setSelected] = useState<PaymentRow | null>(null);
@@ -386,12 +365,10 @@ export function PaymentsPage() {
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const { data } = await api.get("/api/payments/history", { params: { page, limit: pageSize, search: search.trim() || undefined, type: typeFilter !== ALL_FILTER_VALUE ? typeFilter : undefined, status: statusFilter !== ALL_FILTER_VALUE ? statusFilter : undefined, from: toDateStartTimestamp(fromDate), to: toDateEndTimestamp(toDate) } });
-      const payload = asRecord(data);
-      const payments = payload.payments;
-      setRows(Array.isArray(payments) ? payments.map((value) => { const item = asRecord(value); return { id: getId(item), type: getText(item.type), concept: getText(item.concept), amount: Number(item.amount ?? 0), currency: getText(item.currency, "MXN"), status: getText(item.status), paidAt: Number(item.paidAt ?? -1), reference: asRecord(item.reference), parking: asRecord(item.parking), paymentMethod: asRecord(item.paymentMethod) }; }) : []);
-      setTotalItems(Number(payload.total ?? 0));
-      setTotalPages(Math.max(1, Number(payload.totalPages ?? 1)));
+      const result = await loadReadonlyPaymentsData({ page, limit: pageSize, search: search.trim() || undefined, type: typeFilter !== ALL_FILTER_VALUE ? typeFilter : undefined, status: statusFilter !== ALL_FILTER_VALUE ? statusFilter : undefined, from: toDateStartTimestamp(fromDate), to: toDateEndTimestamp(toDate) });
+      setRows(result.rows);
+      setTotalItems(result.total);
+      setTotalPages(Math.max(1, result.totalPages));
     } catch (loadError) { setError(getErrorMessage(loadError, "No se pudieron cargar los pagos")); }
     finally { setLoading(false); }
   }, [fromDate, page, pageSize, search, statusFilter, toDate, typeFilter]);
@@ -434,7 +411,7 @@ export function PaymentsPage() {
       setPage(1);
     }}
     columns={<tr><th>concepto</th><th>tipo</th><th>monto</th><th>fecha</th><th className="col-status">estado</th></tr>}
-    renderRow={(item) => <><td>{item.concept}</td><td>{item.type}</td><td>{formatMoney(item.amount, item.currency)}</td><td>{formatDate(item.paidAt)}</td><td className="col-status"><span className={`admin-crud-status ${item.status === "succeeded" ? "admin-crud-status--active" : "admin-crud-status--inactive"}`}>{item.status}</span></td></>}
+    renderRow={(item) => <><td>{item.concept}</td><td>{item.type}</td><td>{formatMoney(item.amount, item.currency)}</td><td>{formatDate(item.paidAt)}</td><td className="col-status">{renderReadonlyStatusBadge(item.status, item.status === "succeeded" ? "active" : "inactive")}</td></>}
     getSearchText={(item) => [item.concept, item.type, item.status, item.parking?.name].join(" ")}
     selected={selected}
     detailTitle="Detalle del pago"
