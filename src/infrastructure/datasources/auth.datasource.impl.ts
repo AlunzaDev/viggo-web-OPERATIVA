@@ -1,4 +1,6 @@
-﻿import type {
+﻿import { isAxiosError } from "axios";
+
+import type {
   AuthDataSource,
   AuthSession,
   ChangePasswordParams,
@@ -7,8 +9,16 @@
   ResendValidationEmailParams,
   ResetPasswordParams,
 } from "../../domain/datasources/auth.datasource";
-import { isAxiosError } from "axios";
-import { authUserFromObject } from "../../domain/entities/auth-user.entity";
+
+import {
+  authUserFromObject,
+  type AuthUserEntity,
+} from "../../domain/entities/auth-user.entity";
+import {
+  hasWebOperativeAccess,
+  USER_APPS,
+} from "../../domain/entities/user-app-access";
+
 import { api } from "../http/axios.instance";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -18,6 +28,7 @@ const unwrapAuthPayload = (data: unknown): Record<string, unknown> => {
   if (!isRecord(data)) return {};
 
   const nestedCandidates = [data.data, data.result, data.payload, data];
+
   const payload = nestedCandidates.find(
     (candidate): candidate is Record<string, unknown> =>
       isRecord(candidate) &&
@@ -44,11 +55,11 @@ const getTokenFromResponse = (data: Record<string, unknown>): string => {
     (candidate) => typeof candidate === "string" && candidate.trim().length > 0,
   );
 
-  if (!token || typeof token !== "string") {
+  if (typeof token !== "string") {
     throw new Error("La respuesta de autenticación no incluyó un token válido");
   }
 
-  return token;
+  return token.trim();
 };
 
 const hasUserIdentity = (value: Record<string, unknown>): boolean => {
@@ -64,17 +75,30 @@ const hasUserIdentity = (value: Record<string, unknown>): boolean => {
 const getUserFromResponse = (data: Record<string, unknown>) => {
   const candidates = [data.user, data.usuario, data.authUser, data.profile];
 
-  const user = candidates.find(isRecord) ?? (hasUserIdentity(data) ? data : null);
+  const userRecord =
+    candidates.find(isRecord) ?? (hasUserIdentity(data) ? data : null);
 
-  if (!user) {
-    throw new Error("La respuesta de autenticación no incluyó un usuario válido");
+  if (!userRecord) {
+    throw new Error(
+      "La respuesta de autenticación no incluyó un usuario válido",
+    );
   }
 
-  return authUserFromObject(user);
+  const user = authUserFromObject(userRecord);
+
+  if (!hasWebOperativeAccess(user.allowedApps)) {
+    throw new Error("El usuario no tiene acceso al Web Operativo");
+  }
+
+  return user;
 };
 
-const getMessageFromResponse = (data: Record<string, unknown>, fallback: string): string => {
+const getMessageFromResponse = (
+  data: Record<string, unknown>,
+  fallback: string,
+): string => {
   const candidates = [data.message, data.msg, data.detail];
+
   const message = candidates.find(
     (candidate) => typeof candidate === "string" && candidate.trim().length > 0,
   );
@@ -90,9 +114,12 @@ const formatRetryAfterMessage = (retryAfter: unknown): string | null => {
         ? retryAfter
         : null;
 
-  if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return null;
+  if (!seconds || !Number.isFinite(seconds) || seconds <= 0) {
+    return null;
+  }
 
   const minutes = Math.ceil(seconds / 60);
+
   return `Demasiados intentos. Intenta de nuevo en ${minutes} min.`;
 };
 
@@ -102,20 +129,21 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
       ? formatRetryAfterMessage(error.response.headers?.["retry-after"])
       : null;
 
-  if (retryAfterMessage) return retryAfterMessage;
+  if (retryAfterMessage) {
+    return retryAfterMessage;
+  }
 
   const errorData =
-    isAxiosError(error) &&
-    typeof error.response?.data === "object" &&
-    error.response?.data !== null &&
-    !Array.isArray(error.response.data)
-      ? (error.response.data as Record<string, unknown>)
+    isAxiosError(error) && isRecord(error.response?.data)
+      ? error.response.data
       : null;
 
   return (
     (typeof errorData?.message === "string" && errorData.message) ||
     (typeof errorData?.error === "string" && errorData.error) ||
-    (error instanceof Error && error.message.trim().length > 0 ? error.message : null) ||
+    (error instanceof Error && error.message.trim().length > 0
+      ? error.message
+      : null) ||
     fallback
   );
 };
@@ -126,12 +154,13 @@ export class AuthDataSourceImpl implements AuthDataSource {
       const { data } = await api.post(
         "/api/auth/login-correo",
         {
-          correo: email,
+          correo: email.trim().toLowerCase(),
           password,
+          app: USER_APPS.OPERATIVE_WEB,
         },
         {
           skipSessionExpiredHandling: true,
-        }
+        },
       );
 
       const payload = unwrapAuthPayload(data);
@@ -145,7 +174,7 @@ export class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  async getSession() {
+  async getSession(): Promise<AuthUserEntity | null> {
     return null;
   }
 
@@ -155,48 +184,76 @@ export class AuthDataSourceImpl implements AuthDataSource {
 
   async forgotPassword({ email }: ForgotPasswordParams): Promise<string> {
     try {
-      const { data } = await api.post("/api/auth/forgot-password", { correo: email });
+      const { data } = await api.post("/api/auth/forgot-password", {
+        correo: email.trim().toLowerCase(),
+      });
+
       const payload = unwrapAuthPayload(data);
+
       return getMessageFromResponse(
         payload,
         "Si el correo existe, se envió un enlace de recuperación.",
       );
     } catch (error: unknown) {
-      throw new Error(getErrorMessage(error, "No se pudo procesar la solicitud"));
+      throw new Error(
+        getErrorMessage(error, "No se pudo procesar la solicitud"),
+      );
     }
   }
 
-  async resendValidationEmail({ email }: ResendValidationEmailParams): Promise<string> {
+  async resendValidationEmail({
+    email,
+  }: ResendValidationEmailParams): Promise<string> {
     try {
-      const { data } = await api.post("/api/auth/resend-validation-email", { correo: email });
+      const { data } = await api.post("/api/auth/resend-validation-email", {
+        correo: email.trim().toLowerCase(),
+      });
+
       const payload = unwrapAuthPayload(data);
+
       return getMessageFromResponse(
         payload,
         "Si el correo existe y sigue pendiente, se reenviará el enlace de validación.",
       );
     } catch (error: unknown) {
-      throw new Error(getErrorMessage(error, "No se pudo reenviar la validación"));
+      throw new Error(
+        getErrorMessage(error, "No se pudo reenviar la validación"),
+      );
     }
   }
 
-  async resetPassword({ token, newPassword }: ResetPasswordParams): Promise<string> {
+  async resetPassword({
+    token,
+    newPassword,
+  }: ResetPasswordParams): Promise<string> {
     try {
       const { data } = await api.post("/api/auth/reset-password", {
         token,
         newPassword,
       });
+
       const payload = unwrapAuthPayload(data);
 
-      return getMessageFromResponse(payload, "La contraseña se actualizó correctamente.");
+      return getMessageFromResponse(
+        payload,
+        "La contraseña se actualizó correctamente.",
+      );
     } catch (error: unknown) {
-      throw new Error(getErrorMessage(error, "No se pudo restablecer la contraseña"));
+      throw new Error(
+        getErrorMessage(error, "No se pudo restablecer la contraseña"),
+      );
     }
   }
 
-  async changePassword({ currentPassword, newPassword }: ChangePasswordParams): Promise<string> {
+  async changePassword({
+    currentPassword,
+    newPassword,
+  }: ChangePasswordParams): Promise<string> {
     void currentPassword;
     void newPassword;
-    throw new Error("El backend actual no expone cambio de contraseña autenticado.");
+
+    throw new Error(
+      "El backend actual no expone cambio de contraseña autenticado.",
+    );
   }
 }
-

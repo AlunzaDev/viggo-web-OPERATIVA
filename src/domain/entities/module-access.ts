@@ -20,7 +20,7 @@ export const USER_MODULE_LABELS: Record<AppModuleAccess, string> = {
   permissionProfiles: "Perfiles",
   installations: "Instalaciones",
   projects: "Proyectos",
-  modules: "Modulos",
+  modules: "Módulos",
   pensions: "Pensiones",
   pensionPasses: "Pension Pass",
   tickets: "Tickets",
@@ -45,22 +45,28 @@ const MODULE_ALIASES: Record<string, AppModuleAccess> = {
   pospayments: "cashPayments",
 };
 
-export const getDefaultUserModules = (): AppModuleAccess[] => [...AVAILABLE_USER_MODULES];
+export const getDefaultUserModules = (): AppModuleAccess[] => [
+  ...AVAILABLE_USER_MODULES,
+];
 
 export const normalizeUserModules = (value: unknown): AppModuleAccess[] => {
   if (!Array.isArray(value)) {
-    return getDefaultUserModules();
+    return [];
   }
 
-  const normalized = value
-    .map((item) => String(item ?? "").trim())
-    .map((item) => MODULE_ALIASES[item.toLowerCase()] ?? item)
-    .filter((item): item is AppModuleAccess => USER_MODULE_SET.has(item));
-
-  return normalized.length > 0 ? Array.from(new Set(normalized)) : getDefaultUserModules();
+  return Array.from(
+    new Set(
+      value
+        .map((item) => String(item ?? "").trim())
+        .map((item) => MODULE_ALIASES[item.toLowerCase()] ?? item)
+        .filter((item): item is AppModuleAccess => USER_MODULE_SET.has(item)),
+    ),
+  );
 };
 
 export const hasModuleAccess = (
   modules: AppModuleAccess[] | undefined,
-  module: AppModuleAccess
-): boolean => normalizeUserModules(modules).includes(module);
+  module: AppModuleAccess,
+): boolean => {
+  return normalizeUserModules(modules).includes(module);
+};

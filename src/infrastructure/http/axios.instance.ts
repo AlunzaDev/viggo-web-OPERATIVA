@@ -1,6 +1,16 @@
 import axios from "axios";
 import { apiUrl, fallbackApiUrl } from "../../config/backend";
 
+const SESSION_EXPIRED_EVENT = "sikk:session-expired";
+
+const BACKEND_UNAVAILABLE_EVENT = "sikk:backend-unavailable";
+
+const SESSION_INVALIDATING_MESSAGES = new Set([
+  "El usuario no tiene acceso al Web Operativo",
+  "El usuario no tiene acceso a esta aplicación",
+  "La cuenta aún no ha sido validada",
+]);
+
 let sessionTokenMarker: string | null = null;
 
 declare module "axios" {
@@ -10,7 +20,7 @@ declare module "axios" {
   }
 }
 
-export const setSessionTokenMarker = (token: string | null) => {
+export const setSessionTokenMarker = (token: string | null): void => {
   sessionTokenMarker = token;
 };
 
@@ -30,19 +40,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor de respuesta: detecta token expirado (401)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
+
     const canRetryWithFallback =
-      !!fallbackApiUrl &&
-      !config?._viggoRetriedWithFallback &&
-      !config?.skipSessionExpiredHandling &&
+      Boolean(fallbackApiUrl) &&
+      Boolean(config) &&
+      !config._viggoRetriedWithFallback &&
       !error.response &&
       (error.code === "ERR_NETWORK" || error.code === "ECONNREFUSED");
 
-    if (canRetryWithFallback && config) {
+    if (canRetryWithFallback && config && fallbackApiUrl) {
       console.warn("[axios] Primary API unavailable, retrying with fallback", {
         primary: apiUrl,
         fallback: fallbackApiUrl,
@@ -58,47 +68,56 @@ api.interceptors.response.use(
 
     const responseData =
       typeof error.response?.data === "object" &&
-      error.response?.data !== null &&
+      error.response.data !== null &&
       !Array.isArray(error.response.data)
         ? (error.response.data as Record<string, unknown>)
         : null;
 
     const normalizedMessage =
       (typeof responseData?.error === "string" && responseData.error.trim()) ||
-      (typeof responseData?.message === "string" && responseData.message.trim()) ||
+      (typeof responseData?.message === "string" &&
+        responseData.message.trim()) ||
       null;
 
     if (normalizedMessage) {
       error.message = normalizedMessage;
     }
 
-    const shouldHandleSessionExpired = !error.config?.skipSessionExpiredHandling;
+    const status = error.response?.status as number | undefined;
 
-    if (error.response?.status === 401 && shouldHandleSessionExpired && sessionTokenMarker) {
+    const shouldHandleSessionExpired = !config?.skipSessionExpiredHandling;
+
+    const accessWasRevoked =
+      status === 403 &&
+      normalizedMessage !== null &&
+      SESSION_INVALIDATING_MESSAGES.has(normalizedMessage);
+
+    const sessionIsInvalid = status === 401 || accessWasRevoked;
+
+    if (sessionIsInvalid && shouldHandleSessionExpired && sessionTokenMarker) {
       setSessionTokenMarker(null);
 
-      // Notifica a la app via CustomEvent (el AuthProvider lo escucha)
-      window.dispatchEvent(new CustomEvent("sikk:session-expired"));
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
     }
 
-    const status = error.response?.status as number | undefined;
     const hasNoResponse = !error.response;
+
     const isBackendUnavailable =
       error.code !== "ERR_CANCELED" &&
       (hasNoResponse || (typeof status === "number" && status >= 500));
 
     if (isBackendUnavailable) {
       window.dispatchEvent(
-        new CustomEvent("sikk:backend-unavailable", {
+        new CustomEvent(BACKEND_UNAVAILABLE_EVENT, {
           detail: {
             source: "http",
             status: status ?? null,
             message: error.message ?? "Backend no disponible",
           },
-        })
+        }),
       );
     }
 
     return Promise.reject(error);
-  }
+  },
 );
