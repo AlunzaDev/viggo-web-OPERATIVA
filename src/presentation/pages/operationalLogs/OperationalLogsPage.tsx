@@ -170,9 +170,10 @@ export function OperationalLogsPage() {
             : "",
         );
       } finally {
-        if (!active) return;
-        setIsLoading(false);
-        setIsRefreshing(false);
+        if (active) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
       }
     };
 

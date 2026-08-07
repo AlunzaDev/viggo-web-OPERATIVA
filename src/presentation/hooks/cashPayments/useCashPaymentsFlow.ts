@@ -55,6 +55,9 @@ export const useCashPaymentsFlow = () => {
   const amountInputRef = useRef<HTMLInputElement | null>(null);
   const scannerResolveTimeoutRef = useRef<number | null>(null);
   const scannerMetaRef = useRef(createEmptyScannerTypingState());
+  const resolveQrRef = useRef<
+    (source?: "scanner" | "manual") => Promise<void>
+  >(async () => undefined);
 
   const [qrValue, setQrValue] = useState("");
   const [cashiers, setCashiers] = useState<CashierOption[]>([]);
@@ -362,7 +365,7 @@ export const useCashPaymentsFlow = () => {
 
     clearScannerTimeout();
     scannerResolveTimeoutRef.current = window.setTimeout(() => {
-      void resolveQr("scanner");
+      void resolveQrRef.current("scanner");
     }, SCANNER_IDLE_RESOLVE_MS);
 
     return clearScannerTimeout;
@@ -407,6 +410,8 @@ export const useCashPaymentsFlow = () => {
       setLoading(false);
     }
   };
+
+  resolveQrRef.current = resolveQr;
 
   const startSession = async () => {
     setLoading(true);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaBuilding,
@@ -88,7 +88,7 @@ export function SettingsPage() {
   const canManageLocalConfig =
     user?.role === "superRole" || user?.role === "adminRole";
 
-  const loadConfigStatus = async () => {
+  const loadConfigStatus = useCallback(async () => {
     setConfigLoading(true);
     try {
       const state = await loadLocalConfigFlowState(canManageLocalConfig);
@@ -97,11 +97,11 @@ export function SettingsPage() {
     } finally {
       setConfigLoading(false);
     }
-  };
+  }, [canManageLocalConfig]);
 
   useEffect(() => {
     void loadConfigStatus();
-  }, [canManageLocalConfig]);
+  }, [loadConfigStatus]);
 
   const loadMonthlyFlushStatus = async () => {
     if (!canManageLocalConfig) return;

@@ -9,24 +9,6 @@ export type DetailField = { label: string; value: ReactNode; icon?: ReactNode };
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
-const getInitials = (value: string, fallback = "RG") =>
-  (value.trim() || fallback)
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-
-export const renderReadonlyEntity = (title: string, subtitle: string, modifier = "") => (
-  <div className={`shared-identity readonly-entity ${modifier}`.trim()}>
-    <span className="shared-identity__badge readonly-entity__badge">{getInitials(title, subtitle)}</span>
-    <div className="shared-identity__copy readonly-entity__copy">
-      <strong>{title}</strong>
-      <span>{subtitle}</span>
-    </div>
-  </div>
-);
-
 export function ReadonlyDetailModal({
   open,
   title,

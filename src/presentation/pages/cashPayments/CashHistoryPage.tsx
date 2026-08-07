@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCashRegister, FaEye, FaSyncAlt } from "react-icons/fa";
 import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
 import { FilterSidebar } from "../../components/shared/FilterSidebar";
@@ -59,7 +59,7 @@ export function CashHistoryPage() {
     [dateFrom, dateTo, status],
   );
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -79,7 +79,7 @@ export function CashHistoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [queryParams]);
 
   const loadDetail = async (shiftId: string) => {
     setDetailLoading(true);
@@ -96,7 +96,7 @@ export function CashHistoryPage() {
 
   useEffect(() => {
     void loadHistory();
-  }, [queryParams]);
+  }, [loadHistory]);
 
   return (
     <main className="cash-history-page">

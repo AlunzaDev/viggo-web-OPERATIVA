@@ -122,6 +122,9 @@ export function DeviceHeartbeatPage() {
   const markerRefs = useRef<Marker[]>([]);
   const markerCloseTimeoutsRef = useRef<Map<string, number>>(new Map());
   const shouldAutoFitRef = useRef(true);
+  const loadHeartbeatRef = useRef<
+    (mode?: "initial" | "refresh") => Promise<void>
+  >(async () => undefined);
 
   const loadHeartbeat = async (mode: "initial" | "refresh" = "initial") => {
     if (mode === "initial") setIsLoading(true);
@@ -151,8 +154,10 @@ export function DeviceHeartbeatPage() {
     }
   };
 
+  loadHeartbeatRef.current = loadHeartbeat;
+
   useEffect(() => {
-    void loadHeartbeat("initial");
+    void loadHeartbeatRef.current("initial");
   }, []);
 
   useEffect(() => {
@@ -200,6 +205,7 @@ export function DeviceHeartbeatPage() {
     }).addTo(map);
 
     mapRef.current = map;
+    const markerCloseTimeouts = markerCloseTimeoutsRef.current;
 
     window.setTimeout(() => {
       map.invalidateSize();
@@ -207,10 +213,10 @@ export function DeviceHeartbeatPage() {
     }, 120);
 
     return () => {
-      markerCloseTimeoutsRef.current.forEach((timeoutId) =>
+      markerCloseTimeouts.forEach((timeoutId) =>
         window.clearTimeout(timeoutId),
       );
-      markerCloseTimeoutsRef.current.clear();
+      markerCloseTimeouts.clear();
       markerRefs.current.forEach((marker) => marker.remove());
       markerRefs.current = [];
       polygonRef.current?.remove();

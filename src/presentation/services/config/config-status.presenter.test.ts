@@ -14,11 +14,11 @@ describe("config-status.presenter", () => {
 
   it("normalizes backend and cloud sync errors for load and sync flows", () => {
     expect(normalizeConfigSyncError("Network Error", "load")).toContain(
-      "backend local no esta disponible",
+      "Inicia el API operativo",
     );
     expect(
       normalizeConfigSyncError("La nube no esta disponible", "sync"),
-    ).toContain("No pudimos conectar con administrativo");
+    ).toContain("sincronizacion con administrativo");
     expect(
       normalizeConfigSyncError(
         "La instalacion local aun no esta vinculada a un proyecto",

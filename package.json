@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev-with-fallback.mjs",
+    "preflight:operative": "npm --prefix ../viggo-server-api-OPERATIVA run preflight",
     "build": "tsc -b && vite build --mode prod",
     "lint": "oxlint",
     "preview": "vite preview",
@@ -24,9 +25,16 @@
     "react-dom": "^19.2.7",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.7.0",
-    "react-router-dom": "^7.18.1",
+    "react-router-dom": "7.18.2",
     "socket.io-client": "^4.8.3",
     "sweetalert2": "^11.26.25"
+  },
+  "overrides": {
+    "brace-expansion@^1": "1.1.18",
+    "brace-expansion@^2": "2.1.4",
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

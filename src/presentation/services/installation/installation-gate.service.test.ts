@@ -118,7 +118,7 @@ describe("installation-gate.service", () => {
       "Permite la ubicacion",
     );
     expect(normalizeInstallationError(LOCATION_FETCH_FAILED_ERROR).title).toBe(
-      "No se pudo obtener la ubicacion",
+      "No pudimos validar tu ubicacion",
     );
     expect(normalizeInstallationError("Network Error").title).toBe(
       "El backend local no esta disponible",

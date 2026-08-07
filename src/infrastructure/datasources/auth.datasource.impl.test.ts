@@ -40,6 +40,7 @@ describe("AuthDataSourceImpl", () => {
             "pensions",
             "pensionPasses",
           ],
+          permissionProfileId: "profile-operative",
           allowedApps: ["OPERATIVE_WEB"],
         },
       },
@@ -71,7 +72,8 @@ describe("AuthDataSourceImpl", () => {
         role: "superRole",
         active: true,
         parkings: [],
-        modules: ["users", "projects", "modules", "pensions", "pensionPasses"],
+        modules: ["modules", "pensions", "pensionPasses"],
+        permissionProfileId: "profile-operative",
         allowedApps: ["OPERATIVE_WEB"],
       },
     });
@@ -91,6 +93,7 @@ describe("AuthDataSourceImpl", () => {
             estado: "false",
             parkings: ["parking-1"],
             modules: ["projects", "pensions"],
+            permissionProfileId: "profile-operative-2",
             allowedApps: ["OPERATIVE_WEB"],
           },
         },
@@ -111,7 +114,8 @@ describe("AuthDataSourceImpl", () => {
         role: "adminRole",
         active: false,
         parkings: ["parking-1"],
-        modules: ["projects", "pensions"],
+        modules: ["pensions"],
+        permissionProfileId: "profile-operative-2",
         allowedApps: ["OPERATIVE_WEB"],
       },
     });
@@ -238,4 +242,3 @@ describe("AuthDataSourceImpl", () => {
     );
   });
 });
-  
