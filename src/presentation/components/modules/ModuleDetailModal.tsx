@@ -29,8 +29,8 @@ type ModuleDetailModalProps = {
   projectName: string;
   isSubmitting: boolean;
   error: string | null;
-  onEdit: (item: ModuleEntity) => void;
-  onToggleStatus: (item: ModuleEntity) => Promise<void>;
+  onEdit?: (item: ModuleEntity) => void;
+  onToggleStatus?: (item: ModuleEntity) => Promise<void>;
   onResetBinding: (item: ModuleEntity) => Promise<void>;
   onOpenRequest: (item: ModuleEntity, request: ModuleDeviceBindingRequest) => void;
   onClose: () => void;
@@ -89,13 +89,21 @@ export function ModuleDetailModal({
           </>
         ) : null
       }
-      onEditStart={() => {
-        if (item) onEdit(item);
-      }}
-      onToggleStatus={() => {
-        if (!item) return Promise.resolve();
-        return onToggleStatus(item);
-      }}
+      onEditStart={
+        onEdit
+          ? () => {
+              if (item) onEdit(item);
+            }
+          : undefined
+      }
+      onToggleStatus={
+        onToggleStatus
+          ? () => {
+              if (!item) return Promise.resolve();
+              return onToggleStatus(item);
+            }
+          : undefined
+      }
       toggleStatusText={item?.estado ? "Desactivar" : "Activar"}
       toggleStatusIcon={<FaPowerOff />}
     >

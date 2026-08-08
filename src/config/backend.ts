@@ -22,6 +22,7 @@ const prodApiUrl = normalizeUrl(import.meta.env.VITE_PROD_API_URL);
 const prodSocketUrl = normalizeUrl(import.meta.env.VITE_PROD_SOCKET_URL);
 const devApiUrl = normalizeUrl(import.meta.env.VITE_DEV_API_URL);
 const devSocketUrl = normalizeUrl(import.meta.env.VITE_DEV_SOCKET_URL);
+const apiFallbackEnabled = parseBoolean(import.meta.env.VITE_API_FALLBACK_ENABLED);
 
 const runtimeOrigin =
   typeof window !== "undefined" ? window.location.origin : "";
@@ -72,4 +73,5 @@ const getAlternateLocalhostUrl = (value: string): string | null => {
   }
 };
 
-export const fallbackApiUrl = apiUrl ? getAlternateLocalhostUrl(apiUrl) : null;
+export const fallbackApiUrl =
+  apiFallbackEnabled && apiUrl ? getAlternateLocalhostUrl(apiUrl) : null;

@@ -1,9 +1,9 @@
-name: viggo-frontend
+name: viggo-operativo-web
 
 services:
   frontend:
-    container_name: viggo-frontend
-    image: ${FRONTEND_IMAGE:-viggo-web:local}
+    container_name: viggo-operativo-web
+    image: ${FRONTEND_IMAGE:-viggo-operativo-web:local}
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
         - frontend_env
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-5173}:80"
+      - "${FRONTEND_PORT:-3004}:80"
     healthcheck:
       test:
         [
@@ -27,4 +27,4 @@ services:
 
 secrets:
   frontend_env:
-    file: ${FRONTEND_ENV_FILE:-.env.prod}
+    file: ${FRONTEND_ENV_FILE:-.env.docker}

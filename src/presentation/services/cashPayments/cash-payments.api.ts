@@ -96,10 +96,12 @@ export const insertCashIntoSession = async (
   amount: number,
   rawEvent: Record<string, unknown>,
 ): Promise<CashSession> => {
-  const { data } = await api.post(`/api/cash-payments/sessions/${sessionId}/insert-cash`, {
-    amount,
-    rawEvent,
-  });
+  const idempotencyKey = String(rawEvent.idempotencyKey ?? "");
+  const { data } = await api.post(
+    `/api/cash-payments/sessions/${sessionId}/insert-cash`,
+    { amount, rawEvent },
+    { headers: { "Idempotency-Key": idempotencyKey } },
+  );
   return normalizeCashSessionResponse(data);
 };
 
@@ -124,6 +126,7 @@ export const openCashRegisterShift = async (input: {
 
 export const registerCashRegisterMovement = async (
   shiftId: string,
+  idempotencyKey: string,
   input: {
     type: "manual_income" | "manual_expense";
     concept: string;
@@ -133,6 +136,7 @@ export const registerCashRegisterMovement = async (
   const { data } = await api.post(
     `/api/cash-register/shifts/${shiftId}/movements`,
     input,
+    { headers: { "Idempotency-Key": idempotencyKey } },
   );
   return normalizeCashMovementDetailResponse(data);
 };

@@ -99,6 +99,7 @@ export const insertCashFlow = async (input: {
   session: CashSession | null;
   insertAmount: string;
   selectedCashier: CashierOption | null;
+  idempotencyKey: string;
 }): Promise<CashSession> => {
   if (!input.session) {
     throw new Error("No hay un cobro activo.");
@@ -112,7 +113,11 @@ export const insertCashFlow = async (input: {
   return insertCashIntoSession(
     input.session.id,
     amount,
-    createManualCashDeviceEvent(input.session, input.selectedCashier),
+    createManualCashDeviceEvent(
+      input.session,
+      input.selectedCashier,
+      input.idempotencyKey,
+    ),
   );
 };
 
@@ -160,6 +165,7 @@ export const registerCashMovementFlow = async (input: {
   movementType: "manual_income" | "manual_expense";
   movementConcept: string;
   movementAmount: string;
+  idempotencyKey: string;
 }): Promise<CashRegisterShiftDetail | null> => {
   if (!input.activeShiftDetail) {
     throw new Error("No hay un turno abierto para registrar movimientos.");
@@ -174,11 +180,15 @@ export const registerCashMovementFlow = async (input: {
     throw new Error("Captura un importe valido para el movimiento.");
   }
 
-  return registerCashRegisterMovement(input.activeShiftDetail.shift.id, {
-    type: input.movementType,
-    concept: input.movementConcept.trim(),
-    amount,
-  });
+  return registerCashRegisterMovement(
+    input.activeShiftDetail.shift.id,
+    input.idempotencyKey,
+    {
+      type: input.movementType,
+      concept: input.movementConcept.trim(),
+      amount,
+    },
+  );
 };
 
 export const previewCashCutFlow = async (input: {

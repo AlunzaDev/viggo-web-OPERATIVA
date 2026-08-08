@@ -16,6 +16,7 @@ let sessionTokenMarker: string | null = null;
 declare module "axios" {
   export interface AxiosRequestConfig {
     skipSessionExpiredHandling?: boolean;
+    _viggoRetriedNetworkError?: boolean;
     _viggoRetriedWithFallback?: boolean;
   }
 }
@@ -44,6 +45,18 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
+    const canRetryNetworkError =
+      Boolean(config) &&
+      !config._viggoRetriedNetworkError &&
+      !error.response &&
+      (error.code === "ERR_NETWORK" || error.code === "ECONNABORTED");
+
+    if (canRetryNetworkError && config) {
+      return api.request({
+        ...config,
+        _viggoRetriedNetworkError: true,
+      });
+    }
 
     const canRetryWithFallback =
       Boolean(fallbackApiUrl) &&

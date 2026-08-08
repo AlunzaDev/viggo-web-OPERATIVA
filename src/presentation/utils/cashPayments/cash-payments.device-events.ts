@@ -6,11 +6,9 @@ import type {
 export const createManualCashDeviceEvent = (
   session: CashSession,
   selectedCashier: CashierOption | null,
+  idempotencyKey: string,
 ) => ({
-  idempotencyKey:
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${session.id}-${Date.now()}`,
+  idempotencyKey,
   source: "viggo_web",
   moduloId: session.moduloId,
   moduloIdentificador: session.moduloIdentificador ?? selectedCashier?.identificador,

@@ -170,7 +170,7 @@ export function CashPaymentsWorkbench({
               QR o idBoleto
               <input
                 ref={qrInputRef}
-                // Para reactivar foco inicial: agrega autoFocus aqui y activa ENABLE_QR_AUTO_FOCUS en hooks/cashPayments/useCashPaymentsFlow.ts.
+                autoFocus
                 value={qrValue}
                 onChange={(event) => onHandleQrInputChange(event.target.value)}
                 onKeyDown={onHandleQrInputKeyDown}

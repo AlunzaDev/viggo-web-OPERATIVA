@@ -46,6 +46,11 @@ const DeviceHeartbeatPage = lazy(async () => {
   return { default: module.DeviceHeartbeatPage };
 });
 
+const ModulesPage = lazy(async () => {
+  const module = await import("../pages/modules/ModulesPage");
+  return { default: module.ModulesPage };
+});
+
 const OperationalLogsPage = lazy(async () => {
   const module = await import("../pages/operationalLogs/OperationalLogsPage");
   return { default: module.OperationalLogsPage };
@@ -186,8 +191,22 @@ export function AppRouter() {
         <Route path="/accesos" element={<Navigate to="/caja/cobro" replace />} />
         <Route path="/perfiles-permisos" element={<Navigate to="/caja/cobro" replace />} />
         <Route path="/projects" element={<Navigate to="/caja/cobro" replace />} />
-        <Route path="/projects/:projectId/modulos" element={<Navigate to="/caja/cobro" replace />} />
-        <Route path="/modulos" element={<Navigate to="/caja/cobro" replace />} />
+        <Route
+          path="/projects/:projectId/modulos"
+          element={
+            <ProtectedRoute modules={["modules"]}>
+              <ModulesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/modulos"
+          element={
+            <ProtectedRoute modules={["modules"]}>
+              <ModulesPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/projects/:projectId/devices"
           element={<Navigate to="/caja/cobro" replace />}

@@ -10,7 +10,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaChartPie, FaCog, FaCreditCard, FaExchangeAlt, FaExclamationTriangle, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
+import { FaBroadcastTower, FaCashRegister, FaChartLine, FaChevronDown, FaChartPie, FaCog, FaCreditCard, FaCubes, FaExchangeAlt, FaExclamationTriangle, FaIdCard, FaReceipt, FaTicketAlt, FaWallet } from "react-icons/fa";
 import {
   motion,
   useMotionTemplate,
@@ -202,6 +202,13 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen, onClo
         icon: <FaExclamationTriangle className="sidebar-icon" />,
         canView: canViewOperationalLogs,
         isActive: location.pathname.startsWith("/bitacora"),
+      },
+      {
+        path: "/modulos",
+        label: "Modulos",
+        icon: <FaCubes className="sidebar-icon" />,
+        canView: canViewDeviceHeartbeat,
+        isActive: location.pathname.startsWith("/modulos") || location.pathname.includes("/modulos"),
       },
       {
         path: "/heartbeat",

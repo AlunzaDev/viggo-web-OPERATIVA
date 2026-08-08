@@ -45,9 +45,9 @@ import {
   persistCashPaymentState,
   readPersistedCashPaymentState,
 } from "../../utils/cashPayments/cash-payments.storage";
+import { createFinancialOperationKey } from "../../utils/cashPayments/cash-payments.idempotency";
 
-// Cambia a true para volver a enfocar automaticamente el input del QR.
-const ENABLE_QR_AUTO_FOCUS = false;
+const ENABLE_QR_AUTO_FOCUS = true;
 
 export const useCashPaymentsFlow = () => {
   const cashPaymentFlowStorageKey = useMemo(() => getCashPaymentFlowStorageKey(), []);
@@ -58,6 +58,8 @@ export const useCashPaymentsFlow = () => {
   const resolveQrRef = useRef<
     (source?: "scanner" | "manual") => Promise<void>
   >(async () => undefined);
+  const pendingInsertRef = useRef<{ fingerprint: string; key: string } | null>(null);
+  const pendingMovementRef = useRef<{ fingerprint: string; key: string } | null>(null);
 
   const [qrValue, setQrValue] = useState("");
   const [cashiers, setCashiers] = useState<CashierOption[]>([]);
@@ -437,11 +439,20 @@ export const useCashPaymentsFlow = () => {
     clearMessages();
 
     try {
+      const fingerprint = `${session?.id ?? ""}:${insertAmount}`;
+      if (pendingInsertRef.current?.fingerprint !== fingerprint) {
+        pendingInsertRef.current = {
+          fingerprint,
+          key: createFinancialOperationKey("cash-insertion"),
+        };
+      }
       const nextSession = await insertCashFlow({
         session,
         insertAmount,
         selectedCashier,
+        idempotencyKey: pendingInsertRef.current.key,
       });
+      pendingInsertRef.current = null;
       setSession(nextSession);
       await refreshActiveShift(nextSession.moduloId || selectedCashierId);
 
@@ -552,12 +563,21 @@ export const useCashPaymentsFlow = () => {
     clearMessages();
 
     try {
+      const fingerprint = `${activeShiftDetail?.shift.id ?? ""}:${movementType}:${movementConcept.trim()}:${movementAmount}`;
+      if (pendingMovementRef.current?.fingerprint !== fingerprint) {
+        pendingMovementRef.current = {
+          fingerprint,
+          key: createFinancialOperationKey("cash-movement"),
+        };
+      }
       const detail = await registerCashMovementFlow({
         activeShiftDetail,
         movementType,
         movementConcept,
         movementAmount,
+        idempotencyKey: pendingMovementRef.current.key,
       });
+      pendingMovementRef.current = null;
       if (detail) {
         setActiveShiftDetail(detail);
       } else if (activeShiftDetail) {

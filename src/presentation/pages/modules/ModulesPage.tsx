@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  FaPlus,
-} from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ModuleEntity,
@@ -36,6 +34,7 @@ type ProjectRouteState = {
 };
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const ENABLE_MODULE_MUTATIONS = false;
 
 export function ModulesPage() {
   const navigate = useNavigate();
@@ -43,7 +42,7 @@ export function ModulesPage() {
   const { projectId = "" } = useParams();
   const locationState = (location.state ?? {}) as ProjectRouteState;
 
-  usePageTitle("Modulos del proyecto");
+  usePageTitle("Modulos operativos");
 
   const { parkings } = useParkings();
   const projects = useMemo<ProyectoOption[]>(
@@ -91,7 +90,8 @@ export function ModulesPage() {
     () =>
       locationState.projectName?.trim() ||
       projectById.get(projectId) ||
-      projectId,
+      projectId ||
+      "Modulos operativos",
     [locationState.projectName, projectById, projectId],
   );
 
@@ -136,6 +136,7 @@ export function ModulesPage() {
   }, [selectedItem, selectedRequest]);
 
   const openCreate = () => {
+    setSelectedItem(null);
     setEditingId(null);
     setForm({
       ...INITIAL_FORM,
@@ -218,9 +219,9 @@ export function ModulesPage() {
       <PageHeader
         eyebrow="Modulos del proyecto"
         title={selectedProjectName || "Proyecto"}
-        subtitle="Aqui se muestran los modulos del proyecto seleccionado."
-        backLabel="Volver a proyectos"
-        onBack={() => navigate("/projects")}
+        subtitle="Consulta modulos, equipos vinculados y solicitudes pendientes de dispositivos."
+        backLabel="Volver a heartbeat"
+        onBack={() => navigate("/heartbeat")}
       />
 
       <CrudActionsIsland
@@ -234,7 +235,7 @@ export function ModulesPage() {
           goToPage(1);
         }}
         searchPlaceholder="Buscar modulos"
-        showCreate
+        showCreate={ENABLE_MODULE_MUTATIONS}
         createLabel="Crear modulo"
         createIcon={<FaPlus />}
         onCreate={openCreate}
@@ -299,8 +300,10 @@ export function ModulesPage() {
                 entityName={`modulo ${item.nombre}`}
                 isActive={item.estado}
                 onView={() => setSelectedItem(item)}
-                onEdit={() => openEdit(item)}
-                onToggleStatus={() => toggleModuleState(item)}
+                onEdit={ENABLE_MODULE_MUTATIONS ? () => openEdit(item) : undefined}
+                onToggleStatus={
+                  ENABLE_MODULE_MUTATIONS ? () => toggleModuleState(item) : undefined
+                }
               />
             </td>
           </tr>
@@ -319,8 +322,8 @@ export function ModulesPage() {
           isSaving || isUpdating || isDeleting || isBindingActionRunning
         }
         error={error}
-        onEdit={openEdit}
-        onToggleStatus={toggleModuleState}
+        onEdit={ENABLE_MODULE_MUTATIONS ? openEdit : undefined}
+        onToggleStatus={ENABLE_MODULE_MUTATIONS ? toggleModuleState : undefined}
         onResetBinding={handleResetBinding}
         onOpenRequest={(item, request) => {
           setSelectedItem(item);
