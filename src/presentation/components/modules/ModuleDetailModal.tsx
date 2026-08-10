@@ -24,6 +24,10 @@ import {
   getBindingStatusLabel,
   getRequestStatusClassName,
 } from "../../utils/modules/moduleDetail.utils";
+import {
+  getRemoteSupportLinks,
+  getRemoteSupportProviderLabel,
+} from "../../services/remoteSupport/remote-support.presenter";
 
 type ModuleDetailModalProps = {
   open: boolean;
@@ -36,15 +40,6 @@ type ModuleDetailModalProps = {
   onResetBinding: (item: ModuleEntity) => Promise<void>;
   onOpenRequest: (item: ModuleEntity, request: ModuleDeviceBindingRequest) => void;
   onClose: () => void;
-};
-
-const buildMeshCentralDeviceUrl = (baseUrl?: string, deviceId?: string) => {
-  const cleanBaseUrl = String(baseUrl ?? "").trim().replace(/\/+$/, "");
-  const cleanDeviceId = String(deviceId ?? "").trim();
-
-  if (!cleanBaseUrl || !cleanDeviceId) return "";
-
-  return `${cleanBaseUrl}/?viewmode=10&gotonode=${cleanDeviceId}`;
 };
 
 export function ModuleDetailModal({
@@ -61,10 +56,7 @@ export function ModuleDetailModal({
 }: ModuleDetailModalProps) {
   const currentBinding = item?.deviceBinding ?? null;
   const remoteSupport = item?.remoteSupport ?? null;
-  const remoteSupportUrl = buildMeshCentralDeviceUrl(
-    remoteSupport?.baseUrl,
-    remoteSupport?.deviceId,
-  ) || remoteSupport?.supportUrl || "";
+  const remoteSupportLinks = getRemoteSupportLinks(remoteSupport);
   const bindingRequests = item?.deviceBindingRequests ?? [];
   const hasBindingData = Boolean(
     currentBinding?.fingerprint ||
@@ -239,7 +231,7 @@ export function ModuleDetailModal({
           <div className="modal-section-grid">
             <article className="form-group admin-crud-detail-item">
               <label>Proveedor</label>
-              <p>{remoteSupport.provider}</p>
+              <p>{getRemoteSupportProviderLabel(remoteSupport.provider)}</p>
             </article>
             <article className="form-group admin-crud-detail-item">
               <label>Equipo Mesh</label>
@@ -248,12 +240,12 @@ export function ModuleDetailModal({
             <article className="form-group modal-field-full admin-crud-detail-item">
               <label>Acciones</label>
               <div className="admin-crud-inline-actions">
-                {remoteSupportUrl ? (
-                  <a className="btn-form-secondary" href={remoteSupportUrl} target="_blank" rel="noreferrer">
+                {remoteSupportLinks.map((link) => (
+                  <a key={`${link.kind}-${link.url}`} className="btn-form-secondary" href={link.url} target="_blank" rel="noreferrer">
                     <FaExternalLinkAlt />
-                    <span>Abrir soporte</span>
+                    <span>{link.label}</span>
                   </a>
-                ) : null}
+                ))}
               </div>
             </article>
           </div>
