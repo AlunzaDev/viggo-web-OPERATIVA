@@ -1,5 +1,7 @@
 import {
   FaAlignLeft,
+  FaDesktop,
+  FaExternalLinkAlt,
   FaHashtag,
   FaLayerGroup,
   FaLink,
@@ -36,6 +38,15 @@ type ModuleDetailModalProps = {
   onClose: () => void;
 };
 
+const buildMeshCentralDeviceUrl = (baseUrl?: string, deviceId?: string) => {
+  const cleanBaseUrl = String(baseUrl ?? "").trim().replace(/\/+$/, "");
+  const cleanDeviceId = String(deviceId ?? "").trim();
+
+  if (!cleanBaseUrl || !cleanDeviceId) return "";
+
+  return `${cleanBaseUrl}/?viewmode=10&gotonode=${cleanDeviceId}`;
+};
+
 export function ModuleDetailModal({
   open,
   item,
@@ -49,6 +60,11 @@ export function ModuleDetailModal({
   onClose,
 }: ModuleDetailModalProps) {
   const currentBinding = item?.deviceBinding ?? null;
+  const remoteSupport = item?.remoteSupport ?? null;
+  const remoteSupportUrl = buildMeshCentralDeviceUrl(
+    remoteSupport?.baseUrl,
+    remoteSupport?.deviceId,
+  ) || remoteSupport?.supportUrl || "";
   const bindingRequests = item?.deviceBindingRequests ?? [];
   const hasBindingData = Boolean(
     currentBinding?.fingerprint ||
@@ -213,6 +229,42 @@ export function ModuleDetailModal({
           </div>
         </section>
       )}
+
+      <section className="modal-form-section">
+        <div className="modal-section-header">
+          <FaDesktop className="modal-section-icon" />
+          <h3 className="modal-section-title">Soporte remoto</h3>
+        </div>
+        {remoteSupport?.enabled ? (
+          <div className="modal-section-grid">
+            <article className="form-group admin-crud-detail-item">
+              <label>Proveedor</label>
+              <p>{remoteSupport.provider}</p>
+            </article>
+            <article className="form-group admin-crud-detail-item">
+              <label>Equipo Mesh</label>
+              <p>{remoteSupport.deviceName || remoteSupport.deviceId || "Sin nombre"}</p>
+            </article>
+            <article className="form-group modal-field-full admin-crud-detail-item">
+              <label>Acciones</label>
+              <div className="admin-crud-inline-actions">
+                {remoteSupportUrl ? (
+                  <a className="btn-form-secondary" href={remoteSupportUrl} target="_blank" rel="noreferrer">
+                    <FaExternalLinkAlt />
+                    <span>Abrir soporte</span>
+                  </a>
+                ) : null}
+              </div>
+            </article>
+          </div>
+        ) : (
+          <div className="admin-crud-detail-item">
+            <p className="admin-crud-detail-muted">
+              Este modulo aun no tiene soporte remoto configurado.
+            </p>
+          </div>
+        )}
+      </section>
 
       {hasPendingRequests ? (
         <section className="modal-form-section">

@@ -89,6 +89,20 @@ export interface ModuleDeviceRuntime {
     message?: string;
 }
 
+export interface ModuleRemoteSupport {
+    provider: "MESHCENTRAL";
+    enabled: boolean;
+    deviceName?: string;
+    deviceId?: string;
+    groupId?: string;
+    baseUrl?: string;
+    supportUrl?: string;
+    desktopUrl?: string;
+    terminalUrl?: string;
+    linkedAt?: Date;
+    updatedAt?: Date;
+}
+
 export class ModuleEntity {
     readonly id: string;
     readonly nombre: string;
@@ -105,6 +119,7 @@ export class ModuleEntity {
     readonly deviceBindingRequests: ModuleDeviceBindingRequest[];
     readonly deviceConnectionAudit: ModuleDeviceConnectionAudit | null;
     readonly deviceRuntime: ModuleDeviceRuntime | null;
+    readonly remoteSupport: ModuleRemoteSupport | null;
     readonly submodulos: ModuleSubmodule[];
 
     constructor(options: {
@@ -123,6 +138,7 @@ export class ModuleEntity {
         deviceBindingRequests?: ModuleDeviceBindingRequest[];
         deviceConnectionAudit?: ModuleDeviceConnectionAudit | null;
         deviceRuntime?: ModuleDeviceRuntime | null;
+        remoteSupport?: ModuleRemoteSupport | null;
         submodulos?: ModuleSubmodule[];
     }) {
         this.id = options.id;
@@ -140,6 +156,7 @@ export class ModuleEntity {
         this.deviceBindingRequests = options.deviceBindingRequests ?? [];
         this.deviceConnectionAudit = options.deviceConnectionAudit ?? null;
         this.deviceRuntime = options.deviceRuntime ?? null;
+        this.remoteSupport = options.remoteSupport ?? null;
         this.submodulos = options.submodulos ?? [];
     }
 
@@ -191,6 +208,7 @@ export class ModuleEntity {
         const deviceBindingRequests = parseDeviceBindingRequests(object.deviceBindingRequests);
         const deviceConnectionAudit = parseDeviceConnectionAudit(object.deviceConnectionAudit);
         const deviceRuntime = parseDeviceRuntime(object.deviceRuntime);
+        const remoteSupport = parseRemoteSupport(object.remoteSupport);
         const submodulos = parseSubmodulos(object.submodulos);
 
         if (!id) throw new Error("El modulo no incluyo id");
@@ -214,6 +232,7 @@ export class ModuleEntity {
             deviceBindingRequests,
             deviceConnectionAudit,
             deviceRuntime,
+            remoteSupport,
             submodulos,
         });
     }
@@ -235,6 +254,7 @@ export class ModuleEntity {
             deviceBindingRequests: module.deviceBindingRequests,
             deviceConnectionAudit: module.deviceConnectionAudit,
             deviceRuntime: module.deviceRuntime,
+            remoteSupport: module.remoteSupport,
             submodulos: module.submodulos,
         });
     }
@@ -388,6 +408,33 @@ function parseDeviceBindingRequest(value: unknown): ModuleDeviceBindingRequest |
         requestedAt: parseDate(request.requestedAt),
         resolvedAt: request.resolvedAt ? parseDate(request.resolvedAt) : undefined,
         notes: normalizeOptionalText(request.notes),
+    };
+}
+
+function parseRemoteSupport(value: unknown): ModuleRemoteSupport | null {
+    if (!value || typeof value !== "object") {
+        return null;
+    }
+
+    const support = value as Record<string, unknown>;
+    const provider = String(support.provider ?? "MESHCENTRAL").trim().toUpperCase();
+
+    if (provider !== "MESHCENTRAL") {
+        return null;
+    }
+
+    return {
+        provider,
+        enabled: Boolean(support.enabled),
+        deviceName: normalizeOptionalText(support.deviceName),
+        deviceId: normalizeOptionalText(support.deviceId),
+        groupId: normalizeOptionalText(support.groupId),
+        baseUrl: normalizeOptionalText(support.baseUrl),
+        supportUrl: normalizeOptionalText(support.supportUrl),
+        desktopUrl: normalizeOptionalText(support.desktopUrl),
+        terminalUrl: normalizeOptionalText(support.terminalUrl),
+        linkedAt: support.linkedAt ? parseDate(support.linkedAt) : undefined,
+        updatedAt: support.updatedAt ? parseDate(support.updatedAt) : undefined,
     };
 }
 

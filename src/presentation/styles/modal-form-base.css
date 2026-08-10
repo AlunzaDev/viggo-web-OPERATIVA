@@ -239,6 +239,18 @@
   gap: 8px;
 }
 
+.admin-crud-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-crud-inline-actions .btn-form-secondary {
+  width: auto;
+  min-width: 9rem;
+  text-decoration: none;
+}
+
 .btn-form-spinner {
   width: 16px;
   height: 16px;
