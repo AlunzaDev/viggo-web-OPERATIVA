@@ -46,7 +46,7 @@ export function ModuleModal({
         </div>
         <div className="modal-section-grid">
           <div className="form-group">
-            <label htmlFor="modulo-nombre">nombre</label>
+            <label htmlFor="modulo-nombre">nombre <span className="required">*</span></label>
             <input
               id="modulo-nombre"
               value={form.nombre}
@@ -57,7 +57,7 @@ export function ModuleModal({
             />
           </div>
           <div className="form-group">
-            <label htmlFor="modulo-proyecto">proyecto</label>
+            <label htmlFor="modulo-proyecto">proyecto <span className="required">*</span></label>
             <select
               id="modulo-proyecto"
               value={form.proyecto}
@@ -75,7 +75,7 @@ export function ModuleModal({
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="modulo-tipo">tipo</label>
+            <label htmlFor="modulo-tipo">tipo <span className="required">*</span></label>
             <select
               id="modulo-tipo"
               value={form.tipo}
@@ -89,7 +89,7 @@ export function ModuleModal({
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="modulo-identificador">identificador</label>
+            <label htmlFor="modulo-identificador">identificador <span className="required">*</span></label>
             <input
               id="modulo-identificador"
               value={form.identificador}
