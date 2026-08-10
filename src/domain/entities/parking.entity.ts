@@ -4,6 +4,14 @@ export type ProjectAreaPoint = {
     longitude: number;
 };
 
+export type ProjectRemoteSupportProvider = "MESHCENTRAL";
+
+export type ProjectRemoteSupport = {
+    provider: ProjectRemoteSupportProvider;
+    enabled: boolean;
+    baseUrl: string;
+};
+
 export class ParkingEntity {
     readonly id: string;
     readonly nombre: string;
@@ -11,6 +19,7 @@ export class ParkingEntity {
     readonly area: ProjectAreaPoint[];
     readonly ciudad: string;
     readonly identificador: string;
+    readonly remoteSupport: ProjectRemoteSupport | null;
     readonly img: string;
     readonly descripcion: string;
     readonly estado: boolean;
@@ -22,6 +31,7 @@ export class ParkingEntity {
         area?: ProjectAreaPoint[];
         ciudad: string;
         identificador: string;
+        remoteSupport?: ProjectRemoteSupport | null;
         img?: string;
         descripcion?: string;
         estado?: boolean;
@@ -32,6 +42,7 @@ export class ParkingEntity {
         this.area = options.area ?? [];
         this.ciudad = options.ciudad;
         this.identificador = options.identificador;
+        this.remoteSupport = options.remoteSupport ?? null;
         this.img = options.img ?? "";
         this.descripcion = options.descripcion ?? "";
         this.estado = options.estado ?? true;
@@ -62,6 +73,7 @@ export class ParkingEntity {
         const nombre = String(object.nombre ?? object.name ?? "").trim();
         const ciudad = String(object.ciudad ?? "").trim();
         const identificador = String(object.identificador ?? "").trim();
+        const remoteSupport = ParkingEntity.parseRemoteSupport(object.remoteSupport);
         const area = ParkingEntity.parseArea(object.coordinates);
         const coordinates = ParkingEntity.resolveCenter(area, ParkingEntity.parseCoordinates(object.coordinates));
         const img = String(object.img ?? "").trim();
@@ -80,6 +92,7 @@ export class ParkingEntity {
             area,
             ciudad,
             identificador,
+            remoteSupport,
             img,
             descripcion,
             estado,
@@ -94,6 +107,7 @@ export class ParkingEntity {
             area: project.area,
             ciudad: project.ciudad,
             identificador: project.identificador,
+            remoteSupport: project.remoteSupport,
             img: project.img,
             descripcion: project.descripcion,
             estado,
@@ -110,6 +124,24 @@ export class ParkingEntity {
         }
 
         return [0, 0];
+    }
+
+    private static parseRemoteSupport(value: unknown): ProjectRemoteSupport | null {
+        if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+
+        const source = value as Record<string, unknown>;
+        const provider = String(source.provider ?? "MESHCENTRAL").trim().toUpperCase();
+        const baseUrl = String(source.baseUrl ?? "").trim();
+        const enabled = Boolean(source.enabled) || baseUrl.length > 0;
+
+        if (provider !== "MESHCENTRAL") return null;
+        if (!enabled && !baseUrl) return null;
+
+        return {
+            provider: "MESHCENTRAL",
+            enabled,
+            baseUrl,
+        };
     }
 
     private static parseArea(value: unknown): ProjectAreaPoint[] {

@@ -23,12 +23,13 @@ const buildMeshCentralDeviceUrl = (baseUrl?: string, deviceId?: string) => {
 
 export const getRemoteSupportLinks = (
   remoteSupport?: ModuleRemoteSupport | null,
+  options: { inheritedBaseUrl?: string } = {},
 ): RemoteSupportLink[] => {
   if (!remoteSupport?.enabled) return [];
 
   if (remoteSupport.provider === "MESHCENTRAL") {
     const url =
-      buildMeshCentralDeviceUrl(remoteSupport.baseUrl, remoteSupport.deviceId) ||
+      buildMeshCentralDeviceUrl(remoteSupport.baseUrl || options.inheritedBaseUrl, remoteSupport.deviceId) ||
       remoteSupport.supportUrl ||
       "";
 

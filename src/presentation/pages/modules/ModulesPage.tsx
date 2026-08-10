@@ -85,6 +85,13 @@ export function ModulesPage() {
     () => new Map(projects.map((project) => [project.id, project.nombre])),
     [projects],
   );
+  const currentProject = useMemo(
+    () => parkings.find((project) => project.id === projectId) ?? null,
+    [parkings, projectId],
+  );
+  const inheritedRemoteSupportBaseUrl = currentProject?.remoteSupport?.enabled
+    ? currentProject.remoteSupport.baseUrl
+    : "";
 
   const selectedProjectName = useMemo(
     () =>
@@ -318,6 +325,7 @@ export function ModulesPage() {
             ? projectById.get(selectedItem.proyecto) ?? selectedItem.proyecto
             : ""
         }
+        projectRemoteSupportBaseUrl={inheritedRemoteSupportBaseUrl}
         isSubmitting={
           isSaving || isUpdating || isDeleting || isBindingActionRunning
         }

@@ -33,6 +33,7 @@ type ModuleDetailModalProps = {
   open: boolean;
   item: ModuleEntity | null;
   projectName: string;
+  projectRemoteSupportBaseUrl?: string;
   isSubmitting: boolean;
   error: string | null;
   onEdit?: (item: ModuleEntity) => void;
@@ -46,6 +47,7 @@ export function ModuleDetailModal({
   open,
   item,
   projectName,
+  projectRemoteSupportBaseUrl = "",
   isSubmitting,
   error,
   onEdit,
@@ -56,7 +58,9 @@ export function ModuleDetailModal({
 }: ModuleDetailModalProps) {
   const currentBinding = item?.deviceBinding ?? null;
   const remoteSupport = item?.remoteSupport ?? null;
-  const remoteSupportLinks = getRemoteSupportLinks(remoteSupport);
+  const remoteSupportLinks = getRemoteSupportLinks(remoteSupport, {
+    inheritedBaseUrl: projectRemoteSupportBaseUrl,
+  });
   const bindingRequests = item?.deviceBindingRequests ?? [];
   const hasBindingData = Boolean(
     currentBinding?.fingerprint ||
