@@ -1,8 +1,11 @@
 import type { ScannerInputMeta } from "../../types/cashPayments/cash-payments.types";
 
 export const SCANNER_MAX_KEY_INTERVAL_MS = 45;
-export const SCANNER_IDLE_RESOLVE_MS = 90;
+export const SCANNER_IDLE_RESOLVE_MS = 400;
 export const SCANNER_MIN_LENGTH = 12;
+
+export const isTicketIdReady = (value: string): boolean =>
+  value.trim().length >= SCANNER_MIN_LENGTH;
 
 export type ScannerTypingState = {
   startedAt: number;

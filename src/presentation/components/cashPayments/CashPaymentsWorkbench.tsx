@@ -179,7 +179,7 @@ export function CashPaymentsWorkbench({
             </label>
             {scannerMeta.isScannerLikely ? (
               <p className="cash-payments-panel__caption">
-                Escaneo detectado. Validando boleto en cuanto termine la lectura...
+                ID detectado. Validando boleto al terminar la captura...
               </p>
             ) : null}
             <div className="cash-payments-actions">

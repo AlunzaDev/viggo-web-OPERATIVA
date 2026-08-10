@@ -35,9 +35,7 @@ import {
 } from "../../services/cashPayments/cash-payments.flow";
 import {
   createEmptyScannerMeta,
-  createEmptyScannerTypingState,
-  getCompletedInputSource,
-  getScannerMetaAfterCharacter,
+  isTicketIdReady,
   SCANNER_IDLE_RESOLVE_MS,
 } from "../../utils/cashPayments/cash-payments.scanner";
 import {
@@ -54,7 +52,7 @@ export const useCashPaymentsFlow = () => {
   const qrInputRef = useRef<HTMLInputElement | null>(null);
   const amountInputRef = useRef<HTMLInputElement | null>(null);
   const scannerResolveTimeoutRef = useRef<number | null>(null);
-  const scannerMetaRef = useRef(createEmptyScannerTypingState());
+  const lastAutoResolvedQrRef = useRef("");
   const resolveQrRef = useRef<
     (source?: "scanner" | "manual") => Promise<void>
   >(async () => undefined);
@@ -356,10 +354,11 @@ export const useCashPaymentsFlow = () => {
 
   useEffect(() => {
     if (
-      !scannerMeta.isScannerLikely ||
+      !isTicketIdReady(qrValue) ||
       loading ||
       currentStepIndex !== 0 ||
-      !qrValue.trim()
+      !qrValue.trim() ||
+      lastAutoResolvedQrRef.current === qrValue.trim()
     ) {
       clearScannerTimeout();
       return;
@@ -367,11 +366,12 @@ export const useCashPaymentsFlow = () => {
 
     clearScannerTimeout();
     scannerResolveTimeoutRef.current = window.setTimeout(() => {
-      void resolveQrRef.current("scanner");
+      lastAutoResolvedQrRef.current = qrValue.trim();
+      void resolveQrRef.current("manual");
     }, SCANNER_IDLE_RESOLVE_MS);
 
     return clearScannerTimeout;
-  }, [currentStepIndex, loading, qrValue, scannerMeta.isScannerLikely]);
+  }, [currentStepIndex, loading, qrValue]);
 
   const resolveQr = async (source: "scanner" | "manual" = "manual") => {
     if (!qrValue.trim()) {
@@ -652,52 +652,29 @@ export const useCashPaymentsFlow = () => {
   };
 
   const handleQrInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const now = Date.now();
-
     if (event.key === "Enter") {
       event.preventDefault();
       clearScannerTimeout();
-      const inputSource = getCompletedInputSource(
-        scannerMetaRef.current,
-        qrValue,
-        now,
-      );
-
       setScannerMeta({
         isScannerLikely: false,
-        lastCompletedInput: inputSource,
+        lastCompletedInput: "manual",
       });
-      scannerMetaRef.current = createEmptyScannerTypingState();
-      void resolveQr(inputSource);
-      return;
+      void resolveQr("manual");
     }
-
-    if (event.key.length !== 1) {
-      return;
-    }
-
-    const nextScannerState = getScannerMetaAfterCharacter(
-      scannerMetaRef.current,
-      now,
-    );
-    scannerMetaRef.current = nextScannerState.typingState;
-
-    setScannerMeta((current) => ({
-      ...current,
-      isScannerLikely: nextScannerState.isScannerLikely,
-    }));
   };
 
   const handleQrInputChange = (value: string) => {
     setQrValue(value);
 
+    const isReady = isTicketIdReady(value);
+
+    setScannerMeta((current) => ({
+      ...current,
+      isScannerLikely: isReady,
+    }));
+
     if (!value.trim()) {
       clearScannerTimeout();
-      scannerMetaRef.current = createEmptyScannerTypingState();
-      setScannerMeta((current) => ({
-        ...current,
-        isScannerLikely: false,
-      }));
     }
   };
 
