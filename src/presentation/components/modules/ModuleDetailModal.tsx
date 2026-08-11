@@ -39,6 +39,7 @@ type ModuleDetailModalProps = {
   onEdit?: (item: ModuleEntity) => void;
   onToggleStatus?: (item: ModuleEntity) => Promise<void>;
   onResetBinding: (item: ModuleEntity) => Promise<void>;
+  onResolveMeshCentralDevice?: (item: ModuleEntity) => Promise<void>;
   onOpenRequest: (item: ModuleEntity, request: ModuleDeviceBindingRequest) => void;
   onClose: () => void;
 };
@@ -53,6 +54,7 @@ export function ModuleDetailModal({
   onEdit,
   onToggleStatus,
   onResetBinding,
+  onResolveMeshCentralDevice,
   onOpenRequest,
   onClose,
 }: ModuleDetailModalProps) {
@@ -250,6 +252,20 @@ export function ModuleDetailModal({
                     <span>{link.label}</span>
                   </a>
                 ))}
+                {onResolveMeshCentralDevice ? (
+                  <button
+                    type="button"
+                    className="btn-form-secondary"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      if (!item) return;
+                      void onResolveMeshCentralDevice(item);
+                    }}
+                  >
+                    <FaLink />
+                    <span>Resolver MeshCentral</span>
+                  </button>
+                ) : null}
               </div>
             </article>
           </div>

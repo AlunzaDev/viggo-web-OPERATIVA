@@ -21,4 +21,5 @@ export abstract class ModuleDatasource {
     abstract rejectDeviceBinding(id: string, fingerprint?: string): Promise<ModuleEntity>;
     abstract reopenDeviceBinding(id: string, fingerprint?: string): Promise<ModuleEntity>;
     abstract resetDeviceBinding(id: string): Promise<ModuleEntity>;
+    abstract resolveMeshCentralDevice(id: string): Promise<ModuleEntity>;
 }

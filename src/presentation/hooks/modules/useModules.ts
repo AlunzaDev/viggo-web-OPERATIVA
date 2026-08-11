@@ -5,6 +5,7 @@ import { DeleteModule } from "../../../application/use-cases/modules/delete-modu
 import { RejectModuleDeviceBinding } from "../../../application/use-cases/modules/reject-module-device-binding.usecase";
 import { ReopenModuleDeviceBinding } from "../../../application/use-cases/modules/reopen-module-device-binding.usecase";
 import { ResetModuleDeviceBinding } from "../../../application/use-cases/modules/reset-module-device-binding.usecase";
+import { ResolveModuleMeshCentralDevice } from "../../../application/use-cases/modules/resolve-module-meshcentral-device.usecase";
 import { UpdateModule } from "../../../application/use-cases/modules/update-module.usecase";
 import { ModuleEntity, type ModuleType } from "../../../domain/entities/module.entity";
 import { ModuleDatasourceImpl } from "../../../infrastructure/datasources/module.datasource.impl";
@@ -22,6 +23,7 @@ const approveModuleDeviceBindingUseCase = new ApproveModuleDeviceBinding(reposit
 const rejectModuleDeviceBindingUseCase = new RejectModuleDeviceBinding(repository);
 const reopenModuleDeviceBindingUseCase = new ReopenModuleDeviceBinding(repository);
 const resetModuleDeviceBindingUseCase = new ResetModuleDeviceBinding(repository);
+const resolveModuleMeshCentralDeviceUseCase = new ResolveModuleMeshCentralDevice(repository);
 
 export type ModuleFormPayload = {
     nombre: string;
@@ -187,6 +189,22 @@ export function useModules(projectId?: string) {
         }
     };
 
+    const resolveMeshCentralDevice = async (id: string) => {
+        setIsBindingActionRunning(true);
+        setError(null);
+        try {
+            const updated = await resolveModuleMeshCentralDeviceUseCase.execute(id);
+            replaceModule(updated);
+            return updated;
+        } catch (err: unknown) {
+            const message = getErrorMessage(err, "No se pudo resolver MeshCentral");
+            setError(message);
+            throw new Error(message);
+        } finally {
+            setIsBindingActionRunning(false);
+        }
+    };
+
     const reopenDeviceBinding = async (id: string, fingerprint?: string) => {
         setIsBindingActionRunning(true);
         setError(null);
@@ -225,5 +243,6 @@ export function useModules(projectId?: string) {
         rejectDeviceBinding,
         reopenDeviceBinding,
         resetDeviceBinding,
+        resolveMeshCentralDevice,
     };
 }

@@ -174,4 +174,24 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
             throw new Error(`No se pudo desvincular el modulo con id ${id}`);
         }
     }
+
+    async resolveMeshCentralDevice(id: string): Promise<ModuleEntity> {
+        try {
+            const { data } = await api.post<{
+                modulo?: unknown;
+                resolved?: unknown;
+                error?: unknown;
+            }>(
+                `/api/modulos/${id}/remote-support/resolve-meshcentral-device`,
+                {},
+            );
+            return ModuleEntity.fromObject(normalizeModuleRecord(data));
+        } catch (error: unknown) {
+            const errorMessage = getApiErrorMessage(error);
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+            throw new Error(`No se pudo resolver MeshCentral para el modulo con id ${id}`);
+        }
+    }
 }

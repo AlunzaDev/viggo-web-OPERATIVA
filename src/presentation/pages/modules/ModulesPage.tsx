@@ -79,6 +79,7 @@ export function ModulesPage() {
     rejectDeviceBinding,
     reopenDeviceBinding,
     resetDeviceBinding,
+    resolveMeshCentralDevice,
   } = useModules(projectId);
 
   const projectById = useMemo(
@@ -333,6 +334,9 @@ export function ModulesPage() {
         onEdit={ENABLE_MODULE_MUTATIONS ? openEdit : undefined}
         onToggleStatus={ENABLE_MODULE_MUTATIONS ? toggleModuleState : undefined}
         onResetBinding={handleResetBinding}
+        onResolveMeshCentralDevice={async (item) => {
+          await resolveMeshCentralDevice(item.id);
+        }}
         onOpenRequest={(item, request) => {
           setSelectedItem(item);
           setSelectedRequest(request);

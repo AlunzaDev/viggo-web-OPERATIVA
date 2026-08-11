@@ -42,4 +42,8 @@ export class ModuleRepositoryImpl implements ModuleRepository {
     resetDeviceBinding(id: string): Promise<ModuleEntity> {
         return this.datasource.resetDeviceBinding(id);
     }
+
+    resolveMeshCentralDevice(id: string): Promise<ModuleEntity> {
+        return this.datasource.resolveMeshCentralDevice(id);
+    }
 }
