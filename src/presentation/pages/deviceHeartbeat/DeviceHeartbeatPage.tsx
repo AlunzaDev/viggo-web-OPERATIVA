@@ -58,12 +58,29 @@ import {
 } from "./device-heartbeat.map";
 import { normalizeOperationalUserMessage } from "../../services/operations/operational-state.presenter";
 import "./DeviceHeartbeatPage.css";
+const MAPTILER_API_KEY = String(import.meta.env.VITE_MAPTILER_API_KEY ?? "").trim();
+const OPEN_STREET_MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OPEN_STREET_MAP_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const maptilerTileUrl = (style: "streets-v4-dark") =>
+  MAPTILER_API_KEY
+    ? `https://api.maptiler.com/maps/${style}/256/{z}/{x}/{y}.png?key=${MAPTILER_API_KEY}`
+    : null;
+
+const maptilerAttribution = MAPTILER_API_KEY
+  ? '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+  : OPEN_STREET_MAP_ATTRIBUTION;
+
 const TILE_LAYERS = {
   street: {
     label: "Mapa",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    url: {
+      light: OPEN_STREET_MAP_TILE_URL,
+      dark: maptilerTileUrl("streets-v4-dark") ?? OPEN_STREET_MAP_TILE_URL,
+    },
+    attribution: {
+      light: OPEN_STREET_MAP_ATTRIBUTION,
+      dark: maptilerAttribution,
+    },
     maxZoom: 19,
     icon: FaMap,
   },
@@ -78,6 +95,21 @@ const TILE_LAYERS = {
 } as const;
 
 type TileLayerKey = keyof typeof TILE_LAYERS;
+
+const getCurrentThemeName = () =>
+  typeof document !== "undefined" && document.documentElement.dataset.theme === "light"
+    ? "light"
+    : "dark";
+
+const resolveTileLayerUrl = (
+  layer: (typeof TILE_LAYERS)[TileLayerKey],
+  themeName: "light" | "dark"
+) => (typeof layer.url === "string" ? layer.url : layer.url[themeName]);
+
+const resolveTileLayerAttribution = (
+  layer: (typeof TILE_LAYERS)[TileLayerKey],
+  themeName: "light" | "dark"
+) => (typeof layer.attribution === "string" ? layer.attribution : layer.attribution[themeName]);
 
 const FILTERS: Array<{ id: DeviceHeartbeatFilter; label: string }> = [
   { id: "all", label: "Todos" },
@@ -102,6 +134,24 @@ const formatCoordinates = (coordinates?: [number, number]) =>
 
 export function DeviceHeartbeatPage() {
   usePageTitle("Heartbeat");
+
+  const [mapThemeName, setMapThemeName] = useState<"light" | "dark">(() => getCurrentThemeName());
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const root = document.documentElement;
+    const syncTheme = () => setMapThemeName(getCurrentThemeName());
+    syncTheme();
+
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const [statusFilter, setStatusFilter] =
     useState<DeviceHeartbeatFilter>("all");
@@ -199,8 +249,8 @@ export function DeviceHeartbeatPage() {
     }).setView(HEARTBEAT_MAP_CENTER, HEARTBEAT_MAP_DEFAULT_ZOOM);
 
     const initialLayer = TILE_LAYERS.street;
-    tileLayerRef.current = L.tileLayer(initialLayer.url, {
-      attribution: initialLayer.attribution,
+    tileLayerRef.current = L.tileLayer(resolveTileLayerUrl(initialLayer, mapThemeName), {
+      attribution: resolveTileLayerAttribution(initialLayer, mapThemeName),
       maxZoom: initialLayer.maxZoom,
     }).addTo(map);
 
@@ -234,12 +284,12 @@ export function DeviceHeartbeatPage() {
 
     tileLayerRef.current?.remove();
     const layer = TILE_LAYERS[tileLayerKey];
-    tileLayerRef.current = L.tileLayer(layer.url, {
-      attribution: layer.attribution,
+    tileLayerRef.current = L.tileLayer(resolveTileLayerUrl(layer, mapThemeName), {
+      attribution: resolveTileLayerAttribution(layer, mapThemeName),
       maxZoom: layer.maxZoom,
     }).addTo(map);
     safelyRefreshHeartbeatMap(map, tileLayerRef.current, [0, 120]);
-  }, [tileLayerKey]);
+  }, [tileLayerKey, mapThemeName]);
 
   useEffect(() => {
     if (filteredModules.length === 0) {
