@@ -1,0 +1,77 @@
+/* Solo extensiones funcionales del Operativo. La base visual es exactamente la
+   misma hoja SettingsPage.css utilizada por Administrativo. */
+.settings-card--account { order: 1; }
+.settings-card--appearance { order: 2; }
+.settings-card--administration { order: 3; }
+.settings-card--session { order: 4; }
+.settings-card--local-config { order: 5; }
+
+.settings-card--wide {
+  grid-column: 1 / -1;
+}
+
+.settings-sync {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-sync > p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.settings-sync__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-sync__grid span {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.settings-sync__grid strong {
+  color: var(--text);
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+  text-transform: none;
+}
+
+.settings-sync__error,
+.settings-sync__success {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 15px;
+  font-weight: 700;
+}
+
+.settings-sync__error {
+  background: color-mix(in srgb, var(--error-color) 12%, transparent);
+  color: color-mix(in srgb, var(--error-color) 74%, var(--text));
+}
+
+.settings-sync__success {
+  background: color-mix(in srgb, var(--success-color) 12%, transparent);
+  color: color-mix(in srgb, var(--success-color) 74%, var(--text));
+}
+
+@media (max-width: 900px) {
+  .settings-sync__grid {
+    grid-template-columns: 1fr;
+  }
+}

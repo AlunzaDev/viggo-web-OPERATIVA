@@ -77,6 +77,42 @@
   color: #72809c;
 }
 
+:root[data-theme="dark"] .operational-log-detail-modal__hero-icon,
+:root:not([data-theme="light"]) .operational-log-detail-modal__hero-icon {
+  background: rgba(143, 169, 242, 0.14);
+  color: #aebfff;
+}
+
+:root[data-theme="dark"] .operational-log-detail-modal__pill,
+:root:not([data-theme="light"]) .operational-log-detail-modal__pill {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+:root[data-theme="dark"] .operational-log-detail-modal__pill.is-incident,
+:root:not([data-theme="light"]) .operational-log-detail-modal__pill.is-incident {
+  background: rgba(226, 166, 67, 0.16);
+  color: #f4d18f;
+}
+
+:root[data-theme="dark"] .operational-log-detail-modal__pill.is-event,
+:root:not([data-theme="light"]) .operational-log-detail-modal__pill.is-event {
+  background: rgba(91, 155, 255, 0.16);
+  color: #b1ccff;
+}
+
+:root[data-theme="dark"] :is(.operational-log-detail-modal__item p, .operational-log-detail-modal__json),
+:root:not([data-theme="light"]) :is(.operational-log-detail-modal__item p, .operational-log-detail-modal__json) {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .operational-log-detail-modal__empty,
+:root:not([data-theme="light"]) .operational-log-detail-modal__empty {
+  color: var(--text-soft);
+}
+
 @media (max-width: 900px) {
   .operational-log-detail-modal__hero,
   .operational-log-detail-modal__metadata {

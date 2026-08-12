@@ -146,6 +146,19 @@
   color: #d64545;
 }
 
+:root[data-theme="dark"] .permission-profiles-page__status.is-active,
+:root:not([data-theme="light"]) .permission-profiles-page__status.is-active {
+  background: rgba(72, 201, 120, 0.16);
+  color: #8be1aa;
+}
+
+:root[data-theme="dark"] .permission-profiles-page__status.is-inactive,
+:root:not([data-theme="light"]) .permission-profiles-page__status.is-inactive,
+:root[data-theme="dark"] .permission-profiles-page__card-actions button.is-danger,
+:root:not([data-theme="light"]) .permission-profiles-page__card-actions button.is-danger {
+  color: #ff9c9c;
+}
+
 .permission-profiles-page__modules {
   display: flex;
   flex-wrap: wrap;

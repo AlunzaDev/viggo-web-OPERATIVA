@@ -63,6 +63,18 @@
   box-shadow: 0 8px 24px color-mix(in srgb, #000 4%, transparent);
 }
 
+.settings-card--hero {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 14%, transparent) 0%, transparent 48%),
+    color-mix(in srgb, var(--surface) 98%, transparent);
+}
+
+.settings-card--account { order: 1; }
+.settings-card--appearance { order: 2; }
+.settings-card--administration { order: 3; }
+.settings-card--session { order: 4; }
+.settings-card--local-config { order: 5; }
+
 .settings-card:hover {
   border-color: color-mix(in srgb, var(--primary-color) 42%, transparent);
   transform: translateY(-3px);
@@ -173,6 +185,116 @@
 .profile-summary:hover {
   border-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
   transform: translateY(-1px);
+}
+
+.settings-account-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-account-chip {
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--text-muted);
+}
+
+.settings-account-chip.is-active {
+  border-color: color-mix(in srgb, var(--success-color) 34%, var(--border));
+  background: color-mix(in srgb, var(--success-color) 14%, transparent);
+  color: color-mix(in srgb, var(--success-color) 78%, var(--text));
+}
+
+.settings-account-chip.is-inactive {
+  border-color: color-mix(in srgb, var(--error-color) 34%, var(--border));
+  background: color-mix(in srgb, var(--error-color) 14%, transparent);
+  color: color-mix(in srgb, var(--error-color) 78%, var(--text));
+}
+
+.settings-account-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-account-stats article {
+  min-height: 88px;
+}
+
+.settings-account-stats strong,
+.settings-account-stats span {
+  display: block;
+}
+
+/* Paridad visual con Settings Administrativo: esta capa representa los estilos
+   finales de los elementos compartidos. */
+.settings-card {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--elev-1);
+  transition: all 0.3s ease;
+}
+
+.settings-card--hero {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 14%, transparent) 0%, transparent 48%),
+    var(--surface);
+}
+
+.settings-card:hover {
+  border-color: color-mix(in srgb, var(--primary-color) 35%, transparent);
+  transform: translateY(-4px);
+  box-shadow: var(--elev-2);
+}
+
+.card-header {
+  border-bottom-color: var(--border);
+}
+
+.profile-summary {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.profile-avatar-large {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary-color) 30%, transparent);
+  transition: all 0.3s ease;
+}
+
+.profile-avatar-fallback,
+.avatar-upload-overlay {
+  border-radius: 50%;
+}
+
+.profile-avatar-container:hover .profile-avatar-large {
+  filter: brightness(0.82);
+  transform: scale(1.05);
+}
+
+.setting-row {
+  border-bottom-color: var(--border);
+}
+
+.theme-badge {
+  letter-spacing: 0.2px;
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+
+.settings-account-stats strong {
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.settings-account-stats span {
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
 }
 
 .profile-avatar-container {
@@ -713,5 +835,51 @@
 
 .settings-project-alerts-modal {
   width: min(94vw, 820px);
+}
+
+/* Mantener la geometria compartida exactamente igual a Administrativo. */
+.settings-card {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--elev-1);
+}
+
+.settings-card--hero {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 14%, transparent) 0%, transparent 48%),
+    var(--surface);
+}
+
+.settings-card:hover {
+  border-color: color-mix(in srgb, var(--primary-color) 35%, transparent);
+  transform: translateY(-4px);
+  box-shadow: var(--elev-2);
+}
+
+.profile-summary {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.profile-avatar-large {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary-color) 30%, transparent);
+  transition: all 0.3s ease;
+}
+
+.profile-avatar-fallback,
+.avatar-upload-overlay {
+  border-radius: 50%;
+}
+
+.profile-avatar-container:hover .profile-avatar-large {
+  filter: brightness(0.82);
+  transform: scale(1.05);
 }
 

@@ -50,6 +50,13 @@ import {
 import { MonthlyFlushModal } from "./MonthlyFlushModal";
 import "../../styles/settings/SettingsPage.css";
 
+const ROLE_LABEL: Record<string, string> = {
+  superRole: "Super administrador",
+  adminRole: "Administrador",
+  pensionRole: "Pension",
+  clientRole: "Cliente",
+};
+
 export function SettingsPage() {
   usePageTitle("Cuenta");
 
@@ -85,6 +92,9 @@ export function SettingsPage() {
       ? "Oscuro"
       : "Claro";
   const userInitials = buildInitials(user?.name || "UV");
+  const roleLabel = user?.role ? ROLE_LABEL[user.role] ?? user.role : "Sin rol";
+  const modulesCount = user?.modules.length ?? 0;
+  const projectsCount = user?.parkings.length ?? 0;
   const canManageLocalConfig =
     user?.role === "superRole" || user?.role === "adminRole";
 
@@ -266,7 +276,7 @@ export function SettingsPage() {
       </div>
 
       <div className="settings-grid">
-        <div className="settings-card">
+        <div className="settings-card settings-card--hero settings-card--account">
           <div className="card-header">
             <FaUserCog className="icon-setting" />
             <h3>Mi Cuenta</h3>
@@ -284,10 +294,30 @@ export function SettingsPage() {
               <span>{user?.email ?? "Sin correo"}</span>
             </div>
           </div>
+
+          <div className="settings-account-meta">
+            <span className="shared-page-meta__pill settings-account-chip">{roleLabel}</span>
+            <span
+              className={`shared-page-meta__pill settings-account-chip ${user?.active ? "is-active" : "is-inactive"}`}
+            >
+              {user?.active ? "Activo" : "Inactivo"}
+            </span>
+          </div>
+
+          <div className="shared-stats-grid settings-account-stats">
+            <article className="shared-stat-card">
+              <strong>{modulesCount}</strong>
+              <span>Modulos habilitados</span>
+            </article>
+            <article className="shared-stat-card">
+              <strong>{projectsCount}</strong>
+              <span>Proyectos asignados</span>
+            </article>
+          </div>
         </div>
 
         {canManageLocalConfig ? (
-          <div className="settings-card settings-card--wide">
+          <div className="settings-card settings-card--wide settings-card--local-config">
             <div className="card-header">
               <FaCloudDownloadAlt className="icon-setting" />
               <h3>Configuracion local</h3>
@@ -355,7 +385,7 @@ export function SettingsPage() {
           </div>
         ) : null}
 
-        <div className="settings-card">
+        <div className="settings-card settings-card--appearance">
           <div className="card-header">
             <ThemeIcon className="icon-setting" />
             <h3>Apariencia</h3>
@@ -385,7 +415,7 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <div className="settings-card">
+        <div className="settings-card settings-card--administration">
           <div className="card-header">
             <FaShieldAlt className="icon-setting" />
             <h3>Administracion</h3>
@@ -408,7 +438,7 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <div className="settings-card">
+        <div className="settings-card settings-card--session">
           <div className="card-header">
             <FaSignOutAlt className="icon-setting" />
             <h3>Sesion</h3>

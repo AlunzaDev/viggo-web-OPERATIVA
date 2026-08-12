@@ -130,3 +130,53 @@
   font-size: 1rem;
   color: #173624;
 }
+
+:root[data-theme="dark"] .cash-payments-hero,
+:root:not([data-theme="light"]) .cash-payments-hero {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(102, 212, 61, 0.07), rgba(255, 255, 255, 0.025)), #222522;
+  color: var(--text);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="dark"] :is(.cash-payments-hero h1, .cash-payments-stepper__item--active .cash-payments-stepper__label, .cash-payments-stat strong),
+:root:not([data-theme="light"]) :is(.cash-payments-hero h1, .cash-payments-stepper__item--active .cash-payments-stepper__label, .cash-payments-stat strong) {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] :is(.cash-payments-hero__eyebrow, .cash-payments-stepper__label, .cash-payments-stat span),
+:root:not([data-theme="light"]) :is(.cash-payments-hero__eyebrow, .cash-payments-stepper__label, .cash-payments-stat span) {
+  color: var(--text-soft);
+}
+
+:root[data-theme="dark"] .cash-payments-stat,
+:root:not([data-theme="light"]) .cash-payments-stat {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+:root[data-theme="dark"] .cash-payments-stepper__circle,
+:root:not([data-theme="light"]) .cash-payments-stepper__circle {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-muted);
+}
+
+:root[data-theme="dark"] .cash-payments-stepper__item:not(:last-child)::after,
+:root:not([data-theme="light"]) .cash-payments-stepper__item:not(:last-child)::after {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+:root[data-theme="dark"] .cash-payments-stepper__item--active .cash-payments-stepper__circle,
+:root:not([data-theme="light"]) .cash-payments-stepper__item--active .cash-payments-stepper__circle {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: #13220f;
+}
+
+:root[data-theme="dark"] .cash-payments-stepper__item--done .cash-payments-stepper__circle,
+:root:not([data-theme="light"]) .cash-payments-stepper__item--done .cash-payments-stepper__circle {
+  border-color: rgba(102, 212, 61, 0.48);
+  background: rgba(102, 212, 61, 0.12);
+  color: #91e971;
+}
