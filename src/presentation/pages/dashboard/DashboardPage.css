@@ -120,9 +120,15 @@
   padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: white;
+  background: var(--surface-2);
+  color: var(--text);
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.dashboard-action:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
 }
 
 .dashboard-action:hover {
@@ -147,6 +153,57 @@
   display: grid;
   gap: 4px;
   text-align: left;
+}
+
+:root[data-theme="dark"] .dashboard-card,
+:root:not([data-theme="light"]) .dashboard-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(90% 140% at 100% 0%, rgba(102, 212, 61, 0.06), transparent 58%),
+    #202120;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="dark"] .dashboard-action,
+:root:not([data-theme="light"]) .dashboard-action {
+  border-color: rgba(255, 255, 255, 0.11);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025)),
+    #292a29;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+:root[data-theme="dark"] .dashboard-action:hover,
+:root:not([data-theme="light"]) .dashboard-action:hover {
+  border-color: rgba(102, 212, 61, 0.42);
+  background:
+    linear-gradient(135deg, rgba(102, 212, 61, 0.105), rgba(255, 255, 255, 0.03)),
+    #2c2e2c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 14px 30px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(102, 212, 61, 0.06);
+}
+
+:root[data-theme="dark"] .dashboard-action__icon,
+:root:not([data-theme="light"]) .dashboard-action__icon {
+  border: 1px solid rgba(102, 212, 61, 0.22);
+  background: rgba(102, 212, 61, 0.12);
+  color: #85e563;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .dashboard-action__body strong,
+:root:not([data-theme="light"]) .dashboard-action__body strong {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+:root[data-theme="dark"] .dashboard-action__body small,
+:root:not([data-theme="light"]) .dashboard-action__body small {
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.4;
 }
 
 @media (max-width: 1080px) {
