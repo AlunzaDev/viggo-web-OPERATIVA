@@ -39,17 +39,17 @@ body.has-floating-crud-island-space {
   gap: var(--crud-dock-gap);
   padding: 8px 10px;
   border-radius: 18px;
-  border: 1px solid rgba(120, 140, 172, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 255, 0.96)),
-    color-mix(in srgb, var(--glass-bg-strong) 88%, transparent);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(246, 249, 255, 0.2)),
+    color-mix(in srgb, var(--glass-bg-strong, rgba(255, 255, 255, 0.3)) 40%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
     0 10px 28px rgba(18, 28, 45, 0.16),
     0 0 0 1px rgba(148, 199, 86, 0.14),
     0 0 22px rgba(148, 199, 86, 0.08);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   animation: crud-actions-island-float-in 0.34s var(--crud-actions-ease);
   transform: scale(var(--crud-island-scale, 1));
   transform-origin: center bottom;
@@ -105,9 +105,9 @@ body.has-floating-crud-island-space {
   background:
     linear-gradient(
       155deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(238, 242, 248, 0.98) 44%,
-      rgba(228, 234, 243, 0.98) 100%
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(238, 242, 248, 0.25) 44%,
+      rgba(228, 234, 243, 0.15) 100%
     );
   color: #34415d;
   display: inline-flex;
@@ -214,9 +214,9 @@ body.has-floating-crud-island-space {
   background:
     linear-gradient(
       155deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(238, 242, 248, 0.98) 44%,
-      rgba(228, 234, 243, 0.98) 100%
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(238, 242, 248, 0.25) 44%,
+      rgba(228, 234, 243, 0.15) 100%
     );
   color: #34415d;
   display: inline-flex;
@@ -331,9 +331,9 @@ body.has-floating-crud-island-space {
   background:
     linear-gradient(
       155deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(238, 242, 248, 0.98) 44%,
-      rgba(228, 234, 243, 0.98) 100%
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(238, 242, 248, 0.25) 44%,
+      rgba(228, 234, 243, 0.15) 100%
     );
   color: #34415d;
   font-family: var(--font-heading);
@@ -435,12 +435,12 @@ body.has-floating-crud-island-space {
 
 :root[data-theme="dark"] .crud-actions-island__panel,
 :root:not([data-theme="light"]) .crud-actions-island__panel {
-  border-color: color-mix(in srgb, var(--primary-color) 28%, var(--glass-border));
+  border-color: rgba(255, 255, 255, 0.1);
   background:
-    linear-gradient(180deg, rgba(39, 41, 44, 0.94), rgba(22, 24, 27, 0.94)),
-    color-mix(in srgb, var(--glass-bg-strong) 82%, transparent);
+    linear-gradient(135deg, rgba(39, 41, 44, 0.45), rgba(22, 24, 27, 0.2)),
+    color-mix(in srgb, var(--glass-bg-strong, rgba(0, 0, 0, 0.3)) 40%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 10px 28px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(148, 199, 86, 0.14),
     0 0 22px rgba(148, 199, 86, 0.08);
@@ -461,13 +461,13 @@ body.has-floating-crud-island-space {
 :root:not([data-theme="light"]) .crud-actions-island__search-trigger,
 :root:not([data-theme="light"]) .crud-actions-island__icon-btn,
 :root:not([data-theme="light"]) .crud-actions-island__action-btn {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.06);
   background:
     linear-gradient(
       155deg,
-      rgba(92, 94, 98, 0.88) 0%,
-      rgba(62, 64, 68, 0.92) 44%,
-      rgba(46, 48, 52, 0.96) 100%
+      rgba(92, 94, 98, 0.3) 0%,
+      rgba(62, 64, 68, 0.15) 44%,
+      rgba(46, 48, 52, 0.05) 100%
     );
   color: #e8edf5;
   box-shadow:
