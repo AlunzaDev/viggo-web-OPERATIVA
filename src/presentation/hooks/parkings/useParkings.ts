@@ -1,20 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
+import { CreateParkingDto } from "../../../application/dtos/parking/create-parking.dto";
+import { UpdateParkingDto } from "../../../application/dtos/parking/update-parking.dto";
 import { ParkingEntity } from "../../../domain/entities/parking.entity";
-import { ParkingDatasourceImpl } from "../../../infrastructure/datasources/parking.datasource.impl";
-import { ParkingRepositoryImpl } from "../../../infrastructure/repositories/parking.repository.impl";
-import { CreateParking } from "../../../application/use-cases/parkings/create-parking.usecase";
-import { UpdateParking } from "../../../application/use-cases/parkings/update-parking.usecase";
-import { DeleteParking } from "../../../application/use-cases/parkings/delete-parking.usecase";
-import { CreateParkingDto } from "../../../infrastructure/dtos/parking/create-parking.dto";
-import { UpdateParkingDto } from "../../../infrastructure/dtos/parking/update-parking.dto";
-
-const datasource = new ParkingDatasourceImpl();
-const repository = new ParkingRepositoryImpl(datasource);
-
-const createParkingUseCase = new CreateParking(repository);
-const updateParkingUseCase = new UpdateParking(repository);
-const deleteParkingUseCase = new DeleteParking(repository);
-
+import {
+    createParkingUseCase,
+    deleteParkingUseCase,
+    getParkingsPageUseCase,
+    updateParkingUseCase,
+} from "../../../application/dependencies/parking.dependencies";
 export type ProjectFormPayload = {
     nombre: string;
     ciudad: string;
@@ -46,7 +39,7 @@ export function useParkings() {
         setIsLoading(true);
         setError(null);
         try {
-            const result = await datasource.getPage({ page, limit: pageSize });
+            const result = await getParkingsPageUseCase.execute({ page, limit: pageSize });
             setParkings(result.items);
             setTotalItems(result.total);
             setTotalPages(Math.max(1, result.totalPages));

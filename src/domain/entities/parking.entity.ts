@@ -4,7 +4,14 @@ export type ProjectAreaPoint = {
     longitude: number;
 };
 
-export type ProjectRemoteSupportProvider = "MESHCENTRAL";
+export const REMOTE_SUPPORT_PROVIDERS = [
+    "MESHCENTRAL",
+    "RUSTDESK",
+    "VIGGO_REMOTE",
+    "CUSTOM",
+] as const;
+
+export type ProjectRemoteSupportProvider = (typeof REMOTE_SUPPORT_PROVIDERS)[number];
 
 export type ProjectRemoteSupport = {
     provider: ProjectRemoteSupportProvider;
@@ -134,11 +141,11 @@ export class ParkingEntity {
         const baseUrl = String(source.baseUrl ?? "").trim();
         const enabled = Boolean(source.enabled) || baseUrl.length > 0;
 
-        if (provider !== "MESHCENTRAL") return null;
+        if (!REMOTE_SUPPORT_PROVIDERS.includes(provider as ProjectRemoteSupportProvider)) return null;
         if (!enabled && !baseUrl) return null;
 
         return {
-            provider: "MESHCENTRAL",
+            provider: provider as ProjectRemoteSupportProvider,
             enabled,
             baseUrl,
         };

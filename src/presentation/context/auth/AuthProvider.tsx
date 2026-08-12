@@ -6,36 +6,18 @@ import {
   type ReactNode,
 } from "react";
 
-import { LoginUseCase } from "../../../application/use-cases/auth/login.usecase";
-
+import { authRepository, loginUseCase, markSessionToken } from "../../../application/dependencies/auth.dependencies";
 import {
   authUserFromObject,
   type AuthUserEntity,
 } from "../../../domain/entities/auth-user.entity";
-
 import { hasWebOperativeAccess } from "../../../domain/entities/user-app-access";
-
-import { AuthDataSourceImpl } from "../../../infrastructure/datasources/auth.datasource.impl";
-
-import { setSessionTokenMarker } from "../../../infrastructure/http/axios.instance";
-
-import { AuthRepositoryImpl } from "../../../infrastructure/repositories/auth.repository.impl";
-
 import { AuthContext } from "./AuthContext";
 import type { LoginPayload } from "./auth.types";
 
 const AUTH_TOKEN_STORAGE_KEY = "viggo.auth.token";
-
 const AUTH_USER_STORAGE_KEY = "viggo.auth.user";
-
 const SESSION_EXPIRED_EVENT = "sikk:session-expired";
-
-const datasource = new AuthDataSourceImpl();
-
-const repository = new AuthRepositoryImpl(datasource);
-
-const loginUseCase = new LoginUseCase(repository);
-
 const isValidWebOperativeUser = (user: AuthUserEntity): boolean => {
   return (
     user.id.length > 0 && user.active && hasWebOperativeAccess(user.allowedApps)
@@ -95,12 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = readStoredUser();
 
     if (storedToken && storedUser) {
-      setSessionTokenMarker(storedToken);
+      markSessionToken(storedToken);
       setToken(storedToken);
       setUser(storedUser);
     } else {
       clearStoredSession();
-      setSessionTokenMarker(null);
+      markSessionToken(null);
       setToken(null);
       setUser(null);
     }
@@ -111,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleSessionExpired = () => {
       clearStoredSession();
-      setSessionTokenMarker(null);
+      markSessionToken(null);
       setToken(null);
       setUser(null);
       setSessionExpired(true);
@@ -134,14 +116,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!isValidWebOperativeUser(session.user)) {
       clearStoredSession();
-      setSessionTokenMarker(null);
+      markSessionToken(null);
 
       throw new Error("El usuario no tiene acceso al Web Operativo");
     }
 
     storeSession(session.token, session.user);
 
-    setSessionTokenMarker(session.token);
+    markSessionToken(session.token);
     setToken(session.token);
     setUser(session.user);
 
@@ -150,10 +132,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await repository.logout();
+      await authRepository.logout();
     } finally {
       clearStoredSession();
-      setSessionTokenMarker(null);
+      markSessionToken(null);
       setToken(null);
       setUser(null);
       setSessionExpired(false);

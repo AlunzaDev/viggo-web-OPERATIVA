@@ -1,6 +1,6 @@
 import { ParkingEntity } from "../entities/parking.entity";
-import { CreateParkingDto } from "../../infrastructure/dtos/parking/create-parking.dto";
-import { UpdateParkingDto } from "../../infrastructure/dtos/parking/update-parking.dto";
+import { CreateParkingDto } from "../../application/dtos/parking/create-parking.dto";
+import { UpdateParkingDto } from "../../application/dtos/parking/update-parking.dto";
 
 export type PaginationParams = {
     page?: number;

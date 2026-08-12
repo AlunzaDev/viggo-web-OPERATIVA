@@ -1,3 +1,6 @@
 @import url("../shared/modal.css");
-@import url("../../../../../viggo-web/src/presentation/styles/settings/SettingsPage.css");
+@import url("./settings-base.css");
+@import url("./settings-light.css");
+@import url("./settings-modals.css");
+@import url("./settings-responsive.css");
 @import url("./settings-operative.css");

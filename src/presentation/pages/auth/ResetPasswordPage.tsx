@@ -1,16 +1,10 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import { AuthDataSourceImpl } from "../../../infrastructure/datasources/auth.datasource.impl";
-import { AuthRepositoryImpl } from "../../../infrastructure/repositories/auth.repository.impl";
-import { ResetPasswordUseCase } from "../../../application/use-cases/auth/reset-password.usecase";
 import { PASSWORD_POLICY_MESSAGE, PASSWORD_POLICY_REGEX } from "../../../config/password-policy";
+import { resetPassword } from "../../services/auth/auth-actions.service";
 import "../../styles/auth/ResetPasswordPage.css";
-
-const authDatasource = new AuthDataSourceImpl();
-const authRepository = new AuthRepositoryImpl(authDatasource);
-const resetPasswordUseCase = new ResetPasswordUseCase(authRepository);
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -59,10 +53,7 @@ export function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      const message = await resetPasswordUseCase.execute({
-        token: sanitizedToken,
-        newPassword,
-      });
+      const message = await resetPassword(sanitizedToken, newPassword);
 
       await Swal.fire({
         icon: "success",

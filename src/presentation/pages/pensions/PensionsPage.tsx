@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaAlignLeft, FaCalendarAlt, FaClock, FaDollarSign, FaPlus, FaPowerOff, FaProjectDiagram, FaTicketAlt } from "react-icons/fa";
-import { api } from "../../../infrastructure/http/axios.instance";
 import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
 import { loadProjectOptions } from "../../services/catalogs/catalog-options";
 import { CrudRowActions } from "../../components/shared/CrudRowActions";
@@ -11,7 +10,8 @@ import { CreateModalBase } from "../../components/shared/modals/CreateModalBase"
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { TableBase } from "../../components/shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
-import { buildPensionForm, buildPensionPayload, buildWeekSchedule, createInitialPensionForm, normalizePensionsPage, normalizeValidez, type PensionForm, type PensionRecord, type ValidezItem, WEEK_DAYS } from "../../services/pensions/pensions.contract";
+import { buildPensionForm, buildWeekSchedule, createInitialPensionForm, normalizeValidez, type PensionForm, type PensionRecord, type ValidezItem, WEEK_DAYS } from "../../services/pensions/pensions.contract";
+import { loadPensionsPage, savePension, updatePensionStatus } from "../../services/pensions/pensions.api";
 import "../../styles/adminCrud/AdminCrud.css";
 import "../../styles/pensions/PensionsPage.css";
 
@@ -267,10 +267,10 @@ export function PensionsPage() {
     setLoading(true); setError(null);
     try {
       const [pensionesResponse, proyectosData] = await Promise.all([
-        api.get("/api/pensiones", { params: { page, limit: pageSize, search: search.trim() || undefined } }),
+        loadPensionsPage(page, pageSize, search),
         loadProjectOptions(),
       ]);
-      const pensionesPage = normalizePensionsPage(pensionesResponse.data, page, pageSize);
+      const pensionesPage = pensionesResponse;
       setItems(pensionesPage.items);
       setProjects(proyectosData);
       setTotalItems(pensionesPage.total);
@@ -289,9 +289,7 @@ export function PensionsPage() {
   const save = async () => {
     setSaving(true); setError(null);
     try {
-      const payload = buildPensionPayload(form);
-      if (editingId) await api.patch(`/api/pensiones/${editingId}`, payload);
-      else await api.post("/api/pensiones", payload);
+      await savePension(form, editingId);
       setIsModalOpen(false); await loadData();
     } catch (saveError) {
       const message = getErrorMessage(saveError, "No se pudo guardar la pension");
@@ -302,7 +300,7 @@ export function PensionsPage() {
     setSaving(true);
     setError(null);
     try {
-      await api.patch(`/api/pensiones/${item.id}`, buildPensionPayload({ ...buildPensionForm(item), estado: !item.estado }));
+      await updatePensionStatus(item.id, { ...buildPensionForm(item), estado: !item.estado });
       await loadData();
       setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
     } catch (toggleError) {

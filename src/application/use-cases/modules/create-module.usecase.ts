@@ -1,6 +1,6 @@
 import { ModuleEntity } from "../../../domain/entities/module.entity";
 import { ModuleRepository } from "../../../domain/repositories/module.repository";
-import { CreateModuleDto } from "../../../infrastructure/dtos/module/create-module.dto";
+import { CreateModuleDto } from "../../../application/dtos/module/create-module.dto";
 
 export interface CreateModuleUseCase {
     execute(dto: CreateModuleDto): Promise<ModuleEntity>;

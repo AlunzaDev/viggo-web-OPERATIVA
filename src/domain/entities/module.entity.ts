@@ -89,8 +89,17 @@ export interface ModuleDeviceRuntime {
     message?: string;
 }
 
+export const REMOTE_SUPPORT_PROVIDERS = [
+    "MESHCENTRAL",
+    "RUSTDESK",
+    "VIGGO_REMOTE",
+    "CUSTOM",
+] as const;
+
+export type ModuleRemoteSupportProvider = (typeof REMOTE_SUPPORT_PROVIDERS)[number];
+
 export interface ModuleRemoteSupport {
-    provider: "MESHCENTRAL";
+    provider: ModuleRemoteSupportProvider;
     enabled: boolean;
     deviceName?: string;
     deviceId?: string;
@@ -419,12 +428,12 @@ function parseRemoteSupport(value: unknown): ModuleRemoteSupport | null {
     const support = value as Record<string, unknown>;
     const provider = String(support.provider ?? "MESHCENTRAL").trim().toUpperCase();
 
-    if (provider !== "MESHCENTRAL") {
+    if (!REMOTE_SUPPORT_PROVIDERS.includes(provider as ModuleRemoteSupportProvider)) {
         return null;
     }
 
     return {
-        provider,
+        provider: provider as ModuleRemoteSupportProvider,
         enabled: Boolean(support.enabled),
         deviceName: normalizeOptionalText(support.deviceName),
         deviceId: normalizeOptionalText(support.deviceId),

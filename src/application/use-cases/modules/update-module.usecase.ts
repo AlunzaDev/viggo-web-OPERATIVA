@@ -1,6 +1,6 @@
 import { ModuleEntity } from "../../../domain/entities/module.entity";
 import { ModuleRepository } from "../../../domain/repositories/module.repository";
-import { UpdateModuleDto } from "../../../infrastructure/dtos/module/update-module.dto";
+import { UpdateModuleDto } from "../../../application/dtos/module/update-module.dto";
 
 export interface UpdateModuleUseCase {
     execute(dto: UpdateModuleDto): Promise<ModuleEntity>;

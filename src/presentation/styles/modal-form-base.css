@@ -251,6 +251,16 @@
   text-decoration: none;
 }
 
+.admin-crud-spin {
+  animation: modal-form-spin 0.7s linear infinite;
+}
+
+.admin-crud-action-message {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  margin: 0.7rem 0 0;
+}
+
 .btn-form-spinner {
   width: 16px;
   height: 16px;

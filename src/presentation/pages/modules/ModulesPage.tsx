@@ -60,6 +60,8 @@ export function ModulesPage() {
   const [selectedRequest, setSelectedRequest] = useState<ModuleDeviceBindingRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [resolvingRemoteSupportId, setResolvingRemoteSupportId] = useState<string | null>(null);
+  const [remoteSupportActionMessage, setRemoteSupportActionMessage] = useState<string | null>(null);
 
   const {
     modules,
@@ -79,7 +81,7 @@ export function ModulesPage() {
     rejectDeviceBinding,
     reopenDeviceBinding,
     resetDeviceBinding,
-    resolveMeshCentralDevice,
+    resolveRemoteSupportDevice,
   } = useModules(projectId);
 
   const projectById = useMemo(
@@ -222,6 +224,42 @@ export function ModulesPage() {
     await reopenDeviceBinding(item.id, request.fingerprint);
   };
 
+  const handleResolveRemoteSupportDevice = async (item: ModuleEntity) => {
+    setResolvingRemoteSupportId(item.id);
+    setRemoteSupportActionMessage("Buscando el equipo de soporte remoto...");
+
+    try {
+      const updated = await resolveRemoteSupportDevice(item.id);
+      const deviceLabel =
+        updated.remoteSupport?.deviceName ||
+        updated.remoteSupport?.deviceId ||
+        "equipo remoto";
+
+      setRemoteSupportActionMessage(`Soporte remoto resuelto: ${deviceLabel}.`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "No se pudo resolver soporte remoto.";
+      setRemoteSupportActionMessage(message);
+    } finally {
+      setResolvingRemoteSupportId(null);
+    }
+  };
+
+  const handleOpenRemoteSupport = async (item: ModuleEntity, viewMode: number) => {
+    const params = new URLSearchParams({
+      viewMode: String(viewMode),
+      moduleName: item.nombre,
+    });
+    const launcherUrl = `/soporte-remoto/${item.id}?${params.toString()}`;
+    const remoteWindow = window.open(launcherUrl, "_blank");
+
+    if (!remoteWindow) {
+      setRemoteSupportActionMessage("El navegador bloqueo la ventana emergente de soporte remoto.");
+      return;
+    }
+
+    setRemoteSupportActionMessage(`Preparando soporte remoto para ${item.nombre}.`);
+  };
+
   return (
     <main className="admin-crud-page">
       <PageHeader
@@ -331,12 +369,15 @@ export function ModulesPage() {
           isSaving || isUpdating || isDeleting || isBindingActionRunning
         }
         error={error}
+        remoteSupportActionMessage={remoteSupportActionMessage}
+        isResolvingRemoteSupport={Boolean(
+          selectedItem && resolvingRemoteSupportId === selectedItem.id,
+        )}
         onEdit={ENABLE_MODULE_MUTATIONS ? openEdit : undefined}
         onToggleStatus={ENABLE_MODULE_MUTATIONS ? toggleModuleState : undefined}
         onResetBinding={handleResetBinding}
-        onResolveMeshCentralDevice={async (item) => {
-          await resolveMeshCentralDevice(item.id);
-        }}
+        onOpenRemoteSupport={handleOpenRemoteSupport}
+        onResolveRemoteSupportDevice={handleResolveRemoteSupportDevice}
         onOpenRequest={(item, request) => {
           setSelectedItem(item);
           setSelectedRequest(request);
@@ -344,6 +385,7 @@ export function ModulesPage() {
         onClose={() => {
           setSelectedItem(null);
           setSelectedRequest(null);
+          setRemoteSupportActionMessage(null);
         }}
       />
 

@@ -6,8 +6,8 @@ import type {
 import { ParkingEntity } from "../../domain/entities/parking.entity";
 import { api } from "../http/axios.instance";
 import { getApiErrorMessage } from "../http/api-contracts";
-import { CreateParkingDto } from "../dtos/parking/create-parking.dto";
-import { UpdateParkingDto } from "../dtos/parking/update-parking.dto";
+import { CreateParkingDto } from "../../application/dtos/parking/create-parking.dto";
+import { UpdateParkingDto } from "../../application/dtos/parking/update-parking.dto";
 import {
     normalizeProjectCollection,
     normalizeProjectPage,

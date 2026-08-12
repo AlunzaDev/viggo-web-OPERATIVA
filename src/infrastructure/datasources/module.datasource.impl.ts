@@ -1,12 +1,15 @@
 import { ModuleDatasource } from "../../domain/datasources/module.datasource";
-import type { PaginatedModuleResult } from "../../domain/datasources/module.datasource";
+import type {
+    ModuleRemoteSupportSessionUrl,
+    PaginatedModuleResult,
+} from "../../domain/datasources/module.datasource";
 import { ModuleEntity } from "../../domain/entities/module.entity";
 import { api } from "../http/axios.instance";
 import {
     getApiErrorMessage,
 } from "../http/api-contracts";
-import { CreateModuleDto } from "../dtos/module/create-module.dto";
-import { UpdateModuleDto } from "../dtos/module/update-module.dto";
+import { CreateModuleDto } from "../../application/dtos/module/create-module.dto";
+import { UpdateModuleDto } from "../../application/dtos/module/update-module.dto";
 import {
     normalizeModuleCollection,
     normalizeModulePage,
@@ -175,14 +178,14 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
         }
     }
 
-    async resolveMeshCentralDevice(id: string): Promise<ModuleEntity> {
+    async resolveRemoteSupportDevice(id: string): Promise<ModuleEntity> {
         try {
             const { data } = await api.post<{
                 modulo?: unknown;
                 resolved?: unknown;
                 error?: unknown;
             }>(
-                `/api/modulos/${id}/remote-support/resolve-meshcentral-device`,
+                `/api/modulos/${id}/remote-support/resolve-device`,
                 {},
             );
             return ModuleEntity.fromObject(normalizeModuleRecord(data));
@@ -191,7 +194,26 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
             if (errorMessage) {
                 throw new Error(errorMessage);
             }
-            throw new Error(`No se pudo resolver MeshCentral para el modulo con id ${id}`);
+            throw new Error(`No se pudo resolver soporte remoto para el modulo con id ${id}`);
+        }
+    }
+
+    async createRemoteSupportSessionUrl(
+        id: string,
+        viewMode = 10,
+    ): Promise<ModuleRemoteSupportSessionUrl> {
+        try {
+            const { data } = await api.post<ModuleRemoteSupportSessionUrl>(
+                `/api/modulos/${id}/remote-support/session-url`,
+                { viewMode },
+            );
+            return data;
+        } catch (error: unknown) {
+            const errorMessage = getApiErrorMessage(error);
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+            throw new Error(`No se pudo crear sesion de soporte remoto para el modulo con id ${id}`);
         }
     }
 }

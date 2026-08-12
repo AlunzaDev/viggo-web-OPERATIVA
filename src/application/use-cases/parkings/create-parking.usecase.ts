@@ -1,6 +1,6 @@
 import { ParkingEntity } from "../../../domain/entities/parking.entity";
 import { ParkingRepository } from "../../../domain/repositories/parking.repository";
-import { CreateParkingDto } from "../../../infrastructure/dtos/parking/create-parking.dto";
+import { CreateParkingDto } from "../../../application/dtos/parking/create-parking.dto";
 
 export interface CreateParkingUseCase {
     execute(dto: CreateParkingDto): Promise<ParkingEntity>;

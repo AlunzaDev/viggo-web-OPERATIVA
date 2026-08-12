@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCalendarAlt, FaCheckCircle, FaIdCard, FaParking, FaPlus, FaPowerOff, FaTicketAlt, FaUser } from "react-icons/fa";
-import { api } from "../../../infrastructure/http/axios.instance";
 import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
 import { loadPensionOptions, loadUserOptions } from "../../services/catalogs/catalog-options";
 import { CrudRowActions } from "../../components/shared/CrudRowActions";
@@ -11,7 +10,8 @@ import { CreateModalBase } from "../../components/shared/modals/CreateModalBase"
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { TableBase } from "../../components/shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
-import { buildPensionPassForm, buildPensionPassPayload, createInitialPensionPassForm, normalizePensionPassCollection, type PensionPassForm, type PensionPassRecord } from "../../services/pensionPasses/pension-passes.contract";
+import { buildPensionPassForm, createInitialPensionPassForm, type PensionPassForm, type PensionPassRecord } from "../../services/pensionPasses/pension-passes.contract";
+import { loadPensionPasses, savePensionPass, updatePensionPassStatus } from "../../services/pensionPasses/pension-passes.api";
 import "../../styles/adminCrud/AdminCrud.css";
 
 type PensionPass = PensionPassRecord;
@@ -198,8 +198,8 @@ export function PensionPassesPage() {
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [passesResponse, pensionsData, usersData] = await Promise.all([api.get("/api/pension-pass"), loadPensionOptions(), loadUserOptions()]);
-      setItems(normalizePensionPassCollection(passesResponse.data));
+      const [passesResponse, pensionsData, usersData] = await Promise.all([loadPensionPasses(), loadPensionOptions(), loadUserOptions()]);
+      setItems(passesResponse);
       setPensions(pensionsData);
       setUsers(usersData);
     } catch (loadError) { setError(getErrorMessage(loadError, "No se pudieron cargar los pension-pass")); }
@@ -212,7 +212,7 @@ export function PensionPassesPage() {
   const openEdit = (item: PensionPass) => { setSelectedItem(null); setEditingId(item.id); setForm(buildPensionPassForm(item)); setIsModalOpen(true); };
   const save = async () => {
     setSaving(true); setError(null);
-    try { if (editingId) await api.patch(`/api/pension-pass/${editingId}`, buildPensionPassPayload(form)); else await api.post("/api/pension-pass", buildPensionPassPayload(form)); setIsModalOpen(false); await loadData(); }
+    try { await savePensionPass(form, editingId); setIsModalOpen(false); await loadData(); }
     catch (saveError) { const message = getErrorMessage(saveError, "No se pudo guardar el pension-pass"); setError(message); throw new Error(message); }
     finally { setSaving(false); }
   };
@@ -220,7 +220,7 @@ export function PensionPassesPage() {
     setSaving(true);
     setError(null);
     try {
-      await api.patch(`/api/pension-pass/${item.id}`, buildPensionPassPayload({ ...buildPensionPassForm(item), estado: !item.estado }));
+      await updatePensionPassStatus(item.id, { ...buildPensionPassForm(item), estado: !item.estado });
       await loadData();
       setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
     } catch (toggleError) {

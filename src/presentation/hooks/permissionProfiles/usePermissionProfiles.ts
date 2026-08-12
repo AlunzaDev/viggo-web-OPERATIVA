@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { PermissionProfileEntity } from "../../../domain/entities/permission-profile.entity";
-import { api } from "../../../infrastructure/http/axios.instance";
 import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
 import {
-  normalizePermissionProfileCollection,
-  normalizePermissionProfileRecord,
-} from "./permission-profiles.contract";
+  createPermissionProfile,
+  deletePermissionProfile,
+  fetchPermissionProfiles,
+  updatePermissionProfile,
+} from "../../services/permissionProfiles/permission-profiles.api";
 
 type PermissionProfilePayload = {
   nombre: string;
@@ -30,8 +31,8 @@ export function usePermissionProfiles() {
     setIsLoading(true);
     setError(null);
     try {
-      const { data } = await api.get("/api/permission-profiles");
-      setProfiles(normalizePermissionProfileCollection(data));
+      const result = await fetchPermissionProfiles();
+      setProfiles(result);
     } catch (err) {
       setError(getErrorMessage(err, "No se pudieron cargar los perfiles"));
     } finally {
@@ -47,10 +48,7 @@ export function usePermissionProfiles() {
     setIsSaving(true);
     setError(null);
     try {
-      const { data } = await api.post("/api/permission-profiles", payload);
-      const created = PermissionProfileEntity.fromObject(
-        normalizePermissionProfileRecord(data),
-      );
+      const created = await createPermissionProfile(payload);
       setProfiles((prev) => [...prev, created].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")));
       return created;
     } catch (err) {
@@ -66,10 +64,7 @@ export function usePermissionProfiles() {
     setIsUpdating(true);
     setError(null);
     try {
-      const { data } = await api.patch(`/api/permission-profiles/${id}`, payload);
-      const updated = PermissionProfileEntity.fromObject(
-        normalizePermissionProfileRecord(data),
-      );
+      const updated = await updatePermissionProfile(id, payload);
       setProfiles((prev) =>
         prev
           .map((profile) => (profile.id === id ? updated : profile))
@@ -89,7 +84,7 @@ export function usePermissionProfiles() {
     setIsDeleting(true);
     setError(null);
     try {
-      await api.delete(`/api/permission-profiles/${id}`);
+      await deletePermissionProfile(id);
       setProfiles((prev) => prev.filter((profile) => profile.id !== id));
     } catch (err) {
       const message = getErrorMessage(err, "No se pudo eliminar el perfil");

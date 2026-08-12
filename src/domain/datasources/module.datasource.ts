@@ -1,7 +1,8 @@
 import { ModuleEntity } from "../entities/module.entity";
-import { CreateModuleDto } from "../../infrastructure/dtos/module/create-module.dto";
-import { UpdateModuleDto } from "../../infrastructure/dtos/module/update-module.dto";
+import { CreateModuleDto } from "../../application/dtos/module/create-module.dto";
+import { UpdateModuleDto } from "../../application/dtos/module/update-module.dto";
 import type { PaginationParams } from "./parking.datasource";
+export type { PaginationParams } from "./parking.datasource";
 
 export type PaginatedModuleResult = {
     items: ModuleEntity[];
@@ -9,6 +10,16 @@ export type PaginatedModuleResult = {
     page: number;
     limit: number;
     totalPages: number;
+};
+
+export type ModuleRemoteSupportSessionUrl = {
+    url: string;
+    loginUrl: string;
+    targetUrl: string;
+    viewMode: number;
+    expiresInSeconds: number;
+    deviceId: string;
+    deviceName: string;
 };
 
 export abstract class ModuleDatasource {
@@ -21,5 +32,6 @@ export abstract class ModuleDatasource {
     abstract rejectDeviceBinding(id: string, fingerprint?: string): Promise<ModuleEntity>;
     abstract reopenDeviceBinding(id: string, fingerprint?: string): Promise<ModuleEntity>;
     abstract resetDeviceBinding(id: string): Promise<ModuleEntity>;
-    abstract resolveMeshCentralDevice(id: string): Promise<ModuleEntity>;
+    abstract resolveRemoteSupportDevice(id: string): Promise<ModuleEntity>;
+    abstract createRemoteSupportSessionUrl(id: string, viewMode?: number): Promise<ModuleRemoteSupportSessionUrl>;
 }

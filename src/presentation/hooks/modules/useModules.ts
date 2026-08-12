@@ -1,30 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { ApproveModuleDeviceBinding } from "../../../application/use-cases/modules/approve-module-device-binding.usecase";
-import { CreateModule } from "../../../application/use-cases/modules/create-module.usecase";
-import { DeleteModule } from "../../../application/use-cases/modules/delete-module.usecase";
-import { RejectModuleDeviceBinding } from "../../../application/use-cases/modules/reject-module-device-binding.usecase";
-import { ReopenModuleDeviceBinding } from "../../../application/use-cases/modules/reopen-module-device-binding.usecase";
-import { ResetModuleDeviceBinding } from "../../../application/use-cases/modules/reset-module-device-binding.usecase";
-import { ResolveModuleMeshCentralDevice } from "../../../application/use-cases/modules/resolve-module-meshcentral-device.usecase";
-import { UpdateModule } from "../../../application/use-cases/modules/update-module.usecase";
+import {
+    approveModuleDeviceBindingUseCase,
+    createModuleRemoteSupportSessionUrlUseCase,
+    createModuleUseCase,
+    deleteModuleUseCase,
+    getModulesPageUseCase,
+    rejectModuleDeviceBindingUseCase,
+    reopenModuleDeviceBindingUseCase,
+    resetModuleDeviceBindingUseCase,
+    resolveModuleRemoteSupportDeviceUseCase,
+    updateModuleUseCase,
+} from "../../../application/dependencies/module.dependencies";
+import { CreateModuleDto } from "../../../application/dtos/module/create-module.dto";
+import { UpdateModuleDto } from "../../../application/dtos/module/update-module.dto";
 import { ModuleEntity, type ModuleType } from "../../../domain/entities/module.entity";
-import { ModuleDatasourceImpl } from "../../../infrastructure/datasources/module.datasource.impl";
-import { CreateModuleDto } from "../../../infrastructure/dtos/module/create-module.dto";
-import { UpdateModuleDto } from "../../../infrastructure/dtos/module/update-module.dto";
-import { ModuleRepositoryImpl } from "../../../infrastructure/repositories/module.repository.impl";
-
-const datasource = new ModuleDatasourceImpl();
-const repository = new ModuleRepositoryImpl(datasource);
-
-const createModuleUseCase = new CreateModule(repository);
-const updateModuleUseCase = new UpdateModule(repository);
-const deleteModuleUseCase = new DeleteModule(repository);
-const approveModuleDeviceBindingUseCase = new ApproveModuleDeviceBinding(repository);
-const rejectModuleDeviceBindingUseCase = new RejectModuleDeviceBinding(repository);
-const reopenModuleDeviceBindingUseCase = new ReopenModuleDeviceBinding(repository);
-const resetModuleDeviceBindingUseCase = new ResetModuleDeviceBinding(repository);
-const resolveModuleMeshCentralDeviceUseCase = new ResolveModuleMeshCentralDevice(repository);
-
 export type ModuleFormPayload = {
     nombre: string;
     proyecto: string;
@@ -54,7 +43,7 @@ export function useModules(projectId?: string) {
         setIsLoading(true);
         setError(null);
         try {
-            const result = await datasource.getPage({ projectId, page, limit: pageSize });
+            const result = await getModulesPageUseCase.execute({ projectId, page, limit: pageSize });
             setModules(result.items);
             setTotalItems(result.total);
             setTotalPages(Math.max(1, result.totalPages));
@@ -189,15 +178,29 @@ export function useModules(projectId?: string) {
         }
     };
 
-    const resolveMeshCentralDevice = async (id: string) => {
+    const resolveRemoteSupportDevice = async (id: string) => {
         setIsBindingActionRunning(true);
         setError(null);
         try {
-            const updated = await resolveModuleMeshCentralDeviceUseCase.execute(id);
+            const updated = await resolveModuleRemoteSupportDeviceUseCase.execute(id);
             replaceModule(updated);
             return updated;
         } catch (err: unknown) {
-            const message = getErrorMessage(err, "No se pudo resolver MeshCentral");
+            const message = getErrorMessage(err, "No se pudo resolver soporte remoto");
+            setError(message);
+            throw new Error(message);
+        } finally {
+            setIsBindingActionRunning(false);
+        }
+    };
+
+    const createRemoteSupportSessionUrl = async (id: string, viewMode?: number) => {
+        setIsBindingActionRunning(true);
+        setError(null);
+        try {
+            return await createModuleRemoteSupportSessionUrlUseCase.execute(id, viewMode);
+        } catch (err: unknown) {
+            const message = getErrorMessage(err, "No se pudo abrir soporte remoto");
             setError(message);
             throw new Error(message);
         } finally {
@@ -243,6 +246,7 @@ export function useModules(projectId?: string) {
         rejectDeviceBinding,
         reopenDeviceBinding,
         resetDeviceBinding,
-        resolveMeshCentralDevice,
+        resolveRemoteSupportDevice,
+        createRemoteSupportSessionUrl,
     };
 }

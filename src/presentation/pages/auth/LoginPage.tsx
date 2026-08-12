@@ -1,22 +1,14 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/auth/useAuth";
 import { getDefaultAuthorizedPath } from "../../router/module-routing";
-import { AuthDataSourceImpl } from "../../../infrastructure/datasources/auth.datasource.impl";
-import { AuthRepositoryImpl } from "../../../infrastructure/repositories/auth.repository.impl";
-import { ForgotPasswordUseCase } from "../../../application/use-cases/auth/forgot-password.usecase";
-import { ResendValidationEmailUseCase } from "../../../application/use-cases/auth/resend-validation-email.usecase";
 import { applyTheme, resolveInitialTheme, type ThemeMode } from "../../../config/theme-mode";
+import { requestPasswordReset, resendValidationEmail } from "../../services/auth/auth-actions.service";
 import { showAppToast } from "../../utils/feedback/swalToast";
 import "../../styles/auth/LoginPage.css";
-
-const authDatasource = new AuthDataSourceImpl();
-const authRepository = new AuthRepositoryImpl(authDatasource);
-const forgotPasswordUseCase = new ForgotPasswordUseCase(authRepository);
-const resendValidationEmailUseCase = new ResendValidationEmailUseCase(authRepository);
 
 const normalizeLoginError = (rawMessage: string) => {
   const message = rawMessage.trim();
@@ -139,7 +131,7 @@ export function LoginPage() {
         }
 
         try {
-          return await forgotPasswordUseCase.execute({ email: normalizedEmail });
+          return await requestPasswordReset(normalizedEmail);
         } catch (error) {
           Swal.showValidationMessage(
             error instanceof Error ? error.message : "No se pudo enviar el enlace",
@@ -184,7 +176,7 @@ export function LoginPage() {
         }
 
         try {
-          return await resendValidationEmailUseCase.execute({ email: normalizedEmail });
+          return await resendValidationEmail(normalizedEmail);
         } catch (error) {
           Swal.showValidationMessage(
             error instanceof Error ? error.message : "No se pudo reenviar el enlace",

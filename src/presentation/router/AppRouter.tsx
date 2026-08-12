@@ -51,6 +51,11 @@ const ModulesPage = lazy(async () => {
   return { default: module.ModulesPage };
 });
 
+const RemoteSupportLauncherPage = lazy(async () => {
+  const module = await import("../pages/remoteSupport/RemoteSupportLauncherPage");
+  return { default: module.RemoteSupportLauncherPage };
+});
+
 const OperationalLogsPage = lazy(async () => {
   const module = await import("../pages/operationalLogs/OperationalLogsPage");
   return { default: module.OperationalLogsPage };
@@ -146,6 +151,17 @@ export function AppRouter() {
       <Route
         path="/"
         element={<Navigate to={isAuthenticated ? getDefaultAuthorizedPath(user) : "/login"} replace />}
+      />
+
+      <Route
+        path="/soporte-remoto/:moduleId"
+        element={
+          <ProtectedRoute modules={["modules"]}>
+            <Suspense fallback={<RouteFallback />}>
+              <RemoteSupportLauncherPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
       />
 
       <Route element={<PrivateLayoutRoute />}>

@@ -5,6 +5,7 @@ import {
   FaHashtag,
   FaLayerGroup,
   FaLink,
+  FaSpinner,
   FaPowerOff,
   FaProjectDiagram,
   FaShieldAlt,
@@ -36,10 +37,13 @@ type ModuleDetailModalProps = {
   projectRemoteSupportBaseUrl?: string;
   isSubmitting: boolean;
   error: string | null;
+  remoteSupportActionMessage?: string | null;
+  isResolvingRemoteSupport?: boolean;
   onEdit?: (item: ModuleEntity) => void;
   onToggleStatus?: (item: ModuleEntity) => Promise<void>;
   onResetBinding: (item: ModuleEntity) => Promise<void>;
-  onResolveMeshCentralDevice?: (item: ModuleEntity) => Promise<void>;
+  onOpenRemoteSupport?: (item: ModuleEntity, viewMode: number) => Promise<void>;
+  onResolveRemoteSupportDevice?: (item: ModuleEntity) => Promise<void>;
   onOpenRequest: (item: ModuleEntity, request: ModuleDeviceBindingRequest) => void;
   onClose: () => void;
 };
@@ -51,10 +55,13 @@ export function ModuleDetailModal({
   projectRemoteSupportBaseUrl = "",
   isSubmitting,
   error,
+  remoteSupportActionMessage = null,
+  isResolvingRemoteSupport = false,
   onEdit,
   onToggleStatus,
   onResetBinding,
-  onResolveMeshCentralDevice,
+  onOpenRemoteSupport,
+  onResolveRemoteSupportDevice,
   onOpenRequest,
   onClose,
 }: ModuleDetailModalProps) {
@@ -240,33 +247,52 @@ export function ModuleDetailModal({
               <p>{getRemoteSupportProviderLabel(remoteSupport.provider)}</p>
             </article>
             <article className="form-group admin-crud-detail-item">
-              <label>Equipo Mesh</label>
+              <label>Equipo remoto</label>
               <p>{remoteSupport.deviceName || remoteSupport.deviceId || "Sin nombre"}</p>
             </article>
             <article className="form-group modal-field-full admin-crud-detail-item">
               <label>Acciones</label>
               <div className="admin-crud-inline-actions">
                 {remoteSupportLinks.map((link) => (
+                  onOpenRemoteSupport ? (
+                    <button
+                      key={`${link.kind}-${link.url}`}
+                      type="button"
+                      className="btn-form-secondary"
+                      disabled={isSubmitting || isResolvingRemoteSupport}
+                      onClick={() => {
+                        if (!item) return;
+                        void onOpenRemoteSupport(item, link.viewMode);
+                      }}
+                    >
+                      <FaExternalLinkAlt />
+                      <span>{link.label}</span>
+                    </button>
+                  ) : (
                   <a key={`${link.kind}-${link.url}`} className="btn-form-secondary" href={link.url} target="_blank" rel="noreferrer">
                     <FaExternalLinkAlt />
                     <span>{link.label}</span>
                   </a>
+                  )
                 ))}
-                {onResolveMeshCentralDevice ? (
+                {onResolveRemoteSupportDevice ? (
                   <button
                     type="button"
                     className="btn-form-secondary"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isResolvingRemoteSupport}
                     onClick={() => {
                       if (!item) return;
-                      void onResolveMeshCentralDevice(item);
+                      void onResolveRemoteSupportDevice(item);
                     }}
                   >
-                    <FaLink />
-                    <span>Resolver MeshCentral</span>
+                    {isResolvingRemoteSupport ? <FaSpinner className="admin-crud-spin" /> : <FaLink />}
+                    <span>{isResolvingRemoteSupport ? "Resolviendo soporte remoto..." : "Resolver soporte remoto"}</span>
                   </button>
                 ) : null}
               </div>
+              {remoteSupportActionMessage ? (
+                <p className="admin-crud-action-message">{remoteSupportActionMessage}</p>
+              ) : null}
             </article>
           </div>
         ) : (
