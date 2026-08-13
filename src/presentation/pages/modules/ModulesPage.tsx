@@ -36,6 +36,28 @@ type ProjectRouteState = {
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 const ENABLE_MODULE_MUTATIONS = false;
 
+const openSupportLauncherWindow = (url: string) => {
+  const width = Math.min(window.screen.availWidth || 1400, 1400);
+  const height = Math.min(window.screen.availHeight || 900, 900);
+  const left = Math.max(((window.screen.availWidth || width) - width) / 2, 0);
+  const top = Math.max(((window.screen.availHeight || height) - height) / 2, 0);
+  const features = [
+    "popup=yes",
+    "toolbar=no",
+    "location=no",
+    "menubar=no",
+    "status=no",
+    "scrollbars=yes",
+    "resizable=yes",
+    `width=${Math.floor(width)}`,
+    `height=${Math.floor(height)}`,
+    `left=${Math.floor(left)}`,
+    `top=${Math.floor(top)}`,
+  ].join(",");
+
+  return window.open(url, "viggo-remote-support", features);
+};
+
 export function ModulesPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -250,13 +272,14 @@ export function ModulesPage() {
       moduleName: item.nombre,
     });
     const launcherUrl = `/soporte-remoto/${item.id}?${params.toString()}`;
-    const remoteWindow = window.open(launcherUrl, "_blank");
+    const remoteWindow = openSupportLauncherWindow(launcherUrl);
 
     if (!remoteWindow) {
       setRemoteSupportActionMessage("El navegador bloqueo la ventana emergente de soporte remoto.");
       return;
     }
 
+    remoteWindow.focus();
     setRemoteSupportActionMessage(`Preparando soporte remoto para ${item.nombre}.`);
   };
 
@@ -412,6 +435,7 @@ export function ModulesPage() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={save}
       />
+
     </main>
   );
 }

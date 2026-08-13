@@ -38,6 +38,164 @@ const normalizeViewMode = (value: string | null) => {
   return [10, 11, 12].includes(parsed) ? parsed : 10;
 };
 
+const openRemoteSupportPopup = (url: string) => {
+  if (!url) return;
+
+  const width = Math.min(window.screen.availWidth || 1400, 1400);
+  const height = Math.min(window.screen.availHeight || 900, 900);
+  const left = Math.max(((window.screen.availWidth || width) - width) / 2, 0);
+  const top = Math.max(((window.screen.availHeight || height) - height) / 2, 0);
+
+  const features = [
+    "popup=yes",
+    "toolbar=no",
+    "location=no",
+    "menubar=no",
+    "status=no",
+    "scrollbars=yes",
+    "resizable=yes",
+    `width=${Math.floor(width)}`,
+    `height=${Math.floor(height)}`,
+    `left=${Math.floor(left)}`,
+    `top=${Math.floor(top)}`,
+  ].join(",");
+
+  window.open(url, "viggo-remote-support", features)?.focus();
+};
+
+type MeshCentralWindow = Window & {
+  currentNode?: unknown;
+  desktop?: { State?: number };
+  terminal?: { State?: number };
+  connectDesktop?: (event: unknown, connectionType: number) => void;
+  connectTerminal?: (event?: unknown, connectionType?: number) => void;
+  deskToggleFull?: () => void;
+};
+
+const automateEmbeddedDesktop = (
+  iframe: HTMLIFrameElement | null,
+  viewMode: number,
+  modeLabel: string,
+  onStatusChange: (status: string) => void,
+  onReady: () => void,
+) => {
+  if (!iframe) return;
+
+  let attempts = 0;
+  const maxAttempts = 24;
+
+  const revealWhenConnected = (
+    getState: () => number,
+    readyStatus: string,
+    fallbackDelay = 500,
+  ) => {
+    let stateAttempts = 0;
+    const maxStateAttempts = 16;
+
+    const checkState = () => {
+      stateAttempts += 1;
+      const state = getState();
+
+      if (state > 0 || stateAttempts >= maxStateAttempts) {
+        onStatusChange(readyStatus);
+        onReady();
+        return;
+      }
+
+      window.setTimeout(checkState, 150);
+    };
+
+    window.setTimeout(checkState, fallbackDelay);
+  };
+
+  const tryAutomate = () => {
+    attempts += 1;
+
+    try {
+      const meshWindow = iframe.contentWindow as MeshCentralWindow | null;
+      const meshDocument = iframe.contentDocument;
+      const isReady =
+        Boolean(meshWindow?.currentNode) &&
+        (viewMode === 11
+          ? typeof meshWindow?.connectDesktop === "function"
+          : typeof meshWindow?.connectTerminal === "function");
+
+      if (isReady) {
+        if (viewMode === 12) {
+          const terminalState = meshWindow?.terminal?.State ?? 0;
+
+          if (terminalState === 0) {
+            onStatusChange("Conectando terminal remota automaticamente...");
+            meshWindow?.connectTerminal?.(null, 1);
+          }
+
+          window.setTimeout(() => {
+            try {
+              onStatusChange("Activando vista completa de MeshCentral...");
+              if (typeof meshWindow?.deskToggleFull === "function") {
+                meshWindow.deskToggleFull();
+              } else {
+                meshDocument
+                  ?.querySelector<HTMLElement>("[onclick*='deskToggleFull']")
+                  ?.click();
+              }
+            } catch {
+              // Si MeshCentral no permite expandir terminal todavia, mostramos la terminal conectada.
+            }
+            revealWhenConnected(
+              () => meshWindow?.terminal?.State ?? 0,
+              "terminal remota lista dentro de Viggo.",
+              100,
+            );
+          }, 220);
+
+          return;
+        }
+
+        const desktopState = meshWindow?.desktop?.State ?? 0;
+
+        if (desktopState === 0) {
+          onStatusChange("Conectando pantalla remota automaticamente...");
+          meshWindow?.connectDesktop?.(null, 1);
+        }
+
+        window.setTimeout(() => {
+          try {
+            onStatusChange("Activando vista completa de MeshCentral...");
+            if (typeof meshWindow?.deskToggleFull === "function") {
+              meshWindow.deskToggleFull();
+            } else {
+              meshDocument
+                ?.querySelector<HTMLElement>("[onclick*='deskToggleFull']")
+                ?.click();
+            }
+          } catch {
+            // Si MeshCentral no permite expandir todavia, mostramos la pantalla conectada.
+          }
+          revealWhenConnected(
+            () => meshWindow?.desktop?.State ?? 0,
+            "pantalla remota lista dentro de Viggo.",
+            100,
+          );
+        }, 320);
+
+        return;
+      }
+    } catch {
+      // El iframe todavia puede estar navegando; reintentamos abajo.
+    }
+
+    if (attempts < maxAttempts) {
+      window.setTimeout(tryAutomate, 250);
+    } else {
+      onStatusChange(`${modeLabel} lista. Si no conecta, usa Connect.`);
+      onReady();
+    }
+  };
+
+  window.setTimeout(tryAutomate, 150);
+};
+
 export function RemoteSupportLauncherPage() {
   const navigate = useNavigate();
   const { moduleId = "" } = useParams();
@@ -46,9 +204,12 @@ export function RemoteSupportLauncherPage() {
   const modeLabel = SUPPORT_MODE_LABELS[viewMode] ?? SUPPORT_MODE_LABELS[10];
   const modeIcon = SUPPORT_MODE_ICONS[viewMode] ?? SUPPORT_MODE_ICONS[10];
   const hasStartedRef = useRef(false);
+  const embeddedFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const embeddedAutomationUrlRef = useRef("");
   const [status, setStatus] = useState("Preparando sesion segura...");
   const [targetUrl, setTargetUrl] = useState("");
   const [embeddedUrl, setEmbeddedUrl] = useState("");
+  const [isEmbeddedReady, setIsEmbeddedReady] = useState(false);
   const [error, setError] = useState("");
   const { createRemoteSupportSessionUrl } = useModules();
 
@@ -84,15 +245,12 @@ export function RemoteSupportLauncherPage() {
             return;
           }
 
-          setStatus(`Iniciando ${modeLabel} dentro de Viggo...`);
-          setEmbeddedUrl(
-            toEmbeddedMeshCentralUrl(session.loginUrl || session.url),
-          );
-
+          setStatus(`Autenticando MeshCentral dentro de Viggo...`);
+          setEmbeddedUrl(toEmbeddedMeshCentralUrl(session.loginUrl || session.url));
           window.setTimeout(() => {
-            setStatus(`${modeLabel} lista dentro de Viggo.`);
+            setStatus(`Abriendo ${modeLabel} del equipo...`);
             setEmbeddedUrl(toEmbeddedMeshCentralUrl(session.targetUrl));
-          }, 3000);
+          }, 350);
         }, 300);
       } catch (err: unknown) {
         const message =
@@ -122,7 +280,7 @@ export function RemoteSupportLauncherPage() {
         </div>
 
         <article
-          className={`remote-support-launcher__card${embeddedUrl ? " is-embedded-ready" : ""}`}
+          className={`remote-support-launcher__card${isEmbeddedReady ? " is-embedded-ready" : ""}`}
         >
           <div className="remote-support-launcher__icon">
             {error ? <FaExternalLinkAlt /> : modeIcon}
@@ -167,7 +325,10 @@ export function RemoteSupportLauncherPage() {
           </div>
         </article>
         {embeddedUrl ? (
-          <section className="remote-support-launcher__embedded-panel">
+          <section
+            className={`remote-support-launcher__embedded-panel${isEmbeddedReady ? " is-ready" : ""}`}
+            aria-hidden={!isEmbeddedReady}
+          >
             <div className="remote-support-launcher__embedded-toolbar">
               <div>
                 <p className="remote-support-launcher__embedded-eyebrow">
@@ -176,21 +337,38 @@ export function RemoteSupportLauncherPage() {
                 <h2>{modeLabel}</h2>
               </div>
 
-              <a
+              <button
+                type="button"
                 className="remote-support-launcher__button"
-                href={targetUrl}
-                target="_blank"
-                rel="noreferrer"
+                onClick={() => openRemoteSupportPopup(targetUrl)}
               >
                 Abrir externo
-              </a>
+              </button>
             </div>
 
             <iframe
+              ref={embeddedFrameRef}
               className="remote-support-launcher__embedded-frame"
               src={embeddedUrl}
               title={`MeshCentral ${modeLabel}`}
               allow="clipboard-read; clipboard-write; fullscreen"
+              onLoad={() => {
+                if (![11, 12].includes(viewMode)) return;
+                if (!embeddedUrl || embeddedAutomationUrlRef.current === embeddedUrl) {
+                  return;
+                }
+
+                embeddedAutomationUrlRef.current = embeddedUrl;
+                automateEmbeddedDesktop(
+                  embeddedFrameRef.current,
+                  viewMode,
+                  modeLabel,
+                  setStatus,
+                  () => {
+                    setIsEmbeddedReady(true);
+                  },
+                );
+              }}
             />
           </section>
         ) : null}

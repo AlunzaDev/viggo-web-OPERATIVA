@@ -164,11 +164,28 @@
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.985);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.remote-support-launcher__embedded-panel.is-ready {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .remote-support-launcher__embedded-toolbar {
-  min-height: 74px;
-  padding: 14px 18px;
+  min-height: 54px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -189,7 +206,7 @@
 .remote-support-launcher__embedded-toolbar h2 {
   margin: 0;
   color: #102033;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .remote-support-launcher__embedded-frame {
@@ -203,55 +220,4 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.remote-support-launcher__embedded-panel {
-  width: min(1480px, calc(100vw - 48px));
-  height: min(820px, calc(100vh - 150px));
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.18);
-}
-
-.remote-support-launcher__embedded-toolbar {
-  min-height: 74px;
-  padding: 14px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(248, 250, 252, 0.92);
-}
-
-.remote-support-launcher__embedded-eyebrow {
-  margin: 0 0 4px;
-  color: #16a34a;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.remote-support-launcher__embedded-toolbar h2 {
-  margin: 0;
-  color: #102033;
-  font-size: 1.2rem;
-}
-
-.remote-support-launcher__embedded-frame {
-  flex: 1;
-  width: 100%;
-  border: 0;
-  background: #020617;
-}
-
-.remote-support-launcher__card.is-embedded-ready {
-  display: none;
 }
