@@ -2,6 +2,7 @@ import { useEffect, useState, type KeyboardEvent, type RefObject } from "react";
 import {
   FaCashRegister,
   FaCheckCircle,
+  FaExclamationTriangle,
   FaMoneyBillWave,
   FaQrcode,
   FaUndo,
@@ -130,7 +131,13 @@ export function CashPaymentsWorkbench({
                 showAllOption={false}
               />
             </label>
-            <div className="cash-payments-shift-banner">
+            <div
+              className={`cash-payments-shift-banner${
+                !loadingShift && !activeShiftDetail
+                  ? " cash-payments-shift-banner--warning"
+                  : ""
+              }`}
+            >
               {loadingShift ? (
                 <span className="cash-payments-shift-chip cash-payments-shift-chip--muted">
                   Revisando turno...
@@ -145,10 +152,13 @@ export function CashPaymentsWorkbench({
                 </>
               ) : (
                 <>
-                  <span className="cash-payments-shift-chip cash-payments-shift-chip--warning">
-                    Sin turno abierto
+                  <span className="cash-payments-shift-banner__icon" aria-hidden="true">
+                    <FaExclamationTriangle />
                   </span>
-                  <small>Abre la caja POS antes de empezar a cobrar.</small>
+                  <span className="cash-payments-shift-banner__copy">
+                    <strong>Sin turno abierto</strong>
+                    <small>Abre la caja POS antes de empezar a cobrar.</small>
+                  </span>
                 </>
               )}
             </div>
@@ -185,7 +195,7 @@ export function CashPaymentsWorkbench({
             <div className="cash-payments-actions">
               <button
                 type="button"
-                className="cash-payments-button cash-payments-button--primary"
+                className="cash-payments-button cash-payments-button--primary cash-payments-button--validate"
                 onClick={onResolveQr}
                 disabled={loading}
               >

@@ -49,6 +49,41 @@
   color: #5d7263;
 }
 
+.cash-payments-shift-banner--warning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: center;
+  justify-content: initial;
+  border-color: rgba(188, 128, 22, 0.2);
+  background: linear-gradient(135deg, rgba(255, 247, 224, 0.92), rgba(255, 252, 242, 0.78));
+}
+
+.cash-payments-shift-banner__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #95600e;
+  background: rgba(214, 160, 24, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(188, 128, 22, 0.1);
+}
+
+.cash-payments-shift-banner__copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cash-payments-shift-banner__copy strong {
+  color: #67450d;
+  font-size: 0.9rem;
+}
+
+.cash-payments-shift-banner__copy small {
+  line-height: 1.35;
+}
+
 .cash-payments-shift-chip {
   display: inline-flex;
   align-items: center;
@@ -188,6 +223,42 @@
   background: linear-gradient(135deg, #1d5436 0%, #2e6a45 100%);
 }
 
+.cash-payments-button--validate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 1px solid rgba(29, 106, 64, 0.3);
+  background:
+    linear-gradient(135deg, rgba(46, 106, 69, 0.94), rgba(29, 84, 54, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 7px 18px rgba(29, 84, 54, 0.2);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.cash-payments-button--validate:not(:disabled):hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #347a50, #205f3c);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 9px 20px rgba(29, 84, 54, 0.24);
+}
+
+.cash-payments-button--validate:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: inset 0 2px 5px rgba(7, 42, 24, 0.24);
+}
+
+.cash-payments-button--validate svg {
+  opacity: 0.9;
+}
+
 .cash-payments-button--secondary {
   color: #1d5436;
   background: #eff6f1;
@@ -258,6 +329,24 @@
 :root[data-theme="dark"] .cash-payments-shift-banner small,
 :root:not([data-theme="light"]) .cash-payments-shift-banner small {
   color: rgba(234, 241, 255, 0.72);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-banner--warning,
+:root:not([data-theme="light"]) .cash-payments-shift-banner--warning {
+  border-color: rgba(242, 203, 130, 0.16);
+  background: linear-gradient(135deg, rgba(222, 161, 57, 0.11), rgba(255, 255, 255, 0.025));
+}
+
+:root[data-theme="dark"] .cash-payments-shift-banner__icon,
+:root:not([data-theme="light"]) .cash-payments-shift-banner__icon {
+  color: #f2cb82;
+  background: rgba(222, 161, 57, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(242, 203, 130, 0.08);
+}
+
+:root[data-theme="dark"] .cash-payments-shift-banner__copy strong,
+:root:not([data-theme="light"]) .cash-payments-shift-banner__copy strong {
+  color: #f5d797;
 }
 
 :root[data-theme="dark"] .cash-payments-shift-chip,
@@ -348,6 +437,15 @@
 :root:not([data-theme="light"]) .cash-payments-button--secondary {
   color: #a6e6bd;
   background: rgba(43, 164, 94, 0.14);
+}
+
+:root[data-theme="dark"] .cash-payments-button--validate,
+:root:not([data-theme="light"]) .cash-payments-button--validate {
+  border-color: rgba(123, 224, 161, 0.22);
+  background: linear-gradient(135deg, rgba(48, 128, 78, 0.72), rgba(27, 85, 52, 0.82));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 7px 18px rgba(0, 0, 0, 0.24);
 }
 
 :root[data-theme="dark"] .cash-payments-button--danger,

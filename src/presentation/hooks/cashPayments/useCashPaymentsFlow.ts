@@ -295,53 +295,6 @@ export const useCashPaymentsFlow = () => {
   }, [selectedCashierId]);
 
   useEffect(() => {
-    if (!ENABLE_QR_AUTO_FOCUS) {
-      return;
-    }
-
-    if (currentStepIndex !== 0 || loading || isShiftRequiredForCheckout) {
-      return;
-    }
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) {
-        focusQrInput();
-        return;
-      }
-
-      if (
-        qrInputRef.current &&
-        (target === qrInputRef.current || qrInputRef.current.contains(target))
-      ) {
-        return;
-      }
-
-      const interactiveContainer = target.closest(
-        "button, input, textarea, select, [role='combobox'], [role='option'], .vcombo, .vcombo-popover",
-      );
-
-      if (interactiveContainer) {
-        return;
-      }
-
-      focusQrInput();
-    };
-
-    const handleWindowBlur = () => {
-      focusQrInput();
-    };
-
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("blur", handleWindowBlur);
-
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("blur", handleWindowBlur);
-    };
-  }, [currentStepIndex, isShiftRequiredForCheckout, loading]);
-
-  useEffect(() => {
     if (!isShiftRequiredForCheckout) {
       return;
     }
