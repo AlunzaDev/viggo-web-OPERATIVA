@@ -1,5 +1,7 @@
 import { useEffect, useState, type KeyboardEvent, type RefObject } from "react";
+import { Link } from "react-router-dom";
 import {
+  FaArrowRight,
   FaCashRegister,
   FaCheckCircle,
   FaExclamationTriangle,
@@ -159,6 +161,9 @@ export function CashPaymentsWorkbench({
                     <strong>Sin turno abierto</strong>
                     <small>Abre la caja POS antes de empezar a cobrar.</small>
                   </span>
+                  <Link to="/caja/turno" className="cash-payments-shift-banner__action">
+                    Abrir turno <FaArrowRight />
+                  </Link>
                 </>
               )}
             </div>
