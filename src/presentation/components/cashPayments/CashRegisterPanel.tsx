@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   FaBoxOpen,
+  FaCashRegister,
   FaArrowCircleDown,
   FaArrowCircleUp,
   FaLock,
@@ -103,7 +104,15 @@ export function CashRegisterPanel({
   return (
     <section className="cash-register-panel cash-payments-panel">
       <div className="cash-payments-panel__header">
-        <h2>Turno y corte</h2>
+        <div className="cash-register-panel__title">
+          <span className="cash-register-panel__title-icon" aria-hidden="true">
+            <FaCashRegister />
+          </span>
+          <span>
+            <h2>Turno y corte</h2>
+            <small>Administra la apertura, movimientos y cierre de la caja.</small>
+          </span>
+        </div>
         {activeShiftDetail ? (
           <span className="cash-register-panel__badge">POS activo</span>
         ) : (
@@ -130,9 +139,9 @@ export function CashRegisterPanel({
         <section className="cash-register-card cash-register-card--setup">
           <div className="cash-register-card__header">
             <h3>Seleccionar POS</h3>
-            <span className="cash-register-panel__helper">
-              {loadingShift ? "Revisando turno..." : activeShiftDetail ? "Turno abierto" : "Sin turno"}
-            </span>
+            {loadingShift ? (
+              <span className="cash-register-panel__helper">Revisando turno...</span>
+            ) : null}
           </div>
           <label>
             Caja POS
@@ -170,7 +179,7 @@ export function CashRegisterPanel({
               </div>
               <button
                 type="button"
-                className="cash-register-card__action"
+                className="cash-register-card__action cash-register-card__action--open"
                 onClick={onOpenShift}
                 disabled={loading || loadingShift || !selectedCashierId}
               >
@@ -189,19 +198,19 @@ export function CashRegisterPanel({
         {activeShiftDetail ? (
           <>
           <div className="cash-register-panel__summary">
-            <article>
+            <article className="cash-register-summary-card cash-register-summary-card--opening">
               <span>Fondo inicial</span>
               <strong>{formatMoney(activeShiftDetail.summary.openingAmount)}</strong>
             </article>
-            <article>
+            <article className="cash-register-summary-card cash-register-summary-card--income">
               <span>Ingresos</span>
               <strong>{formatMoney(activeShiftDetail.summary.totalIn)}</strong>
             </article>
-            <article>
+            <article className="cash-register-summary-card cash-register-summary-card--expense">
               <span>Salidas</span>
               <strong>{formatMoney(activeShiftDetail.summary.totalOut)}</strong>
             </article>
-            <article>
+            <article className="cash-register-summary-card cash-register-summary-card--expected">
               <span>Esperado</span>
               <strong>{formatMoney(activeShiftDetail.summary.expectedAmount)}</strong>
             </article>
@@ -248,7 +257,7 @@ export function CashRegisterPanel({
               </div>
               <button
                 type="button"
-                className="cash-register-card__action"
+                className="cash-register-card__action cash-register-card__action--movement"
                 onClick={onRegisterManualMovement}
                 disabled={loading}
               >
