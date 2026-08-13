@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   FaBroadcastTower,
+  FaChevronLeft,
+  FaChevronRight,
   FaDoorOpen,
   FaExclamationTriangle,
   FaFilter,
@@ -124,6 +126,7 @@ export function OperationalLogsPage() {
   const [logs, setLogs] = useState<OperationalLogItem[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [summary, setSummary] = useState<OperationalLogsSummary>();
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -161,8 +164,15 @@ export function OperationalLogsPage() {
 
         if (!active) return;
 
+        const nextTotalPages = Math.max(1, result.totalPages);
+        if (page > nextTotalPages) {
+          setPage(nextTotalPages);
+          return;
+        }
+
         setLogs(result.items);
-        setTotalPages(result.totalPages);
+        setTotalPages(nextTotalPages);
+        setTotalItems(result.total);
         setSummary(result.summary);
         setError(
           result.error
@@ -192,6 +202,22 @@ export function OperationalLogsPage() {
   const visibleLogs = useMemo(() => {
     return filterOperationalLogsByQuickFilter(logs, quickFilter);
   }, [logs, quickFilter]);
+
+  const paginationItems = useMemo(() => {
+    const items: Array<number | "dots-left" | "dots-right"> = [1];
+    if (totalPages <= 1) return items;
+
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+    if (start > 2) items.push("dots-left");
+    for (let current = start; current <= end; current += 1) items.push(current);
+    if (end < totalPages - 1) items.push("dots-right");
+    items.push(totalPages);
+    return items;
+  }, [page, totalPages]);
+
+  const pageStart = totalItems === 0 ? 0 : (page - 1) * 20 + 1;
+  const pageEnd = totalItems === 0 ? 0 : Math.min(page * 20, totalItems);
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -387,21 +413,54 @@ export function OperationalLogsPage() {
         </section>
       )}
 
-      <section className="operational-logs-pagination">
-        <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={page <= 1}>
-          Anterior
-        </button>
-        <span>
-          Pagina {page} de {totalPages}
-        </span>
-        <button
-          type="button"
-          onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-          disabled={page >= totalPages}
-        >
-          Siguiente
-        </button>
-      </section>
+      {totalItems > 0 ? (
+        <nav className="operational-logs-pagination" aria-label="Paginacion de bitacora">
+          <p>
+            Mostrando <strong>{pageStart}-{pageEnd}</strong> de <strong>{totalItems}</strong> registros
+          </p>
+          {totalPages > 1 ? (
+            <div className="operational-logs-pagination__controls">
+              <button
+                type="button"
+                className="operational-logs-pagination__nav"
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                disabled={page <= 1 || isRefreshing}
+                aria-label="Pagina anterior"
+              >
+                <FaChevronLeft />
+              </button>
+              <div className="operational-logs-pagination__pages">
+                {paginationItems.map((item, index) =>
+                  typeof item === "number" ? (
+                    <button
+                      key={`${item}-${index}`}
+                      type="button"
+                      className={item === page ? "is-active" : ""}
+                      onClick={() => setPage(item)}
+                      disabled={isRefreshing}
+                      aria-current={item === page ? "page" : undefined}
+                      aria-label={`Pagina ${item}`}
+                    >
+                      {item}
+                    </button>
+                  ) : (
+                    <span key={item} aria-hidden="true">…</span>
+                  ),
+                )}
+              </div>
+              <button
+                type="button"
+                className="operational-logs-pagination__nav"
+                onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+                disabled={page >= totalPages || isRefreshing}
+                aria-label="Pagina siguiente"
+              >
+                <FaChevronRight />
+              </button>
+            </div>
+          ) : null}
+        </nav>
+      ) : null}
 
       <OperationalLogDetailModal
         open={Boolean(selectedLog)}

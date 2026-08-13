@@ -18,6 +18,7 @@ export type OperationalQuickFilterId = (typeof QUICK_FILTERS)[number]["id"];
 
 export type OperationalLogsFlowResult = {
   items: OperationalLogItem[];
+  total: number;
   totalPages: number;
   summary?: OperationalLogsSummary;
   error: string;
@@ -42,6 +43,7 @@ export const loadOperationalLogsFlow = async (input: {
 
     return {
       items: result.items,
+      total: Math.max(0, Number(result.total ?? 0)),
       totalPages: Math.max(1, Number(result.totalPages ?? 1)),
       summary: result.summary,
       error: "",
@@ -49,6 +51,7 @@ export const loadOperationalLogsFlow = async (input: {
   } catch (error) {
     return {
       items: [],
+      total: 0,
       totalPages: 1,
       summary: undefined,
       error:
