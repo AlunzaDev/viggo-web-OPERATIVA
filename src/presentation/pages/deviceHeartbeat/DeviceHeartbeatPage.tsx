@@ -4,8 +4,10 @@ import "leaflet/dist/leaflet.css";
 import {
   FaBroadcastTower,
   FaCashRegister,
+  FaDesktop,
   FaDoorOpen,
   FaExclamationTriangle,
+  FaExternalLinkAlt,
   FaHashtag,
   FaLayerGroup,
   FaMap,
@@ -18,9 +20,11 @@ import {
   FaServer,
   FaSignOutAlt,
   FaSyncAlt,
+  FaTerminal,
   FaWifi,
 } from "react-icons/fa";
 import { CopyableId } from "../../components/shared/CopyableId";
+import { RemoteSupportViewerModal } from "../../components/remoteSupport/RemoteSupportViewerModal";
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { type ParkingEntity } from "../../../domain/entities/parking.entity";
 import { type ModuleEntity } from "../../../domain/entities/module.entity";
@@ -57,6 +61,17 @@ import {
   toHeartbeatMapLatLng,
 } from "./device-heartbeat.map";
 import { normalizeOperationalUserMessage } from "../../services/operations/operational-state.presenter";
+import { useRemoteSupportPrewarm } from "../../hooks/remoteSupport/useRemoteSupportPrewarm";
+import {
+  getRemoteSupportLinks,
+  getRemoteSupportProviderLabel,
+} from "../../services/remoteSupport/remote-support.presenter";
+import {
+  isEmbeddedRemoteSupportViewMode,
+  MESH_CENTRAL_DESKTOP_VIEW_MODE,
+  MESH_CENTRAL_TERMINAL_VIEW_MODE,
+  type RemoteSupportViewMode,
+} from "../../services/remoteSupport/remote-support-view-mode";
 import "./DeviceHeartbeatPage.css";
 const MAPTILER_API_KEY = String(import.meta.env.VITE_MAPTILER_API_KEY ?? "").trim();
 const OPEN_STREET_MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -85,7 +100,7 @@ const TILE_LAYERS = {
     icon: FaMap,
   },
   satellite: {
-    label: "Satelite",
+    label: "Satélite",
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     attribution:
       "Tiles &copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community",
@@ -131,6 +146,9 @@ const formatCoordinates = (coordinates?: [number, number]) =>
     ? `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
     : "Sin coordenadas";
 
+const openSupportLauncherTab = (url: string) =>
+  window.open(url, "_blank", "noopener,noreferrer");
+
 
 export function DeviceHeartbeatPage() {
   usePageTitle("Heartbeat");
@@ -163,6 +181,14 @@ export function DeviceHeartbeatPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [remoteSupportActionMessage, setRemoteSupportActionMessage] = useState<string | null>(null);
+  const [remoteViewer, setRemoteViewer] = useState<{
+    open: boolean;
+    viewMode: RemoteSupportViewMode;
+  }>({
+    open: false,
+    viewMode: MESH_CENTRAL_DESKTOP_VIEW_MODE,
+  });
   const [pendingFocusModuleId, setPendingFocusModuleId] = useState<string | null>(null);
   const [tileLayerKey, setTileLayerKey] = useState<TileLayerKey>("street");
   const mapElementRef = useRef<HTMLDivElement | null>(null);
@@ -230,6 +256,27 @@ export function DeviceHeartbeatPage() {
     () => getHeartbeatDetailModule(modules, detailModuleId),
     [detailModuleId, modules],
   );
+
+  const inheritedRemoteSupportBaseUrl = linkedProject?.remoteSupport?.enabled
+    ? linkedProject.remoteSupport.baseUrl
+    : "";
+  const remoteSupportLinks = useMemo(
+    () =>
+      getRemoteSupportLinks(detailModule?.remoteSupport, {
+        inheritedBaseUrl: inheritedRemoteSupportBaseUrl,
+      }),
+    [detailModule?.remoteSupport, inheritedRemoteSupportBaseUrl],
+  );
+  const { prewarmUrl, prewarmDesktopUrl, prewarmTerminalUrl } = useRemoteSupportPrewarm(
+    linkedProject?.id ?? "",
+    detailModule,
+    inheritedRemoteSupportBaseUrl,
+  );
+  const activeRemoteTargetUrl =
+    remoteViewer.viewMode === MESH_CENTRAL_TERMINAL_VIEW_MODE
+      ? prewarmTerminalUrl
+      : prewarmDesktopUrl;
+  const activeRemoteEmbedUrl = activeRemoteTargetUrl || prewarmUrl;
 
   const mapMarkers = useMemo(
     () => getHeartbeatMapMarkers(filteredModules),
@@ -520,6 +567,42 @@ export function DeviceHeartbeatPage() {
     setSelectedModuleId(moduleId);
     setDetailModuleId(moduleId);
     setPendingFocusModuleId(moduleId);
+    setRemoteSupportActionMessage(null);
+  };
+
+  const handleOpenRemoteSupport = (module: ModuleEntity, viewMode: number) => {
+    const targetUrl =
+      viewMode === MESH_CENTRAL_TERMINAL_VIEW_MODE
+        ? prewarmTerminalUrl
+        : prewarmDesktopUrl;
+
+    if (isEmbeddedRemoteSupportViewMode(viewMode) && (targetUrl || prewarmUrl)) {
+      setRemoteViewer({
+        open: true,
+        viewMode: viewMode as RemoteSupportViewMode,
+      });
+      setRemoteSupportActionMessage(
+        `Mostrando ${
+          viewMode === MESH_CENTRAL_TERMINAL_VIEW_MODE ? "terminal remota" : "pantalla remota"
+        } de ${module.nombre}.`,
+      );
+      return;
+    }
+
+    const params = new URLSearchParams({
+      viewMode: String(viewMode),
+      moduleName: module.nombre,
+    });
+    const launcherUrl = `/soporte-remoto/${module.id}?${params.toString()}`;
+    const remoteTab = openSupportLauncherTab(launcherUrl);
+
+    if (!remoteTab) {
+      setRemoteSupportActionMessage("El navegador bloqueó la pestaña nueva de soporte remoto.");
+      return;
+    }
+
+    remoteTab.focus?.();
+    setRemoteSupportActionMessage(`Preparando soporte remoto para ${module.nombre}.`);
   };
 
   const handleZoomIn = () => {
@@ -791,7 +874,7 @@ export function DeviceHeartbeatPage() {
             <FaBroadcastTower />
             <h2>Sin proyecto vinculado</h2>
             <p>
-              Esta instalacion todavia no tiene un proyecto local listo para
+              Esta instalación todavía no tiene un proyecto local listo para
               monitoreo.
             </p>
           </section>
@@ -805,7 +888,11 @@ export function DeviceHeartbeatPage() {
           detailModule?.nombre || detailModule?.identificador || "Dispositivo"
         }
         className="device-heartbeat-detail-modal"
-        onClose={() => setDetailModuleId(null)}
+        onClose={() => {
+          setDetailModuleId(null);
+          setRemoteViewer((current) => ({ ...current, open: false }));
+          setRemoteSupportActionMessage(null);
+        }}
         showEditAction={false}
       >
         {detailModule ? (
@@ -856,7 +943,7 @@ export function DeviceHeartbeatPage() {
                   <p>{detailModule.identificador}</p>
                 </article>
                 <article className="form-group admin-crud-detail-item">
-                  <label>Vinculacion</label>
+                  <label>Vinculación</label>
                   <p>{getBindingLabel(detailModule)}</p>
                 </article>
                 <article className="form-group modal-field-full admin-crud-detail-item">
@@ -915,7 +1002,7 @@ export function DeviceHeartbeatPage() {
             <section className="modal-form-section">
               <div className="modal-section-header">
                 <FaMapMarkerAlt className="modal-section-icon" />
-                <h3 className="modal-section-title">Red y ubicacion</h3>
+                <h3 className="modal-section-title">Red y ubicación</h3>
               </div>
 
               <div className="modal-section-grid">
@@ -936,16 +1023,78 @@ export function DeviceHeartbeatPage() {
                   </p>
                 </article>
                 <article className="form-group admin-crud-detail-item">
-                  <label>Ubicacion</label>
+                  <label>Ubicación</label>
                   <p>
                     {detailModule.ubicacion ||
                       detailModule.deviceRuntime?.locationLabel ||
-                      "Sin ubicacion"}
+                      "Sin ubicación"}
                   </p>
                 </article>
                 <article className="form-group admin-crud-detail-item">
                   <label>Coordenadas</label>
                   <p>{formatCoordinates(detailModule.coordinates)}</p>
+                </article>
+              </div>
+            </section>
+
+            <section className="modal-form-section">
+              <div className="modal-section-header">
+                <FaDesktop className="modal-section-icon" />
+                <h3 className="modal-section-title">Soporte remoto</h3>
+              </div>
+
+              <div className="modal-section-grid">
+                <article className="form-group admin-crud-detail-item">
+                  <label>Proveedor</label>
+                  <p>
+                    {detailModule.remoteSupport?.enabled
+                      ? getRemoteSupportProviderLabel(detailModule.remoteSupport.provider)
+                      : "Inactivo"}
+                  </p>
+                </article>
+                <article className="form-group admin-crud-detail-item">
+                  <label>Equipo remoto</label>
+                  <p>
+                    {detailModule.remoteSupport?.deviceName ||
+                      detailModule.remoteSupport?.deviceId ||
+                      "Sin equipo"}
+                  </p>
+                </article>
+                <article className="form-group modal-field-full admin-crud-detail-item">
+                  <label>Acciones</label>
+                  {remoteSupportLinks.length ? (
+                    <div className="device-heartbeat-device-card__actions">
+                      {remoteSupportLinks.map((link) => {
+                        const Icon =
+                          link.kind === "terminal"
+                            ? FaTerminal
+                            : link.kind === "desktop"
+                              ? FaDesktop
+                              : FaExternalLinkAlt;
+
+                        return (
+                          <button
+                            key={`${link.kind}-${link.viewMode}`}
+                            type="button"
+                            className={`device-heartbeat-device-card__action${
+                              link.kind === "primary"
+                                ? " device-heartbeat-device-card__action--primary"
+                                : ""
+                            }`}
+                            onClick={() => handleOpenRemoteSupport(detailModule, link.viewMode)}
+                          >
+                            <Icon />
+                            {link.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p>Sin soporte remoto configurado.</p>
+                  )}
+                  {remoteSupportActionMessage ? (
+                    <p className="admin-crud-detail-muted">{remoteSupportActionMessage}</p>
+                  ) : null}
                 </article>
               </div>
             </section>
@@ -975,7 +1124,7 @@ export function DeviceHeartbeatPage() {
                           <FaWifi /> {submodule.ip || "Sin IP"}
                         </small>
                         <small>
-                          <FaMapMarkerAlt /> {submodule.ubicacion || "Sin ubicacion"}
+                          <FaMapMarkerAlt /> {submodule.ubicacion || "Sin ubicación"}
                         </small>
                         <small>
                           <FaMicrochip /> {submodule.mac || "Sin MAC"}
@@ -995,6 +1144,15 @@ export function DeviceHeartbeatPage() {
           </>
         ) : null}
       </UniqueModalBase>
+
+      <RemoteSupportViewerModal
+        open={remoteViewer.open}
+        viewMode={remoteViewer.viewMode}
+        moduleName={detailModule?.nombre}
+        embedUrl={activeRemoteEmbedUrl}
+        externalUrl={activeRemoteTargetUrl}
+        onClose={() => setRemoteViewer((current) => ({ ...current, open: false }))}
+      />
     </main>
   );
 }

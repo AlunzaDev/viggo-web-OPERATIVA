@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { FaExternalLinkAlt, FaPlus, FaTimes } from "react-icons/fa";
+import { useEffect, useMemo, useState } from "react";
+import { FaPlus } from "react-icons/fa";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ModuleEntity,
@@ -11,6 +11,7 @@ import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
 import { EmptyState } from "../../components/shared/EmptyState";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { TableBase } from "../../components/shared/tables/TableBase";
+import { RemoteSupportViewerModal } from "../../components/remoteSupport/RemoteSupportViewerModal";
 import { useModules } from "../../hooks/modules/useModules";
 import { useParkings } from "../../hooks/parkings/useParkings";
 import { useRemoteSupportPrewarm } from "../../hooks/remoteSupport/useRemoteSupportPrewarm";
@@ -28,6 +29,12 @@ import {
   getBindingStatusClassName,
   getBindingStatusLabel,
 } from "../../utils/modules/moduleDetail.utils";
+import {
+  isEmbeddedRemoteSupportViewMode,
+  MESH_CENTRAL_DESKTOP_VIEW_MODE,
+  MESH_CENTRAL_TERMINAL_VIEW_MODE,
+  type RemoteSupportViewMode,
+} from "../../services/remoteSupport/remote-support-view-mode";
 import "../../styles/adminCrud/AdminCrud.css";
 
 type ProjectRouteState = {
@@ -36,69 +43,9 @@ type ProjectRouteState = {
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 const ENABLE_MODULE_MUTATIONS = false;
-const MESH_CENTRAL_DESKTOP_VIEW_MODE = 11;
 
-type MeshCentralWindow = Window & {
-  currentNode?: unknown;
-  desktop?: { State?: number };
-  connectDesktop?: (event: unknown, connectionType: number) => void;
-  deskToggleFull?: () => void;
-};
-
-const openSupportLauncherWindow = (url: string) => {
-  const width = Math.min(window.screen.availWidth || 1400, 1400);
-  const height = Math.min(window.screen.availHeight || 900, 900);
-  const left = Math.max(((window.screen.availWidth || width) - width) / 2, 0);
-  const top = Math.max(((window.screen.availHeight || height) - height) / 2, 0);
-  const features = [
-    "popup=yes",
-    "toolbar=no",
-    "location=no",
-    "menubar=no",
-    "status=no",
-    "scrollbars=yes",
-    "resizable=yes",
-    `width=${Math.floor(width)}`,
-    `height=${Math.floor(height)}`,
-    `left=${Math.floor(left)}`,
-    `top=${Math.floor(top)}`,
-  ].join(",");
-
-  return window.open(url, "viggo-remote-support", features);
-};
-
-const connectPrewarmedDesktop = (iframe: HTMLIFrameElement | null) => {
-  if (!iframe) return;
-
-  let attempts = 0;
-  const maxAttempts = 24;
-
-  const tryConnect = () => {
-    attempts += 1;
-
-    try {
-      const meshWindow = iframe.contentWindow as MeshCentralWindow | null;
-      const isReady =
-        Boolean(meshWindow?.currentNode) &&
-        typeof meshWindow?.connectDesktop === "function";
-
-      if (isReady) {
-        if ((meshWindow?.desktop?.State ?? 0) === 0) {
-          meshWindow?.connectDesktop?.(null, 1);
-        }
-        return;
-      }
-    } catch {
-      // MeshCentral puede seguir navegando dentro del iframe.
-    }
-
-    if (attempts < maxAttempts) {
-      window.setTimeout(tryConnect, 250);
-    }
-  };
-
-  window.setTimeout(tryConnect, 150);
-};
+const openSupportLauncherTab = (url: string) =>
+  window.open(url, "_blank", "noopener,noreferrer");
 
 export function ModulesPage() {
   const navigate = useNavigate();
@@ -126,8 +73,13 @@ export function ModulesPage() {
   const [search, setSearch] = useState("");
   const [resolvingRemoteSupportId, setResolvingRemoteSupportId] = useState<string | null>(null);
   const [remoteSupportActionMessage, setRemoteSupportActionMessage] = useState<string | null>(null);
-  const [isRemoteOverlayOpen, setIsRemoteOverlayOpen] = useState(false);
-  const prewarmFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const [remoteViewer, setRemoteViewer] = useState<{
+    open: boolean;
+    viewMode: RemoteSupportViewMode;
+  }>({
+    open: false,
+    viewMode: MESH_CENTRAL_DESKTOP_VIEW_MODE,
+  });
 
   const {
     modules,
@@ -161,11 +113,16 @@ export function ModulesPage() {
   const inheritedRemoteSupportBaseUrl = currentProject?.remoteSupport?.enabled
     ? currentProject.remoteSupport.baseUrl
     : "";
-  const { prewarmUrl, prewarmDesktopUrl } = useRemoteSupportPrewarm(
+  const { prewarmUrl, prewarmDesktopUrl, prewarmTerminalUrl } = useRemoteSupportPrewarm(
     projectId,
     selectedItem,
     inheritedRemoteSupportBaseUrl,
   );
+  const activeRemoteTargetUrl =
+    remoteViewer.viewMode === MESH_CENTRAL_TERMINAL_VIEW_MODE
+      ? prewarmTerminalUrl
+      : prewarmDesktopUrl;
+  const activeRemoteEmbedUrl = activeRemoteTargetUrl || prewarmUrl;
 
   const selectedProjectName = useMemo(
     () =>
@@ -316,31 +273,21 @@ export function ModulesPage() {
   };
 
   const handleOpenRemoteSupport = async (item: ModuleEntity, viewMode: number) => {
-    if (viewMode === MESH_CENTRAL_DESKTOP_VIEW_MODE && prewarmDesktopUrl) {
-      setIsRemoteOverlayOpen(true);
-      setRemoteSupportActionMessage(`Mostrando pantalla remota de ${item.nombre}.`);
-      window.setTimeout(() => {
-        try {
-          const meshWindow = prewarmFrameRef.current?.contentWindow as MeshCentralWindow | null;
-          const meshDocument = prewarmFrameRef.current?.contentDocument;
+    const targetUrl =
+      viewMode === MESH_CENTRAL_TERMINAL_VIEW_MODE
+        ? prewarmTerminalUrl
+        : prewarmDesktopUrl;
 
-          if (meshWindow?.desktop?.State === 0) {
-            meshWindow.connectDesktop?.(null, 1);
-          }
-
-          window.setTimeout(() => {
-            if (typeof meshWindow?.deskToggleFull === "function") {
-              meshWindow.deskToggleFull();
-            } else {
-              meshDocument
-                ?.querySelector<HTMLElement>("[onclick*='deskToggleFull']")
-                ?.click();
-            }
-          }, 250);
-        } catch {
-          // Si MeshCentral aun esta navegando, el usuario puede usar Connect manualmente.
-        }
-      }, 100);
+    if (isEmbeddedRemoteSupportViewMode(viewMode) && (targetUrl || prewarmUrl)) {
+      setRemoteViewer({
+        open: true,
+        viewMode: viewMode as RemoteSupportViewMode,
+      });
+      setRemoteSupportActionMessage(
+        `Mostrando ${
+          viewMode === MESH_CENTRAL_TERMINAL_VIEW_MODE ? "terminal remota" : "pantalla remota"
+        } de ${item.nombre}.`,
+      );
       return;
     }
 
@@ -349,18 +296,19 @@ export function ModulesPage() {
       moduleName: item.nombre,
     });
     const launcherUrl = `/soporte-remoto/${item.id}?${params.toString()}`;
-    const remoteWindow = openSupportLauncherWindow(launcherUrl);
+    const remoteWindow = openSupportLauncherTab(launcherUrl);
 
     if (!remoteWindow) {
-      setRemoteSupportActionMessage("El navegador bloqueo la ventana emergente de soporte remoto.");
+      setRemoteSupportActionMessage("El navegador bloqueo la pestaña nueva de soporte remoto.");
       return;
     }
 
-    remoteWindow.focus();
+    remoteWindow.focus?.();
     setRemoteSupportActionMessage(`Preparando soporte remoto para ${item.nombre}.`);
   };
 
   return (
+    <>
     <main className="admin-crud-page">
       <PageHeader
         eyebrow="Modulos del proyecto"
@@ -483,7 +431,7 @@ export function ModulesPage() {
           setSelectedRequest(request);
         }}
         onClose={() => {
-          setIsRemoteOverlayOpen(false);
+          setRemoteViewer((current) => ({ ...current, open: false }));
           setSelectedItem(null);
           setSelectedRequest(null);
           setRemoteSupportActionMessage(null);
@@ -514,52 +462,16 @@ export function ModulesPage() {
         onSubmit={save}
       />
 
-      <div
-        aria-hidden={!isRemoteOverlayOpen}
-        className={`remote-support-prewarm${isRemoteOverlayOpen ? " is-active" : ""}`}
-      >
-        {isRemoteOverlayOpen ? (
-          <div className="remote-support-prewarm__toolbar">
-            <div>
-              <span>Sesion preparada</span>
-              <strong>{selectedItem?.nombre ?? "Pantalla remota"}</strong>
-            </div>
-            <div className="remote-support-prewarm__actions">
-              {prewarmDesktopUrl ? (
-                <a
-                  className="remote-support-prewarm__button"
-                  href={prewarmDesktopUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <FaExternalLinkAlt />
-                  Abrir externo
-                </a>
-              ) : null}
-              <button
-                type="button"
-                className="remote-support-prewarm__button"
-                onClick={() => setIsRemoteOverlayOpen(false)}
-              >
-                <FaTimes />
-                Cerrar
-              </button>
-            </div>
-          </div>
-        ) : null}
-        {prewarmUrl ? (
-          <iframe
-            ref={prewarmFrameRef}
-            src={prewarmUrl}
-            title="Precalentamiento soporte remoto"
-            tabIndex={-1}
-            onLoad={() => {
-              if (!selectedItem || !prewarmDesktopUrl) return;
-              connectPrewarmedDesktop(prewarmFrameRef.current);
-            }}
-          />
-        ) : null}
-      </div>
+      <RemoteSupportViewerModal
+        open={remoteViewer.open}
+        viewMode={remoteViewer.viewMode}
+        moduleName={selectedItem?.nombre}
+        embedUrl={activeRemoteEmbedUrl}
+        externalUrl={activeRemoteTargetUrl}
+        onClose={() => setRemoteViewer((current) => ({ ...current, open: false }))}
+      />
+
     </main>
+    </>
   );
 }
