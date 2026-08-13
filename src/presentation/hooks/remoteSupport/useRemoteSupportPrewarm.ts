@@ -5,6 +5,7 @@ import { getRemoteSupportLinks } from "../../services/remoteSupport/remote-suppo
 
 const PREWARM_TTL_MS = 60_000;
 const DESKTOP_VIEW_MODE = 11;
+const TERMINAL_VIEW_MODE = 12;
 
 type PrewarmStatus = "idle" | "warming" | "ready" | "failed";
 
@@ -49,16 +50,25 @@ export function useRemoteSupportPrewarm(
     [projectId],
   );
 
-  const desktopUrl = useMemo(() => {
-    if (!isRemoteSupportReady(module)) return "";
+  const remoteSupportUrls = useMemo(() => {
+    if (!isRemoteSupportReady(module)) {
+      return { desktopUrl: "", terminalUrl: "" };
+    }
 
-    const desktopLink = getRemoteSupportLinks(module?.remoteSupport, {
+    const links = getRemoteSupportLinks(module?.remoteSupport, {
       inheritedBaseUrl: projectRemoteSupportBaseUrl,
-    }).find((link) => link.viewMode === DESKTOP_VIEW_MODE);
+    });
+    const desktopLink = links.find((link) => link.viewMode === DESKTOP_VIEW_MODE);
+    const terminalLink = links.find((link) => link.viewMode === TERMINAL_VIEW_MODE);
 
-    return toEmbeddedMeshCentralUrl(desktopLink?.url ?? "");
+    return {
+      desktopUrl: toEmbeddedMeshCentralUrl(desktopLink?.url ?? ""),
+      terminalUrl: toEmbeddedMeshCentralUrl(terminalLink?.url ?? ""),
+    };
   }, [module, projectRemoteSupportBaseUrl]);
 
+  const desktopUrl = remoteSupportUrls.desktopUrl;
+  const terminalUrl = remoteSupportUrls.terminalUrl;
   const activeUrl = desktopUrl || loginUrl;
 
   useEffect(() => {
@@ -116,6 +126,7 @@ export function useRemoteSupportPrewarm(
     prewarmUrl: activeUrl,
     prewarmLoginUrl: loginUrl,
     prewarmDesktopUrl: desktopUrl,
+    prewarmTerminalUrl: terminalUrl,
     prewarmStatus: status,
   };
 }

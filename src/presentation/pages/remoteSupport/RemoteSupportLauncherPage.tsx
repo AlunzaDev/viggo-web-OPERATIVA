@@ -42,29 +42,10 @@ const normalizeViewMode = (value: string | null) => {
   return [10, 11, 12].includes(parsed) ? parsed : 10;
 };
 
-const openRemoteSupportPopup = (url: string) => {
+const openRemoteSupportTab = (url: string) => {
   if (!url) return;
 
-  const width = Math.min(window.screen.availWidth || 1400, 1400);
-  const height = Math.min(window.screen.availHeight || 900, 900);
-  const left = Math.max(((window.screen.availWidth || width) - width) / 2, 0);
-  const top = Math.max(((window.screen.availHeight || height) - height) / 2, 0);
-
-  const features = [
-    "popup=yes",
-    "toolbar=no",
-    "location=no",
-    "menubar=no",
-    "status=no",
-    "scrollbars=yes",
-    "resizable=yes",
-    `width=${Math.floor(width)}`,
-    `height=${Math.floor(height)}`,
-    `left=${Math.floor(left)}`,
-    `top=${Math.floor(top)}`,
-  ].join(",");
-
-  window.open(url, "viggo-remote-support", features)?.focus();
+  window.open(url, "_blank", "noopener,noreferrer")?.focus();
 };
 
 type MeshCentralWindow = Window & {
@@ -355,7 +336,7 @@ export function RemoteSupportLauncherPage() {
               <button
                 type="button"
                 className="remote-support-launcher__button"
-                onClick={() => openRemoteSupportPopup(targetUrl)}
+                onClick={() => openRemoteSupportTab(targetUrl)}
               >
                 Abrir externo
               </button>
