@@ -3,6 +3,36 @@
   gap: 14px;
 }
 
+.cash-register-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cash-register-panel__title > span:last-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cash-register-panel__title small {
+  color: #698072;
+  font-size: 0.82rem;
+}
+
+.cash-register-panel__title-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  color: #1d6a40;
+  background: linear-gradient(145deg, rgba(46, 106, 69, 0.14), rgba(46, 106, 69, 0.06));
+  border: 1px solid rgba(46, 106, 69, 0.12);
+}
+
 .cash-register-panel__helper {
   color: #698072;
   font-size: 0.88rem;
@@ -34,9 +64,32 @@
 }
 
 .cash-register-panel__summary article {
+  position: relative;
+  overflow: hidden;
   border-radius: 18px;
   padding: 12px;
   background: #f4f7f4;
+  border: 1px solid rgba(29, 84, 54, 0.06);
+}
+
+.cash-register-summary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #84958a;
+}
+
+.cash-register-summary-card--income::before {
+  background: #2f9b59;
+}
+
+.cash-register-summary-card--expense::before {
+  background: #c06464;
+}
+
+.cash-register-summary-card--expected::before {
+  background: #c8932d;
 }
 
 .cash-register-panel__summary span {
@@ -69,7 +122,10 @@
 }
 
 .cash-register-card--setup {
-  background: #f8fbf8;
+  background:
+    linear-gradient(135deg, rgba(46, 106, 69, 0.055), transparent 55%),
+    #f8fbf8;
+  border-color: rgba(46, 106, 69, 0.13);
 }
 
 .cash-register-card--preview {
@@ -139,12 +195,20 @@
 }
 
 .cash-register-card input {
+  box-sizing: border-box;
   width: 100%;
   border: 1px solid #d8dfd8;
   border-radius: 14px;
   padding: 11px 14px;
   background: #fff;
   color: #173624;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.cash-register-card input:focus {
+  border-color: #2e6a45;
+  box-shadow: 0 0 0 3px rgba(46, 106, 69, 0.12);
 }
 
 .cash-register-card .vcombo {
@@ -224,6 +288,62 @@
 .cash-register-card__action {
   background: linear-gradient(135deg, #1d5436 0%, #2e6a45 100%);
   color: #f7f5ef;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 7px 18px rgba(29, 84, 54, 0.18);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.cash-register-card__action:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(29, 84, 54, 0.24);
+}
+
+.cash-register-card__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.cash-register-card__action--movement {
+  justify-self: start;
+}
+
+.cash-register-card__action--open {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  justify-self: start;
+  overflow: hidden;
+  border-color: rgba(255, 255, 255, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 52%),
+    linear-gradient(135deg, rgba(47, 123, 76, 0.92), rgba(27, 82, 50, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 22px rgba(29, 84, 54, 0.22);
+  backdrop-filter: blur(10px) saturate(1.12);
+}
+
+.cash-register-card__action--open::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 18%, rgba(255, 255, 255, 0.1) 48%, transparent 72%);
+  transform: translateX(-70%);
+  transition: transform 240ms ease;
+  pointer-events: none;
+}
+
+.cash-register-card__action--open:not(:disabled):hover::after {
+  transform: translateX(70%);
+}
+
+.cash-register-card__action--open svg {
+  opacity: 0.92;
 }
 
 .cash-register-card__action--secondary {
@@ -232,8 +352,9 @@
 }
 
 .cash-register-card__action--danger {
-  background: #faecec;
-  color: #862f2f;
+  background: linear-gradient(135deg, #9d4646, #7c3030);
+  color: #fff7f7;
+  box-shadow: 0 7px 18px rgba(124, 48, 48, 0.18);
 }
 
 .cash-register-cut-modal {
@@ -384,6 +505,18 @@
   color: rgba(234, 241, 255, 0.7);
 }
 
+:root[data-theme="dark"] .cash-register-panel__title small,
+:root:not([data-theme="light"]) .cash-register-panel__title small {
+  color: rgba(234, 241, 255, 0.62);
+}
+
+:root[data-theme="dark"] .cash-register-panel__title-icon,
+:root:not([data-theme="light"]) .cash-register-panel__title-icon {
+  color: #91e9b1;
+  background: rgba(43, 164, 94, 0.12);
+  border-color: rgba(123, 224, 161, 0.14);
+}
+
 :root[data-theme="dark"] .cash-register-panel__summary span,
 :root:not([data-theme="light"]) .cash-register-panel__summary span,
 :root[data-theme="dark"] .cash-register-card label,
@@ -403,6 +536,32 @@
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
   color: #eef6ef;
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .cash-register-card input:focus,
+:root:not([data-theme="light"]) .cash-register-card input:focus {
+  border-color: rgba(123, 224, 161, 0.55);
+  box-shadow: 0 0 0 3px rgba(43, 164, 94, 0.14);
+}
+
+:root[data-theme="dark"] .cash-register-card--setup,
+:root:not([data-theme="light"]) .cash-register-card--setup {
+  background:
+    linear-gradient(135deg, rgba(43, 164, 94, 0.08), transparent 58%),
+    rgba(255, 255, 255, 0.025);
+  border-color: rgba(123, 224, 161, 0.12);
+}
+
+:root[data-theme="dark"] .cash-register-card__action--open,
+:root:not([data-theme="light"]) .cash-register-card__action--open {
+  border-color: rgba(145, 233, 177, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 52%),
+    linear-gradient(135deg, rgba(47, 139, 82, 0.68), rgba(23, 82, 48, 0.76));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.26);
 }
 
 :root[data-theme="dark"] .cash-register-card__denoms,
