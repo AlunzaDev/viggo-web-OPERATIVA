@@ -43,4 +43,8 @@ export class AuthRepositoryImpl implements AuthRepository {
   changePassword(params: ChangePasswordParams): Promise<string> {
     return this.datasource.changePassword(params);
   }
+
+  updateBarrierBlasterHighScore(score: number): Promise<number> {
+    return this.datasource.updateBarrierBlasterHighScore(score);
+  }
 }

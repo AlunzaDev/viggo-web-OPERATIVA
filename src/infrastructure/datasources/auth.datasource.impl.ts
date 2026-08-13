@@ -182,6 +182,24 @@ export class AuthDataSourceImpl implements AuthDataSource {
     return Promise.resolve();
   }
 
+  async updateBarrierBlasterHighScore(score: number): Promise<number> {
+    const { data } = await api.patch(
+      "/api/auth/me/barrier-blaster-high-score",
+      { score },
+    );
+
+    if (!isRecord(data)) {
+      throw new Error("El servidor no devolvio el record actualizado");
+    }
+
+    const highScore = data.barrierBlasterHighScore;
+    if (typeof highScore !== "number" || !Number.isFinite(highScore)) {
+      throw new Error("El servidor no devolvio un record valido");
+    }
+
+    return Math.max(0, Math.floor(highScore));
+  }
+
   async forgotPassword({ email }: ForgotPasswordParams): Promise<string> {
     try {
       const { data } = await api.post("/api/auth/forgot-password", {

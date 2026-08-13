@@ -36,4 +36,5 @@ export interface AuthDataSource {
   resendValidationEmail(params: ResendValidationEmailParams): Promise<string>;
   resetPassword(params: ResetPasswordParams): Promise<string>;
   changePassword(params: ChangePasswordParams): Promise<string>;
+  updateBarrierBlasterHighScore(score: number): Promise<number>;
 }

@@ -14,6 +14,7 @@ export interface AuthUserEntity {
   permissionProfileId?: string;
   modules: AppModuleAccess[];
   allowedApps: UserAppAccess[];
+  barrierBlasterHighScore: number;
 }
 
 const normalizeParkingIds = (value: unknown): string[] => {
@@ -98,5 +99,11 @@ export const authUserFromObject = (
         : undefined,
     modules: normalizeUserModules(object.modules),
     allowedApps: normalizeUserApps(object.allowedApps),
+    barrierBlasterHighScore:
+      typeof object.barrierBlasterHighScore === "number" &&
+      Number.isFinite(object.barrierBlasterHighScore) &&
+      object.barrierBlasterHighScore > 0
+        ? Math.floor(object.barrierBlasterHighScore)
+        : 0,
   };
 };
