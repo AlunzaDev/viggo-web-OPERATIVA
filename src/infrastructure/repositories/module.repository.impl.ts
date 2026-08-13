@@ -54,4 +54,8 @@ export class ModuleRepositoryImpl implements ModuleRepository {
     createRemoteSupportSessionUrl(id: string, viewMode?: number): Promise<ModuleRemoteSupportSessionUrl> {
         return this.datasource.createRemoteSupportSessionUrl(id, viewMode);
     }
+
+    createProjectRemoteSupportSessionUrl(projectId: string): Promise<ModuleRemoteSupportSessionUrl> {
+        return this.datasource.createProjectRemoteSupportSessionUrl(projectId);
+    }
 }

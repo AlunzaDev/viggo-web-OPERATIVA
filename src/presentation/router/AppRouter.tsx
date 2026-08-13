@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { MainLayout } from "../components/mainLayout/MainLayout";
 import { ScreenLoader } from "../components/shared/loading/ScreenLoader";
 import { useAuth } from "../context/auth/useAuth";
+import { RemoteSupportLauncherPage } from "../pages/remoteSupport/RemoteSupportLauncherPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { getDefaultAuthorizedPath } from "./module-routing";
 
@@ -49,11 +50,6 @@ const DeviceHeartbeatPage = lazy(async () => {
 const ModulesPage = lazy(async () => {
   const module = await import("../pages/modules/ModulesPage");
   return { default: module.ModulesPage };
-});
-
-const RemoteSupportLauncherPage = lazy(async () => {
-  const module = await import("../pages/remoteSupport/RemoteSupportLauncherPage");
-  return { default: module.RemoteSupportLauncherPage };
 });
 
 const OperationalLogsPage = lazy(async () => {
@@ -157,9 +153,7 @@ export function AppRouter() {
         path="/soporte-remoto/:moduleId"
         element={
           <ProtectedRoute modules={["modules"]}>
-            <Suspense fallback={<RouteFallback />}>
-              <RemoteSupportLauncherPage />
-            </Suspense>
+            <RemoteSupportLauncherPage />
           </ProtectedRoute>
         }
       />

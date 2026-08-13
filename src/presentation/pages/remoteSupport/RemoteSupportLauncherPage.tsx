@@ -8,6 +8,10 @@ import {
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { useModules } from "../../hooks/modules/useModules";
+import {
+  getRemoteSupportPrewarmKey,
+  hasWarmMeshCentralSession,
+} from "../../services/remoteSupport/remote-support-prewarm-cache";
 import "./RemoteSupportLauncherPage.css";
 
 const SUPPORT_MODE_LABELS: Record<number, string> = {
@@ -234,14 +238,25 @@ export function RemoteSupportLauncherPage() {
         const session = await createRemoteSupportSessionUrl(moduleId, viewMode);
 
         setTargetUrl(session.targetUrl);
+        const hasWarmSession = hasWarmMeshCentralSession(
+          getRemoteSupportPrewarmKey(moduleId),
+        );
         setStatus(
-          `Autenticando MeshCentral para ${session.deviceName || moduleName}...`,
+          hasWarmSession
+            ? `Usando sesion preparada para ${session.deviceName || moduleName}...`
+            : `Autenticando MeshCentral para ${session.deviceName || moduleName}...`,
         );
 
         window.setTimeout(() => {
           if (viewMode === 10) {
             setStatus(`Abriendo ${modeLabel}...`);
             window.location.href = session.targetUrl;
+            return;
+          }
+
+          if (hasWarmSession) {
+            setStatus(`Abriendo ${modeLabel} del equipo...`);
+            setEmbeddedUrl(toEmbeddedMeshCentralUrl(session.targetUrl));
             return;
           }
 

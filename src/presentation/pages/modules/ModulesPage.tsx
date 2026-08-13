@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FaExternalLinkAlt, FaPlus, FaTimes } from "react-icons/fa";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ModuleEntity,
@@ -13,6 +13,7 @@ import { PageHeader } from "../../components/shared/PageHeader";
 import { TableBase } from "../../components/shared/tables/TableBase";
 import { useModules } from "../../hooks/modules/useModules";
 import { useParkings } from "../../hooks/parkings/useParkings";
+import { useRemoteSupportPrewarm } from "../../hooks/remoteSupport/useRemoteSupportPrewarm";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { ModuleDetailModal } from "../../components/modules/ModuleDetailModal";
 import { ModuleModal } from "../../components/modules/ModuleModal";
@@ -35,6 +36,14 @@ type ProjectRouteState = {
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 const ENABLE_MODULE_MUTATIONS = false;
+const MESH_CENTRAL_DESKTOP_VIEW_MODE = 11;
+
+type MeshCentralWindow = Window & {
+  currentNode?: unknown;
+  desktop?: { State?: number };
+  connectDesktop?: (event: unknown, connectionType: number) => void;
+  deskToggleFull?: () => void;
+};
 
 const openSupportLauncherWindow = (url: string) => {
   const width = Math.min(window.screen.availWidth || 1400, 1400);
@@ -56,6 +65,39 @@ const openSupportLauncherWindow = (url: string) => {
   ].join(",");
 
   return window.open(url, "viggo-remote-support", features);
+};
+
+const connectPrewarmedDesktop = (iframe: HTMLIFrameElement | null) => {
+  if (!iframe) return;
+
+  let attempts = 0;
+  const maxAttempts = 24;
+
+  const tryConnect = () => {
+    attempts += 1;
+
+    try {
+      const meshWindow = iframe.contentWindow as MeshCentralWindow | null;
+      const isReady =
+        Boolean(meshWindow?.currentNode) &&
+        typeof meshWindow?.connectDesktop === "function";
+
+      if (isReady) {
+        if ((meshWindow?.desktop?.State ?? 0) === 0) {
+          meshWindow?.connectDesktop?.(null, 1);
+        }
+        return;
+      }
+    } catch {
+      // MeshCentral puede seguir navegando dentro del iframe.
+    }
+
+    if (attempts < maxAttempts) {
+      window.setTimeout(tryConnect, 250);
+    }
+  };
+
+  window.setTimeout(tryConnect, 150);
 };
 
 export function ModulesPage() {
@@ -84,6 +126,8 @@ export function ModulesPage() {
   const [search, setSearch] = useState("");
   const [resolvingRemoteSupportId, setResolvingRemoteSupportId] = useState<string | null>(null);
   const [remoteSupportActionMessage, setRemoteSupportActionMessage] = useState<string | null>(null);
+  const [isRemoteOverlayOpen, setIsRemoteOverlayOpen] = useState(false);
+  const prewarmFrameRef = useRef<HTMLIFrameElement | null>(null);
 
   const {
     modules,
@@ -117,6 +161,11 @@ export function ModulesPage() {
   const inheritedRemoteSupportBaseUrl = currentProject?.remoteSupport?.enabled
     ? currentProject.remoteSupport.baseUrl
     : "";
+  const { prewarmUrl, prewarmDesktopUrl } = useRemoteSupportPrewarm(
+    projectId,
+    selectedItem,
+    inheritedRemoteSupportBaseUrl,
+  );
 
   const selectedProjectName = useMemo(
     () =>
@@ -267,6 +316,34 @@ export function ModulesPage() {
   };
 
   const handleOpenRemoteSupport = async (item: ModuleEntity, viewMode: number) => {
+    if (viewMode === MESH_CENTRAL_DESKTOP_VIEW_MODE && prewarmDesktopUrl) {
+      setIsRemoteOverlayOpen(true);
+      setRemoteSupportActionMessage(`Mostrando pantalla remota de ${item.nombre}.`);
+      window.setTimeout(() => {
+        try {
+          const meshWindow = prewarmFrameRef.current?.contentWindow as MeshCentralWindow | null;
+          const meshDocument = prewarmFrameRef.current?.contentDocument;
+
+          if (meshWindow?.desktop?.State === 0) {
+            meshWindow.connectDesktop?.(null, 1);
+          }
+
+          window.setTimeout(() => {
+            if (typeof meshWindow?.deskToggleFull === "function") {
+              meshWindow.deskToggleFull();
+            } else {
+              meshDocument
+                ?.querySelector<HTMLElement>("[onclick*='deskToggleFull']")
+                ?.click();
+            }
+          }, 250);
+        } catch {
+          // Si MeshCentral aun esta navegando, el usuario puede usar Connect manualmente.
+        }
+      }, 100);
+      return;
+    }
+
     const params = new URLSearchParams({
       viewMode: String(viewMode),
       moduleName: item.nombre,
@@ -406,6 +483,7 @@ export function ModulesPage() {
           setSelectedRequest(request);
         }}
         onClose={() => {
+          setIsRemoteOverlayOpen(false);
           setSelectedItem(null);
           setSelectedRequest(null);
           setRemoteSupportActionMessage(null);
@@ -436,6 +514,52 @@ export function ModulesPage() {
         onSubmit={save}
       />
 
+      <div
+        aria-hidden={!isRemoteOverlayOpen}
+        className={`remote-support-prewarm${isRemoteOverlayOpen ? " is-active" : ""}`}
+      >
+        {isRemoteOverlayOpen ? (
+          <div className="remote-support-prewarm__toolbar">
+            <div>
+              <span>Sesion preparada</span>
+              <strong>{selectedItem?.nombre ?? "Pantalla remota"}</strong>
+            </div>
+            <div className="remote-support-prewarm__actions">
+              {prewarmDesktopUrl ? (
+                <a
+                  className="remote-support-prewarm__button"
+                  href={prewarmDesktopUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FaExternalLinkAlt />
+                  Abrir externo
+                </a>
+              ) : null}
+              <button
+                type="button"
+                className="remote-support-prewarm__button"
+                onClick={() => setIsRemoteOverlayOpen(false)}
+              >
+                <FaTimes />
+                Cerrar
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {prewarmUrl ? (
+          <iframe
+            ref={prewarmFrameRef}
+            src={prewarmUrl}
+            title="Precalentamiento soporte remoto"
+            tabIndex={-1}
+            onLoad={() => {
+              if (!selectedItem || !prewarmDesktopUrl) return;
+              connectPrewarmedDesktop(prewarmFrameRef.current);
+            }}
+          />
+        ) : null}
+      </div>
     </main>
   );
 }

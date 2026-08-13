@@ -15,4 +15,5 @@ export abstract class ModuleRepository {
     abstract resetDeviceBinding(id: string): Promise<ModuleEntity>;
     abstract resolveRemoteSupportDevice(id: string): Promise<ModuleEntity>;
     abstract createRemoteSupportSessionUrl(id: string, viewMode?: number): Promise<ModuleRemoteSupportSessionUrl>;
+    abstract createProjectRemoteSupportSessionUrl(projectId: string): Promise<ModuleRemoteSupportSessionUrl>;
 }

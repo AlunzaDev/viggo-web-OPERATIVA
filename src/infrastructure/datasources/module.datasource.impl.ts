@@ -216,4 +216,22 @@ export class ModuleDatasourceImpl implements ModuleDatasource {
             throw new Error(`No se pudo crear sesion de soporte remoto para el modulo con id ${id}`);
         }
     }
+
+    async createProjectRemoteSupportSessionUrl(
+        projectId: string,
+    ): Promise<ModuleRemoteSupportSessionUrl> {
+        try {
+            const { data } = await api.post<ModuleRemoteSupportSessionUrl>(
+                "/api/modulos/remote-support/session-url",
+                { projectId },
+            );
+            return data;
+        } catch (error: unknown) {
+            const errorMessage = getApiErrorMessage(error);
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+            throw new Error(`No se pudo crear sesion de soporte remoto para el proyecto con id ${projectId}`);
+        }
+    }
 }

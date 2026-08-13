@@ -18,8 +18,10 @@ export type ModuleRemoteSupportSessionUrl = {
     targetUrl: string;
     viewMode: number;
     expiresInSeconds: number;
-    deviceId: string;
-    deviceName: string;
+    deviceId?: string;
+    deviceName?: string;
+    projectId?: string;
+    projectName?: string;
 };
 
 export abstract class ModuleDatasource {
@@ -34,4 +36,5 @@ export abstract class ModuleDatasource {
     abstract resetDeviceBinding(id: string): Promise<ModuleEntity>;
     abstract resolveRemoteSupportDevice(id: string): Promise<ModuleEntity>;
     abstract createRemoteSupportSessionUrl(id: string, viewMode?: number): Promise<ModuleRemoteSupportSessionUrl>;
+    abstract createProjectRemoteSupportSessionUrl(projectId: string): Promise<ModuleRemoteSupportSessionUrl>;
 }

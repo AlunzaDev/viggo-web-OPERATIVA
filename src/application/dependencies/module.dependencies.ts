@@ -1,5 +1,6 @@
 import { ApproveModuleDeviceBinding } from "../use-cases/modules/approve-module-device-binding.usecase";
 import { CreateModuleRemoteSupportSessionUrl } from "../use-cases/modules/create-module-remote-support-session-url.usecase";
+import { CreateProjectRemoteSupportSessionUrl } from "../use-cases/modules/create-project-remote-support-session-url.usecase";
 import { CreateModule } from "../use-cases/modules/create-module.usecase";
 import { DeleteModule } from "../use-cases/modules/delete-module.usecase";
 import { GetModulesPage } from "../use-cases/modules/get-modules-page.usecase";
@@ -24,3 +25,4 @@ export const reopenModuleDeviceBindingUseCase = new ReopenModuleDeviceBinding(mo
 export const resetModuleDeviceBindingUseCase = new ResetModuleDeviceBinding(moduleRepository);
 export const resolveModuleRemoteSupportDeviceUseCase = new ResolveModuleRemoteSupportDevice(moduleRepository);
 export const createModuleRemoteSupportSessionUrlUseCase = new CreateModuleRemoteSupportSessionUrl(moduleRepository);
+export const createProjectRemoteSupportSessionUrlUseCase = new CreateProjectRemoteSupportSessionUrl(moduleRepository);
