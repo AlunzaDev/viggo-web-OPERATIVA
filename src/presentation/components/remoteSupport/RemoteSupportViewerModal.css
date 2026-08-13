@@ -23,7 +23,7 @@
 
 .remote-support-viewer.is-active {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   inset: 0;
   z-index: 2147483000;
   display: flex;
@@ -65,9 +65,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: rgba(248, 250, 252, 0.96);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-  color: #102033;
+  color: var(--text);
 }
 
 .remote-support-viewer__toolbar span {
@@ -99,8 +99,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #e2e8f0;
-  color: #102033;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
   font-weight: 800;
   text-decoration: none;
   cursor: pointer;
@@ -125,12 +126,12 @@
   display: grid;
   justify-items: center;
   gap: 14px;
-  border: 1px solid rgba(226, 232, 240, 0.88);
+  border: 1px solid var(--border);
   border-radius: 24px;
-  background: rgba(248, 250, 252, 0.96);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
   text-align: center;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .remote-support-viewer__loading-mark {
@@ -156,7 +157,7 @@
 
 .remote-support-viewer__loading-title {
   margin: 0;
-  color: #102033 !important;
+  color: var(--text) !important;
   font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 900;
   line-height: 1.18;
@@ -179,4 +180,16 @@
 
 .remote-support-viewer__loading-status svg {
   animation: admin-crud-spin 0.9s linear infinite;
+}
+
+@media (max-width: 720px) {
+  .remote-support-viewer.is-active { padding: 0; }
+  .remote-support-viewer.is-active .remote-support-viewer__modal {
+    width: 100vw; height: 100dvh; border: 0; border-radius: 0;
+  }
+  .remote-support-viewer__toolbar { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .remote-support-viewer__actions { width: 100%; }
+  .remote-support-viewer__button { flex: 1; justify-content: center; }
+  .remote-support-viewer__loading { inset-block-start: 94px; }
+  .remote-support-viewer__loading-card { width: calc(100% - 24px); padding: 24px 16px; }
 }

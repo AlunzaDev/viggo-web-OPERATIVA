@@ -511,6 +511,11 @@
 }
 
 @media (max-width: 768px) {
+  .admin-crud-table { min-width: 600px; }
+  .admin-crud-page th.col-actions,
+  .admin-crud-page td.col-actions,
+  .admin-crud-page th.col-acciones,
+  .admin-crud-page td.col-acciones { width: 124px; min-width: 124px; }
   .admin-crud-detail-modal {
     width: min(96vw, 760px);
   }
@@ -518,4 +523,12 @@
   .admin-crud-detail-hero {
     align-items: flex-start;
   }
+}
+
+@media (max-width: 520px) {
+  .admin-crud-table { min-width: 520px; }
+  .admin-crud-page th.col-actions,
+  .admin-crud-page td.col-actions,
+  .admin-crud-page th.col-acciones,
+  .admin-crud-page td.col-acciones { width: 108px; min-width: 108px; }
 }

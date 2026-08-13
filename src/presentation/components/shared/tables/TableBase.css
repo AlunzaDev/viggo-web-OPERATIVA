@@ -241,7 +241,7 @@
 
 @media (max-width: 640px) {
   .base-table-wrap {
-    --base-table-min-width: 520px;
+    --base-table-min-width: 440px;
   }
 
   .base-table th,
@@ -278,6 +278,11 @@
     width: 100%;
     font-size: 0.8rem;
   }
+}
+
+@media (max-width: 420px) {
+  .base-table-wrap { --base-table-min-width: 390px; }
+  .base-table th, .base-table td { padding-inline: 8px; }
 }
 
 @media (max-width: 560px) {

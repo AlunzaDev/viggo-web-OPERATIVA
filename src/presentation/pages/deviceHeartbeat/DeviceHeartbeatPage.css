@@ -1060,7 +1060,7 @@
 
   .device-heartbeat-map-panel,
   .device-heartbeat-map {
-    min-height: 500px;
+    min-height: clamp(360px, 58dvh, 500px);
   }
 }
 
@@ -1091,7 +1091,7 @@
 
   .device-heartbeat-map-panel,
   .device-heartbeat-map {
-    min-height: 420px;
+    min-height: clamp(320px, 52dvh, 420px);
   }
 
   .device-heartbeat-island__filters {
@@ -1101,4 +1101,9 @@
   .device-heartbeat-detail-hero {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-height: 760px) and (min-width: 641px) {
+  .device-heartbeat-map-panel,
+  .device-heartbeat-map { min-height: clamp(340px, 58dvh, 460px); }
 }

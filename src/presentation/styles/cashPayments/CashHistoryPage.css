@@ -273,6 +273,7 @@
 }
 
 @media (max-width: 1180px) {
+  .cash-history-table { min-width: 720px; }
   .cash-history-layout,
   .cash-history-kpis {
     grid-template-columns: 1fr 1fr;
@@ -284,6 +285,7 @@
 }
 
 @media (max-width: 720px) {
+  .cash-history-table { min-width: 560px; }
   .cash-history-hero,
   .cash-history-list__header,
   .cash-history-detail__header {
@@ -296,6 +298,10 @@
   .cash-history-detail__numbers {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 480px) {
+  .cash-history-table { min-width: 500px; }
 }
 
 :root[data-theme="dark"] .cash-history-page,
