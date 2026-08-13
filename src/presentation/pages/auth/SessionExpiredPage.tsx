@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { FiLogIn, FiPlay } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { applyTheme, resolveInitialTheme, type ThemeMode } from "../../../config/theme-mode";
-import {
-  BarrierBlasterGame,
-  type BarrierBlasterGameSummary,
-} from "../../components/auth/BarrierBlasterGame";
+import { ParkingMergeGame } from "../../components/auth/ParkingMergeGame";
 import { useAuth } from "../../context/auth/useAuth";
 import "../../styles/auth/SessionExpiredPage.css";
 
@@ -33,8 +30,8 @@ export function SessionExpiredPage() {
     navigate("/login", { replace: true });
   };
 
-  const handleGameOver = (summary: BarrierBlasterGameSummary) => {
-    const nextHighScore = Math.max(highScore, summary.highScore, summary.score);
+  const handleGameOver = (gameScore: number) => {
+    const nextHighScore = Math.max(highScore, gameScore);
     setHighScore(nextHighScore);
     window.localStorage.setItem(HIGH_SCORE_KEY, String(nextHighScore));
   };
@@ -49,8 +46,7 @@ export function SessionExpiredPage() {
 
       {isGameActive ? (
         <div className="session-expired-game-shell">
-          <BarrierBlasterGame
-            mode="play"
+          <ParkingMergeGame
             initialHighScore={highScore}
             onGameOver={handleGameOver}
             onReturnToLogin={() => void handleGoToLogin()}
@@ -89,7 +85,7 @@ export function SessionExpiredPage() {
               onClick={() => setIsGameActive(true)}
             >
               <FiPlay size={19} />
-              Jugar Barrier Blaster
+              Jugar Parking Merge
             </button>
           </div>
         </div>

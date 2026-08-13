@@ -1,0 +1,85 @@
+.parking-merge-game { width: 100%; min-height: 100dvh; padding: clamp(14px,2.5vw,28px); box-sizing: border-box; color: #edf2f7; background: radial-gradient(circle at 50% -15%,rgba(73,93,146,.38),transparent 42%),#0e1219; }
+.parking-merge-game__header { display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1040px;margin:0 auto 16px; }
+.parking-merge-game__header span,.parking-merge-game__panel span,.parking-merge-game__evolution>span { color:#aab7dc;font-size:.72rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase; }
+.parking-merge-game__header h1 { margin:3px 0 0;font-size:clamp(1.6rem,4vw,2.35rem); }
+.parking-merge-game button { display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 15px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(255,255,255,.07);color:#fff;font:inherit;font-weight:800;cursor:pointer; }
+.parking-merge-game__content { display:grid;grid-template-columns:170px minmax(280px,420px) 170px;justify-content:center;align-items:start;gap:18px; }
+.parking-merge-game__panel,.parking-merge-game__evolution { display:grid;gap:10px; }
+.parking-merge-game__panel article,.parking-merge-game__evolution div { display:grid;gap:3px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.045); }
+.parking-merge-game__panel article>strong { font-size:1.45rem; }
+.parking-merge-game__next { text-align:center; }
+.parking-merge-game__next strong { font-size:2.4rem!important; }
+.parking-merge-game__next small,.parking-merge-game__evolution small { color:#aeb8c8; }
+.parking-merge-game__panel p { margin:5px 0 0;color:#99a5b7;font-size:.8rem;line-height:1.5; }
+.parking-merge-game__board { position:relative;width:100%;overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:20px;box-shadow:0 24px 70px rgba(0,0,0,.38);touch-action:none; }
+.parking-merge-game__board canvas { display:block;width:100%;height:auto;cursor:crosshair; }
+.parking-merge-game__evolution div { grid-template-columns:32px 1fr;align-items:center;padding:8px 10px; }
+.parking-merge-game__evolution b { grid-row:1;font-size:1.35rem; }.parking-merge-game__evolution small { grid-column:2; }
+.parking-merge-game__over { position:absolute;inset:0;display:grid;place-content:center;justify-items:center;padding:22px;text-align:center;background:rgba(7,10,15,.8);backdrop-filter:blur(10px); }
+.parking-merge-game__over>span { color:#f0a0a0;font-weight:900;letter-spacing:.1em;text-transform:uppercase; }.parking-merge-game__over h2 { margin:10px 0 0;font-size:2.5rem; }.parking-merge-game__over p { color:#adb8c8; }.parking-merge-game__over>div { display:flex;flex-wrap:wrap;justify-content:center;gap:9px; }.parking-merge-game__over button { border-color:rgba(102,212,61,.3);background:rgba(102,212,61,.18); }.parking-merge-game__over button.is-secondary { border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.07); }
+@media(max-width:820px){.parking-merge-game__content{grid-template-columns:minmax(280px,420px)}.parking-merge-game__panel{grid-template-columns:repeat(3,1fr);order:2}.parking-merge-game__panel p{grid-column:1/-1}.parking-merge-game__evolution{display:none}.parking-merge-game__header button{width:42px;padding:0;font-size:0}.parking-merge-game__header button svg{font-size:18px}}
+@media(max-width:460px){.parking-merge-game{padding:10px}.parking-merge-game__panel article{padding:9px}.parking-merge-game__panel article>strong{font-size:1.1rem}.parking-merge-game__next strong{font-size:1.75rem!important}.parking-merge-game__header{margin-bottom:9px}}
+
+/* El tablero original mide 420 x 620. En laptops se escala por la altura
+   disponible para que encabezado, tablero y controles quepan a zoom 100%. */
+@media (min-width: 821px) and (max-height: 820px) {
+  .parking-merge-game {
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+    padding: 12px 18px;
+  }
+
+  .parking-merge-game__header {
+    max-width: 960px;
+    margin-bottom: 10px;
+  }
+
+  .parking-merge-game__header h1 {
+    font-size: clamp(1.35rem, 3vh, 1.85rem);
+  }
+
+  .parking-merge-game__content {
+    grid-template-columns: 150px minmax(260px, min(420px, calc((100dvh - 92px) * 0.6774))) 150px;
+    gap: 12px;
+  }
+
+  .parking-merge-game__panel,
+  .parking-merge-game__evolution {
+    gap: 7px;
+  }
+
+  .parking-merge-game__panel article {
+    padding: 9px 10px;
+  }
+
+  .parking-merge-game__evolution div {
+    padding: 5px 8px;
+  }
+
+  .parking-merge-game__panel p {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 820px) {
+  .parking-merge-game {
+    min-height: 100dvh;
+    padding-block: 10px;
+  }
+
+  .parking-merge-game__content {
+    grid-template-columns: minmax(260px, min(420px, calc((100dvh - 190px) * 0.6774)));
+  }
+}
+
+@media (max-height: 650px) and (min-width: 821px) {
+  .parking-merge-game__evolution {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .parking-merge-game__evolution > span {
+    grid-column: 1 / -1;
+  }
+}
