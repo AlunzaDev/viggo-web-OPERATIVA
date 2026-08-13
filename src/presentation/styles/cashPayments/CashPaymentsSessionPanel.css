@@ -163,3 +163,75 @@
   color: #7be0a1;
   background: rgba(43, 164, 94, 0.18);
 }
+
+:root[data-theme="dark"] :is(
+    .cash-payments-session__status--pending_cash,
+    .cash-payments-session__status--created
+  ),
+:root:not([data-theme="light"]) :is(
+    .cash-payments-session__status--pending_cash,
+    .cash-payments-session__status--created
+  ) {
+  color: #f2cb82;
+  background: rgba(222, 161, 57, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-session__status--partially_paid,
+:root:not([data-theme="light"]) .cash-payments-session__status--partially_paid {
+  color: #8ed8ec;
+  background: rgba(65, 164, 190, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-session__status--paid,
+:root:not([data-theme="light"]) .cash-payments-session__status--paid {
+  color: #91e9b1;
+  background: rgba(43, 164, 94, 0.16);
+}
+
+:root[data-theme="dark"] :is(
+    .cash-payments-session__status--cancelled,
+    .cash-payments-session__status--expired,
+    .cash-payments-session__status--failed
+  ),
+:root:not([data-theme="light"]) :is(
+    .cash-payments-session__status--cancelled,
+    .cash-payments-session__status--expired,
+    .cash-payments-session__status--failed
+  ) {
+  color: #ffb5b5;
+  background: rgba(212, 74, 74, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-session__summary article,
+:root:not([data-theme="light"]) .cash-payments-session__summary article,
+:root[data-theme="dark"] .cash-payments-events article,
+:root:not([data-theme="light"]) .cash-payments-events article {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] :is(
+    .cash-payments-session__summary strong,
+    .cash-payments-events strong,
+    .cash-payments-session__empty-copy h3
+  ),
+:root:not([data-theme="light"]) :is(
+    .cash-payments-session__summary strong,
+    .cash-payments-events strong,
+    .cash-payments-session__empty-copy h3
+  ) {
+  color: #eef6ef;
+}
+
+:root[data-theme="dark"] :is(
+    .cash-payments-session__summary span,
+    .cash-payments-events time,
+    .cash-payments-events p
+  ),
+:root:not([data-theme="light"]) :is(
+    .cash-payments-session__summary span,
+    .cash-payments-events time,
+    .cash-payments-events p
+  ) {
+  color: rgba(234, 241, 255, 0.66);
+}

@@ -7,22 +7,29 @@
 .cash-payments-form {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .cash-payments-workarea {
   display: grid;
   gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e5ebe4;
+  border-radius: 18px;
+  background: #f8faf7;
 }
 
 .cash-payments-quickbar {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(220px, 0.8fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
   align-items: end;
   gap: 10px;
   padding: 12px;
   border-radius: 18px;
   background: #f4f7f4;
   border: 1px solid #e5ebe4;
+  min-width: 0;
 }
 
 .cash-payments-shift-banner {
@@ -110,9 +117,11 @@
   font-size: 0.9rem;
   color: #365240;
   font-weight: 600;
+  min-width: 0;
 }
 
 .cash-payments-form input {
+  box-sizing: border-box;
   width: 100%;
   border: 1px solid #d8dfd8;
   border-radius: 16px;
@@ -131,6 +140,7 @@
 
 .cash-payments-form .vcombo {
   width: 100%;
+  min-width: 0;
 }
 
 .cash-payments-form .vcombo-btn {
@@ -289,4 +299,83 @@
 :root[data-theme="dark"] .cash-payments-shift-box__header span,
 :root:not([data-theme="light"]) .cash-payments-shift-box__header span {
   color: rgba(234, 241, 255, 0.7);
+}
+
+:root[data-theme="dark"] .cash-payments-quickbar,
+:root:not([data-theme="light"]) .cash-payments-quickbar {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .cash-payments-workarea,
+:root:not([data-theme="light"]) .cash-payments-workarea {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .cash-payments-quickbar .vcombo-btn,
+:root:not([data-theme="light"]) .cash-payments-quickbar .vcombo-btn {
+  color: #eef6ef;
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.11);
+}
+
+:root[data-theme="dark"] .cash-payments-form label,
+:root:not([data-theme="light"]) .cash-payments-form label {
+  color: rgba(234, 241, 255, 0.78);
+}
+
+:root[data-theme="dark"] .cash-payments-form input,
+:root:not([data-theme="light"]) .cash-payments-form input {
+  color: #eef6ef;
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.11);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .cash-payments-form input::placeholder,
+:root:not([data-theme="light"]) .cash-payments-form input::placeholder {
+  color: rgba(234, 241, 255, 0.42);
+}
+
+:root[data-theme="dark"] .cash-payments-form input:focus,
+:root:not([data-theme="light"]) .cash-payments-form input:focus {
+  border-color: rgba(123, 224, 161, 0.62);
+  box-shadow: 0 0 0 4px rgba(43, 164, 94, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-button--secondary,
+:root:not([data-theme="light"]) .cash-payments-button--secondary {
+  color: #a6e6bd;
+  background: rgba(43, 164, 94, 0.14);
+}
+
+:root[data-theme="dark"] .cash-payments-button--danger,
+:root:not([data-theme="light"]) .cash-payments-button--danger {
+  color: #ffb5b5;
+  background: rgba(212, 74, 74, 0.16);
+}
+
+:root[data-theme="dark"] .cash-payments-alert--error,
+:root:not([data-theme="light"]) .cash-payments-alert--error {
+  color: #ffc0c0;
+  background: rgba(212, 74, 74, 0.13);
+  border-color: rgba(255, 135, 135, 0.2);
+}
+
+:root[data-theme="dark"] .cash-payments-alert--success,
+:root:not([data-theme="light"]) .cash-payments-alert--success,
+:root[data-theme="dark"] .cash-payments-done,
+:root:not([data-theme="light"]) .cash-payments-done {
+  background: rgba(43, 164, 94, 0.13);
+  border-color: rgba(123, 224, 161, 0.18);
+}
+
+:root[data-theme="dark"] .cash-payments-done__icon,
+:root:not([data-theme="light"]) .cash-payments-done__icon,
+:root[data-theme="dark"] .cash-payments-alert--success,
+:root:not([data-theme="light"]) .cash-payments-alert--success,
+:root[data-theme="dark"] .cash-payments-done p,
+:root:not([data-theme="light"]) .cash-payments-done p {
+  color: #91e9b1;
 }
