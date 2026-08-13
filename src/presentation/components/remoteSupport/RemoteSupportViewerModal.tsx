@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaExternalLinkAlt, FaSpinner, FaTimes } from "react-icons/fa";
 import { automateMeshCentralIframe } from "../../services/remoteSupport/meshcentral-iframe-automation";
@@ -28,15 +28,18 @@ export function RemoteSupportViewerModal({
 }: Props) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const automationStartedRef = useRef(false);
+  const cleanupAutomationRef = useRef<(() => void) | null>(null);
   const [isFrameReady, setIsFrameReady] = useState(false);
 
   const modeLabel = getRemoteSupportViewLabel(viewMode);
+  const frameKey = `${moduleName}:${viewMode}:${embedUrl}`;
 
   const startAutomation = () => {
     if (!open || !embedUrl || automationStartedRef.current) return;
     automationStartedRef.current = true;
 
-    automateMeshCentralIframe({
+    cleanupAutomationRef.current?.();
+    cleanupAutomationRef.current = automateMeshCentralIframe({
       iframe: iframeRef.current,
       viewMode,
       onReady: () => setIsFrameReady(true),
@@ -44,6 +47,9 @@ export function RemoteSupportViewerModal({
   };
 
   useEffect(() => {
+    cleanupAutomationRef.current?.();
+    cleanupAutomationRef.current = null;
+
     if (!open) {
       setIsFrameReady(false);
       automationStartedRef.current = false;
@@ -52,12 +58,17 @@ export function RemoteSupportViewerModal({
 
     setIsFrameReady(false);
     automationStartedRef.current = false;
-    window.setTimeout(startAutomation, 100);
+    const startTimeout = window.setTimeout(startAutomation, 100);
     const fallback = window.setTimeout(() => setIsFrameReady(true), 5500);
 
-    return () => window.clearTimeout(fallback);
+    return () => {
+      window.clearTimeout(startTimeout);
+      window.clearTimeout(fallback);
+      cleanupAutomationRef.current?.();
+      cleanupAutomationRef.current = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, embedUrl, viewMode]);
+  }, [open, frameKey]);
 
   const content = (
     <div
@@ -98,6 +109,7 @@ export function RemoteSupportViewerModal({
         ) : null}
         {embedUrl ? (
           <iframe
+            key={frameKey}
             ref={iframeRef}
             src={embedUrl}
             title={`Precalentamiento ${modeLabel}`}

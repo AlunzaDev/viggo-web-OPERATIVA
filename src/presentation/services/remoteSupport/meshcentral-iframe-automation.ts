@@ -23,12 +23,25 @@ export const automateMeshCentralIframe = ({
   viewMode,
   onReady,
 }: AutomationOptions) => {
-  if (!iframe) return;
+  if (!iframe) return () => undefined;
 
   let attempts = 0;
+  let isCancelled = false;
+  const timeoutIds = new Set<number>();
   const maxAttempts = 24;
 
+  const schedule = (callback: () => void, delay: number) => {
+    const timeoutId = window.setTimeout(() => {
+      timeoutIds.delete(timeoutId);
+      if (!isCancelled) callback();
+    }, delay);
+
+    timeoutIds.add(timeoutId);
+    return timeoutId;
+  };
+
   const tryConnect = () => {
+    if (isCancelled) return;
     attempts += 1;
 
     try {
@@ -54,7 +67,7 @@ export const automateMeshCentralIframe = ({
           }
         }
 
-        window.setTimeout(() => {
+        schedule(() => {
           try {
             if (typeof meshWindow?.deskToggleFull === "function") {
               meshWindow.deskToggleFull();
@@ -69,6 +82,7 @@ export const automateMeshCentralIframe = ({
 
           let stateAttempts = 0;
           const checkConnectedState = () => {
+            if (isCancelled) return;
             stateAttempts += 1;
 
             if (getState() > 0 || stateAttempts >= 16) {
@@ -76,10 +90,10 @@ export const automateMeshCentralIframe = ({
               return;
             }
 
-            window.setTimeout(checkConnectedState, 150);
+            schedule(checkConnectedState, 150);
           };
 
-          window.setTimeout(checkConnectedState, 100);
+          schedule(checkConnectedState, 100);
         }, 320);
         return;
       }
@@ -88,11 +102,17 @@ export const automateMeshCentralIframe = ({
     }
 
     if (attempts < maxAttempts) {
-      window.setTimeout(tryConnect, 250);
+      schedule(tryConnect, 250);
     } else {
       onReady?.();
     }
   };
 
-  window.setTimeout(tryConnect, 150);
+  schedule(tryConnect, 150);
+
+  return () => {
+    isCancelled = true;
+    timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    timeoutIds.clear();
+  };
 };
