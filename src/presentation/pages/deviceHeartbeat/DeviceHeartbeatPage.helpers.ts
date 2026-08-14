@@ -1,4 +1,5 @@
 import type { ModuleDeviceRuntime, ModuleEntity, ModuleType } from "../../../domain/entities/module.entity";
+import { MODULE_TYPE_LABEL } from "../../../domain/entities/module-type.entity";
 
 export type DeviceHeartbeatStatus = "online" | "offline" | "pending";
 export type DeviceHeartbeatFilter = "all" | DeviceHeartbeatStatus;
@@ -6,9 +7,7 @@ export type DeviceHeartbeatFilter = "all" | DeviceHeartbeatStatus;
 const HEARTBEAT_STALE_MS = 45_000;
 
 export const getModuleTypeLabel = (type: ModuleType) => {
-  if (type === "ENTRADA") return "Entrada";
-  if (type === "SALIDA") return "Salida";
-  return "POS";
+  return MODULE_TYPE_LABEL[type];
 };
 
 export const formatDateTime = (value?: Date | null) => {

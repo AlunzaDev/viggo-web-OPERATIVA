@@ -1,4 +1,11 @@
-export type ModuleType = "ENTRADA" | "SALIDA" | "POS";
+import {
+    MODULE_TYPE_CAPABILITIES,
+    parseModuleType,
+    type ModuleType,
+    type ModuleTypeCapabilities,
+} from "./module-type.entity";
+
+export type { ModuleType, ModuleTypeCapabilities };
 export type ModuleSubmoduleType =
     | "QR_SCANNER"
     | "PRINTER"
@@ -130,6 +137,7 @@ export class ModuleEntity {
     readonly deviceRuntime: ModuleDeviceRuntime | null;
     readonly remoteSupport: ModuleRemoteSupport | null;
     readonly submodulos: ModuleSubmodule[];
+    readonly capabilities: ModuleTypeCapabilities;
 
     constructor(options: {
         id: string;
@@ -149,6 +157,7 @@ export class ModuleEntity {
         deviceRuntime?: ModuleDeviceRuntime | null;
         remoteSupport?: ModuleRemoteSupport | null;
         submodulos?: ModuleSubmodule[];
+        capabilities?: ModuleTypeCapabilities;
     }) {
         this.id = options.id;
         this.nombre = options.nombre;
@@ -167,6 +176,7 @@ export class ModuleEntity {
         this.deviceRuntime = options.deviceRuntime ?? null;
         this.remoteSupport = options.remoteSupport ?? null;
         this.submodulos = options.submodulos ?? [];
+        this.capabilities = options.capabilities ?? MODULE_TYPE_CAPABILITIES[this.tipo];
     }
 
     get name() {
@@ -219,6 +229,7 @@ export class ModuleEntity {
         const deviceRuntime = parseDeviceRuntime(object.deviceRuntime);
         const remoteSupport = parseRemoteSupport(object.remoteSupport);
         const submodulos = parseSubmodulos(object.submodulos);
+        const capabilities = parseModuleCapabilities(object.capabilities);
 
         if (!id) throw new Error("El modulo no incluyo id");
         if (!nombre) throw new Error("El modulo no incluyo nombre");
@@ -243,6 +254,7 @@ export class ModuleEntity {
             deviceRuntime,
             remoteSupport,
             submodulos,
+            capabilities,
         });
     }
 
@@ -265,6 +277,7 @@ export class ModuleEntity {
             deviceRuntime: module.deviceRuntime,
             remoteSupport: module.remoteSupport,
             submodulos: module.submodulos,
+            capabilities: module.capabilities,
         });
     }
 }
@@ -339,17 +352,6 @@ function parseProjectId(value: unknown): string {
     return "";
 }
 
-function parseModuleType(value: unknown): ModuleType {
-    const normalized = String(value ?? "ENTRADA").trim().toUpperCase();
-    if (
-        normalized === "SALIDA" ||
-        normalized === "POS"
-    ) {
-        return normalized;
-    }
-    return "ENTRADA";
-}
-
 function parseEstado(value: unknown): boolean {
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value !== 0;
@@ -359,6 +361,22 @@ function parseEstado(value: unknown): boolean {
         if (["true", "active", "activo", "enabled", "1"].includes(normalized)) return true;
     }
     return true;
+}
+
+function parseModuleCapabilities(value: unknown): ModuleTypeCapabilities {
+    if (!value || typeof value !== "object") {
+        throw new Error("El modulo no incluyo capacidades");
+    }
+
+    const source = value as Record<string, unknown>;
+
+    return {
+        canIssueTickets: Boolean(source.canIssueTickets),
+        canValidateExit: Boolean(source.canValidateExit),
+        canChargePayments: Boolean(source.canChargePayments),
+        requiresDeviceBinding: Boolean(source.requiresDeviceBinding),
+        supportsRemoteSupport: Boolean(source.supportsRemoteSupport),
+    };
 }
 
 function parseDeviceBinding(value: unknown): ModuleDeviceBinding | null {

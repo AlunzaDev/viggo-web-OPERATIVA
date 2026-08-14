@@ -1,4 +1,5 @@
 import { FaLayerGroup } from "react-icons/fa";
+import { MODULE_TYPE_LABEL, MODULE_TYPES } from "../../../domain/entities/module-type.entity";
 import { CreateModalBase } from "../shared/modals/CreateModalBase";
 import type { ModuloForm, ProyectoOption } from "../../types/modules/moduleForm.types";
 
@@ -83,9 +84,11 @@ export function ModuleModal({
                 setForm({ ...form, tipo: event.target.value as ModuloForm["tipo"] })
               }
             >
-              <option value="ENTRADA">ENTRADA</option>
-              <option value="SALIDA">SALIDA</option>
-              <option value="POS">POS</option>
+              {MODULE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {MODULE_TYPE_LABEL[type]}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-group">
