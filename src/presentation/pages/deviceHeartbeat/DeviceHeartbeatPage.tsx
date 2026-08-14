@@ -748,14 +748,6 @@ export function DeviceHeartbeatPage() {
             <span>Proyectos</span>
             <strong>{linkedProject ? "1 visible" : "0 visibles"}</strong>
           </div>
-          <div className="device-heartbeat-projects-actions">
-            <button type="button" onClick={() => setIsProjectExpanded(true)}>
-              Abrir
-            </button>
-            <button type="button" onClick={() => setIsProjectExpanded(false)}>
-              Cerrar
-            </button>
-          </div>
         </header>
 
         {linkedProject ? (

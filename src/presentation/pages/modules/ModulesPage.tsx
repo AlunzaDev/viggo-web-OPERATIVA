@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   ModuleEntity,
   type ModuleDeviceBindingRequest,
@@ -37,10 +37,6 @@ import {
 } from "../../services/remoteSupport/remote-support-view-mode";
 import "../../styles/adminCrud/AdminCrud.css";
 
-type ProjectRouteState = {
-  projectName?: string;
-};
-
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 const ENABLE_MODULE_MUTATIONS = false;
 
@@ -48,10 +44,7 @@ const openSupportLauncherTab = (url: string) =>
   window.open(url, "_blank", "noopener,noreferrer");
 
 export function ModulesPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { projectId = "" } = useParams();
-  const locationState = (location.state ?? {}) as ProjectRouteState;
 
   usePageTitle("Modulos operativos");
 
@@ -123,15 +116,6 @@ export function ModulesPage() {
       ? prewarmTerminalUrl
       : prewarmDesktopUrl;
   const activeRemoteEmbedUrl = activeRemoteTargetUrl || prewarmUrl;
-
-  const selectedProjectName = useMemo(
-    () =>
-      locationState.projectName?.trim() ||
-      projectById.get(projectId) ||
-      projectId ||
-      "Modulos operativos",
-    [locationState.projectName, projectById, projectId],
-  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -311,11 +295,9 @@ export function ModulesPage() {
     <>
     <main className="admin-crud-page">
       <PageHeader
-        eyebrow="Modulos del proyecto"
-        title={selectedProjectName || "Proyecto"}
+        title="Modulos operativos"
+        hideTitle
         subtitle="Consulta modulos, equipos vinculados y solicitudes pendientes de dispositivos."
-        backLabel="Volver a heartbeat"
-        onBack={() => navigate("/heartbeat")}
       />
 
       <CrudActionsIsland

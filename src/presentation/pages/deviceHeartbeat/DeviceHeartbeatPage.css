@@ -669,24 +669,6 @@
   font-weight: 800;
 }
 
-.device-heartbeat-projects-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.device-heartbeat-projects-actions button {
-  min-height: 34px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-2) 86%, transparent);
-  color: var(--text-muted);
-  font-size: 0.76rem;
-  font-weight: 900;
-  padding: 0 10px;
-  cursor: pointer;
-}
-
 .device-heartbeat-project {
   display: grid;
   gap: 0;
