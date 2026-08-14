@@ -16,6 +16,7 @@ import { useModules } from "../../hooks/modules/useModules";
 import { useParkings } from "../../hooks/parkings/useParkings";
 import { useRemoteSupportPrewarm } from "../../hooks/remoteSupport/useRemoteSupportPrewarm";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
+import { getLocalConfigStatus } from "../../services/config/config.api";
 import { ModuleDetailModal } from "../../components/modules/ModuleDetailModal";
 import { ModuleModal } from "../../components/modules/ModuleModal";
 import { ModuleRequestDetailModal } from "../../components/modules/ModuleRequestDetailModal";
@@ -46,7 +47,7 @@ const openSupportLauncherTab = (url: string) =>
 export function ModulesPage() {
   const { projectId = "" } = useParams();
 
-  usePageTitle("Modulos operativos");
+  usePageTitle("Módulos operativos");
 
   const { parkings } = useParkings();
   const projects = useMemo<ProyectoOption[]>(
@@ -57,6 +58,23 @@ export function ModulesPage() {
       })),
     [parkings],
   );
+  const [configuredProjectId, setConfiguredProjectId] = useState("");
+  const effectiveProjectId = projectId || configuredProjectId || parkings[0]?.id || "";
+
+  useEffect(() => {
+    if (projectId) return;
+    let active = true;
+    void getLocalConfigStatus()
+      .then((status) => {
+        if (active) setConfiguredProjectId(status.proyectoId ?? "");
+      })
+      .catch(() => {
+        if (active) setConfiguredProjectId("");
+      });
+    return () => {
+      active = false;
+    };
+  }, [projectId]);
 
   const [form, setForm] = useState<ModuloForm>(INITIAL_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -93,21 +111,21 @@ export function ModulesPage() {
     reopenDeviceBinding,
     resetDeviceBinding,
     resolveRemoteSupportDevice,
-  } = useModules(projectId);
+  } = useModules(effectiveProjectId);
 
   const projectById = useMemo(
     () => new Map(projects.map((project) => [project.id, project.nombre])),
     [projects],
   );
   const currentProject = useMemo(
-    () => parkings.find((project) => project.id === projectId) ?? null,
-    [parkings, projectId],
+    () => parkings.find((project) => project.id === effectiveProjectId) ?? null,
+    [effectiveProjectId, parkings],
   );
   const inheritedRemoteSupportBaseUrl = currentProject?.remoteSupport?.enabled
     ? currentProject.remoteSupport.baseUrl
     : "";
   const { prewarmUrl, prewarmDesktopUrl, prewarmTerminalUrl } = useRemoteSupportPrewarm(
-    projectId,
+    effectiveProjectId,
     selectedItem,
     inheritedRemoteSupportBaseUrl,
   );
@@ -162,7 +180,7 @@ export function ModulesPage() {
     setEditingId(null);
     setForm({
       ...INITIAL_FORM,
-      proyecto: projectId,
+      proyecto: effectiveProjectId,
     });
     setIsModalOpen(true);
   };
@@ -184,7 +202,7 @@ export function ModulesPage() {
   const save = async () => {
     const payload = buildPayload({
       ...form,
-      proyecto: projectId,
+      proyecto: effectiveProjectId,
     });
 
     if (editingId) {
@@ -295,9 +313,9 @@ export function ModulesPage() {
     <>
     <main className="admin-crud-page">
       <PageHeader
-        title="Modulos operativos"
+        title="Módulos operativos"
         hideTitle
-        subtitle="Consulta modulos, equipos vinculados y solicitudes pendientes de dispositivos."
+        subtitle="Consulta módulos, equipos vinculados y solicitudes pendientes de dispositivos."
       />
 
       <CrudActionsIsland
@@ -310,7 +328,7 @@ export function ModulesPage() {
           setSearch("");
           goToPage(1);
         }}
-        searchPlaceholder="Buscar modulos"
+        searchPlaceholder="Buscar módulos"
         showCreate={ENABLE_MODULE_MUTATIONS}
         createLabel="Crear modulo"
         createIcon={<FaPlus />}
@@ -327,8 +345,8 @@ export function ModulesPage() {
         emptyMessage={
           <EmptyState
             tone="empty"
-            title="Sin modulos"
-            description="No se encontraron modulos para este proyecto."
+            title="Sin módulos"
+            description="No se encontraron módulos para este proyecto."
           />
         }
         page={page}
@@ -344,8 +362,8 @@ export function ModulesPage() {
             <th>proyecto</th>
             <th>tipo</th>
             <th>identificador</th>
-            <th>submodulos</th>
-            <th>vinculacion</th>
+            <th>submódulos</th>
+            <th>vinculación</th>
             <th className="col-status">estado</th>
             <th>acciones</th>
           </tr>
@@ -436,7 +454,7 @@ export function ModulesPage() {
         open={isModalOpen}
         editing={Boolean(editingId)}
         form={form}
-        projects={projects.filter((project) => project.id === projectId)}
+        projects={projects.filter((project) => project.id === effectiveProjectId)}
         isSubmitting={isSaving || isUpdating || isBindingActionRunning}
         error={error}
         setForm={setForm}

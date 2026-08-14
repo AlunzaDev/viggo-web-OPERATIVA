@@ -61,6 +61,8 @@ import {
   toHeartbeatMapLatLng,
 } from "./device-heartbeat.map";
 import { normalizeOperationalUserMessage } from "../../services/operations/operational-state.presenter";
+import type { LocalConfigStatus } from "../../services/config/config.api";
+import { formatConfigStatusDate, getConfigSyncStatusLabel } from "../../services/config/config-status.presenter";
 import { useRemoteSupportPrewarm } from "../../hooks/remoteSupport/useRemoteSupportPrewarm";
 import {
   getRemoteSupportLinks,
@@ -181,6 +183,8 @@ export function DeviceHeartbeatPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [configStatus, setConfigStatus] = useState<LocalConfigStatus | null>(null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const [remoteSupportActionMessage, setRemoteSupportActionMessage] = useState<string | null>(null);
   const [remoteViewer, setRemoteViewer] = useState<{
     open: boolean;
@@ -215,6 +219,8 @@ export function DeviceHeartbeatPage() {
 
       setLinkedProject(result.linkedProject);
       setModules(result.modules);
+      setConfigStatus(result.configStatus);
+      setLastUpdatedAt(Date.now());
       setSelectedModuleId(result.selectedModuleId);
       setDetailModuleId(result.detailModuleId);
       setError(null);
@@ -296,8 +302,9 @@ export function DeviceHeartbeatPage() {
     }).setView(HEARTBEAT_MAP_CENTER, HEARTBEAT_MAP_DEFAULT_ZOOM);
 
     const initialLayer = TILE_LAYERS.street;
-    tileLayerRef.current = L.tileLayer(resolveTileLayerUrl(initialLayer, mapThemeName), {
-      attribution: resolveTileLayerAttribution(initialLayer, mapThemeName),
+    const initialThemeName = getCurrentThemeName();
+    tileLayerRef.current = L.tileLayer(resolveTileLayerUrl(initialLayer, initialThemeName), {
+      attribution: resolveTileLayerAttribution(initialLayer, initialThemeName),
       maxZoom: initialLayer.maxZoom,
     }).addTo(map);
 
@@ -355,6 +362,11 @@ export function DeviceHeartbeatPage() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+
+    markerCloseTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    markerCloseTimeoutsRef.current.clear();
+    markerRefs.current.forEach((marker) => marker.remove());
+    markerRefs.current = [];
 
     if (polygonRef.current) {
       polygonRef.current.remove();
@@ -626,7 +638,14 @@ export function DeviceHeartbeatPage() {
             <strong>Mapa operativo</strong>
             <span>
               {linkedProject?.ciudad ?? "Sin ciudad"} · {filteredModules.length}{" "}
-              modulos visibles
+              módulos visibles
+            </span>
+            <span className="device-heartbeat-map-topbar__sync">
+              Sincronización: {getConfigSyncStatusLabel(configStatus?.lastSyncStatus)} ·{" "}
+              {formatConfigStatusDate(configStatus?.lastSyncAt)}
+              {lastUpdatedAt
+                ? ` · Consulta ${getHeartbeatAgeLabel(new Date(lastUpdatedAt))}`
+                : ""}
             </span>
           </div>
 
@@ -947,7 +966,7 @@ export function DeviceHeartbeatPage() {
 
               <div className="modal-section-grid">
                 <article className="form-group admin-crud-detail-item">
-                  <label>Estado de conexion</label>
+                  <label>Estado de conexión</label>
                   <p>
                     {detailModule.deviceRuntime?.connectionStatus || "Sin runtime"}
                   </p>
@@ -971,7 +990,7 @@ export function DeviceHeartbeatPage() {
                   </p>
                 </article>
                 <article className="form-group admin-crud-detail-item">
-                  <label>Ultima desconexion</label>
+                  <label>Última desconexión</label>
                   <p>
                     {formatDateTime(
                       detailModule.deviceRuntime?.lastDisconnectAt,

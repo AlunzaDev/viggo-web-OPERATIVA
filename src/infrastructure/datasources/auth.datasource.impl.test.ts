@@ -75,6 +75,7 @@ describe("AuthDataSourceImpl", () => {
         modules: ["modules", "pensions", "pensionPasses"],
         permissionProfileId: "profile-operative",
         allowedApps: ["OPERATIVE_WEB"],
+        barrierBlasterHighScore: 0,
       },
     });
   });
@@ -117,6 +118,7 @@ describe("AuthDataSourceImpl", () => {
         modules: ["pensions"],
         permissionProfileId: "profile-operative-2",
         allowedApps: ["OPERATIVE_WEB"],
+        barrierBlasterHighScore: 0,
       },
     });
   });

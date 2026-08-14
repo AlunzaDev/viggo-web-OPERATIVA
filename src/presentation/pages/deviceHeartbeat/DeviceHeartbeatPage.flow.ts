@@ -4,6 +4,7 @@ import {
   type ModuleSubmodule,
 } from "../../../domain/entities/module.entity";
 import { loadHeartbeatWorkspaceSnapshot } from "../../services/heartbeat/heartbeat.service";
+import type { LocalConfigStatus } from "../../services/config/config.api";
 import {
   buildHeartbeatStats,
   getHeartbeatAgeLabel,
@@ -35,6 +36,7 @@ export type HeartbeatLoadResult = {
   modules: ModuleEntity[];
   selectedModuleId: string | null;
   detailModuleId: string | null;
+  configStatus: LocalConfigStatus;
 };
 
 const buildSubdeviceStatus = (
@@ -58,6 +60,7 @@ export const loadHeartbeatPageData = async (current: {
   return {
     linkedProject: project,
     modules: activeModules,
+    configStatus: snapshot.configStatus,
     selectedModuleId:
       current.selectedModuleId &&
       activeModules.some((module) => module.id === current.selectedModuleId)

@@ -2,7 +2,7 @@ import { ParkingDatasourceImpl } from "../../../infrastructure/datasources/parki
 import { ModuleDatasourceImpl } from "../../../infrastructure/datasources/module.datasource.impl";
 import type { ParkingEntity } from "../../../domain/entities/parking.entity";
 import type { ModuleEntity } from "../../../domain/entities/module.entity";
-import { getLocalConfigStatus } from "../config/config.api";
+import { getLocalConfigStatus, type LocalConfigStatus } from "../config/config.api";
 
 const parkingDatasource = new ParkingDatasourceImpl();
 const moduleDatasource = new ModuleDatasourceImpl();
@@ -10,6 +10,7 @@ const moduleDatasource = new ModuleDatasourceImpl();
 export type HeartbeatWorkspaceSnapshot = {
   linkedProject: ParkingEntity | null;
   modules: ModuleEntity[];
+  configStatus: LocalConfigStatus;
 };
 
 const resolveLinkedProject = (
@@ -34,5 +35,6 @@ export const loadHeartbeatWorkspaceSnapshot =
     return {
       linkedProject,
       modules: loadedModules.filter((module) => module.estado),
+      configStatus,
     };
   };

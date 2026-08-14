@@ -58,6 +58,10 @@
   font-size: 0.92rem;
 }
 
+.device-heartbeat-map-topbar .device-heartbeat-map-topbar__sync {
+  font-size: 0.75rem;
+}
+
 .device-heartbeat-map-topbar__stats {
   display: inline-flex;
   flex-wrap: wrap;

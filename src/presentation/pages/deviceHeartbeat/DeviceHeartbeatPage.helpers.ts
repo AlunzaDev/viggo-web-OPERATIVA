@@ -54,7 +54,7 @@ export const getStatusHint = (module: ModuleEntity) => {
   const runtime = module.deviceRuntime;
   if (!runtime) return "Sin runtime reportado";
   if (!runtime.isAuthorized) return "Dispositivo no autorizado";
-  if (!runtime.isConnected) return "Sin conexion activa";
+  if (!runtime.isConnected) return "Sin conexión activa";
   return runtime.message || "Heartbeat recibido correctamente";
 };
 
