@@ -518,12 +518,6 @@ export function DeviceHeartbeatPage() {
   }, [linkedProject, mapMarkers]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
-
-    safelyRefreshHeartbeatMap(mapRef.current, tileLayerRef.current, [0, 120]);
-  }, [filteredModules.length, isProjectExpanded]);
-
-  useEffect(() => {
     if (!pendingFocusModuleId || !mapRef.current) return;
 
     const focusTarget =
