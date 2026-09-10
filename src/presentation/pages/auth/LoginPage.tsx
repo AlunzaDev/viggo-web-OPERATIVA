@@ -10,6 +10,8 @@ import { requestPasswordReset, resendValidationEmail } from "../../services/auth
 import { showAppToast } from "../../utils/feedback/swalToast";
 import "../../styles/auth/LoginPage.css";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const normalizeLoginError = (rawMessage: string) => {
   const message = rawMessage.trim();
   const normalized = message.toLowerCase();
@@ -23,32 +25,87 @@ const normalizeLoginError = (rawMessage: string) => {
   ) {
     return {
       title: "No pudimos conectar",
-      message: "Revisa la conexion con el sistema e intenta nuevamente en un momento.",
+      message: "No hay conexión con el sistema. Revisa tu internet e inténtalo nuevamente en un momento.",
     };
   }
 
   if (
     normalized.includes("unauthorized") ||
+    normalized.includes("status code 401") ||
+    normalized.includes("usuario no encontrado") ||
+    normalized.includes("user not found") ||
     normalized.includes("credenciales") ||
     normalized.includes("correo o contraseña") ||
     normalized.includes("correo o contrasena")
   ) {
     return {
       title: "Acceso denegado",
-      message: "Verifica tu correo y contraseña para volver a intentarlo.",
+      message: "El correo o la contraseña son incorrectos. Verifica tus datos y vuelve a intentarlo.",
+    };
+  }
+
+  if (
+    normalized.includes("validar") ||
+    normalized.includes("verificar") ||
+    normalized.includes("no verificado") ||
+    normalized.includes("not verified") ||
+    normalized.includes("email verification")
+  ) {
+    return {
+      title: "Correo pendiente de validación",
+      message: "Valida tu correo antes de iniciar sesión. Puedes solicitar un nuevo enlace desde esta pantalla.",
+    };
+  }
+
+  if (
+    normalized.includes("inactiv") ||
+    normalized.includes("bloquead") ||
+    normalized.includes("disabled") ||
+    normalized.includes("forbidden") ||
+    normalized.includes("status code 403") ||
+    normalized.includes("locked") ||
+    normalized.includes("suspend")
+  ) {
+    return {
+      title: "Cuenta no disponible",
+      message: "Tu cuenta está inactiva, bloqueada o suspendida. Contacta al administrador del sistema.",
+    };
+  }
+
+  if (
+    normalized.includes("demasiados intentos") ||
+    normalized.includes("too many requests") ||
+    normalized.includes("status code 429")
+  ) {
+    return {
+      title: "Demasiados intentos",
+      message: message || "Espera unos minutos antes de volver a intentarlo.",
+    };
+  }
+
+  if (
+    normalized.includes("internal server error") ||
+    normalized.includes("bad gateway") ||
+    normalized.includes("service unavailable") ||
+    /status code 5\d\d/.test(normalized) ||
+    normalized.includes("servidor")
+  ) {
+    return {
+      title: "Servicio no disponible",
+      message: "El sistema no pudo procesar el inicio de sesión. Inténtalo nuevamente más tarde.",
     };
   }
 
   if (normalized.includes("sesion") && normalized.includes("expir")) {
     return {
-      title: "La sesion ya no es valida",
-      message: "Inicia sesion nuevamente para continuar.",
+      title: "La sesión ya no es válida",
+      message: "Inicia sesión nuevamente para continuar.",
     };
   }
 
   return {
-    title: "No pudimos iniciar sesion",
-    message: message || "Intenta nuevamente en un momento.",
+    title: "No pudimos iniciar sesión",
+    message: message || "Ocurrió un problema inesperado. Intenta nuevamente en un momento.",
   };
 };
 
@@ -73,8 +130,20 @@ export function LoginPage() {
 
       if (isSubmittingRef.current) return;
 
-      if (!email.trim() || !password.trim()) {
+      const normalizedEmail = email.trim().toLowerCase();
+
+      if (!normalizedEmail || !password) {
         void showAppToast("warning", "Campos incompletos", "Ingresa tu correo y contraseña.");
+        return;
+      }
+
+      if (!EMAIL_PATTERN.test(normalizedEmail)) {
+        void showAppToast("warning", "Correo no válido", "Escribe un correo electrónico con un formato válido.");
+        return;
+      }
+
+      if (password.length < 6) {
+        void showAppToast("warning", "Contraseña no válida", "La contraseña debe tener al menos 6 caracteres.");
         return;
       }
 
@@ -83,7 +152,7 @@ export function LoginPage() {
 
       try {
         const authenticatedUser = await login({
-          email: email.trim(),
+          email: normalizedEmail,
           password,
         });
 
@@ -221,12 +290,12 @@ export function LoginPage() {
           alt="Viggo"
           className="login-mobile-logo"
         />
-        <h2 className="login-title">Iniciar Sesión</h2>
+        <h2 className="login-title">Iniciar sesión</h2>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form" noValidate>
           <div className="form-group">
             <label htmlFor="email">
-              <FaEnvelope /> Correo Electrónico
+              <FaEnvelope /> Correo electrónico
             </label>
             <input
               type="email"
