@@ -1,2 +1,4 @@
+@import url("../shared/page.css");
 @import url("../shared/modal.css");
+@import url("./settings-base.css");
 @import url("./settings-operative.css");
