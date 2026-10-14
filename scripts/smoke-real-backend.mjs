@@ -86,7 +86,8 @@ const step = async (name, action) => {
 
 const listCount = (body, key) => {
   const value = body?.[key] ?? body?.items ?? body;
-  return Array.isArray(value) ? value.length : "ok";
+  if (!Array.isArray(value)) throw new Error(`La respuesta no contiene la lista ${key}`);
+  return value.length;
 };
 
 const create = (path, token, body) =>
@@ -113,140 +114,39 @@ const main = async () => {
   await step("ping", () => request("/api/ping"));
   await step("health", () => request("/api/health"));
 
-  await step("ver proyectos", async () => listCount(await request("/api/proyectos"), "proyectos"));
-  await step("ver modulos", async () => listCount(await request("/api/modulos"), "modulos"));
-  await step("ver pensiones", async () => listCount(await request("/api/pensiones"), "pensiones"));
-  await step("ver pension pass", async () => listCount(await request("/api/pension-pass"), "pensionPasses"));
-  await step("read-only tickets", async () => listCount(await request("/api/tickets"), "tickets"));
-  await step("read-only movimientos", async () => listCount(await request("/api/pension-moves"), "pensionMoves"));
 
+  required(adminEmail, "REAL_BACKEND_ADMIN_EMAIL");
+  required(adminPassword, "REAL_BACKEND_ADMIN_PASSWORD");
   let token = null;
   if (adminEmail && adminPassword) {
     const login = await step("login admin", () =>
       request("/api/auth/login-correo", {
         method: "POST",
-        body: JSON.stringify({ correo: adminEmail, password: adminPassword }),
+        body: JSON.stringify({ correo: adminEmail, password: adminPassword, app: "OPERATIVE_WEB" }),
       }),
     );
-    token = String(login.token);
+    token = String(required(login.token, "token de login"));
 
     await step("read-only pagos", async () => listCount(await request("/api/payments/history", { token }), "items"));
   } else {
     console.log("SKIP login admin y pagos: faltan REAL_BACKEND_ADMIN_EMAIL/REAL_BACKEND_ADMIN_PASSWORD");
   }
 
+  await step("ver proyectos", async () => listCount(await request("/api/proyectos", { token }), "proyectos"));
+  await step("ver modulos", async () => listCount(await request("/api/modulos", { token }), "modulos"));
+  await step("ver pensiones", async () => listCount(await request("/api/pensiones", { token }), "pensiones"));
+  await step("ver pension pass", async () => listCount(await request("/api/pension-pass", { token }), "pensionPasses"));
+  await step("read-only tickets", async () => listCount(await request("/api/tickets", { token }), "tickets"));
+  await step("read-only movimientos", async () => listCount(await request("/api/pension-moves", { token }), "pensionMoves"));
+
+
   if (!writeEnabled) {
     console.log("SKIP crear/editar: define REAL_BACKEND_WRITE=1 para ejecutar escrituras reales.");
     return;
   }
 
-  required(token, "token admin");
+  throw new Error("OPERATIVO tiene catalogos de solo lectura. Usa el smoke-postgres-clients de ADMINISTRATIVO para probar tickets, caja y desconexion.");
 
-  const usuarioBody = {
-    nombre: `Smoke ${runId}`,
-    apellido: "Backend",
-    correo: `smoke.${runId}@example.test`,
-    telefono: `55${runId.slice(-8)}`,
-    password: "SmokeTest1",
-    rol: "CLIENT_ROLE",
-    emailValidated: true,
-    estado: true,
-  };
-
-  const usuario = await step("crear acceso", async () => {
-    const body = await create("/api/usuarios", token, usuarioBody);
-    return body.usuario ?? body;
-  });
-  const usuarioId = required(idOf(usuario), "id de acceso creado");
-
-  await step("editar acceso", () =>
-    patch(`/api/usuarios/${usuarioId}`, token, { apellido: "Backend Editado" }),
-  );
-  await step("ver acceso", () => request(`/api/usuarios/${usuarioId}`, { token }));
-
-  const proyecto = await step("crear proyecto", async () => {
-    const body = await create("/api/proyectos", token, {
-      nombre: `Smoke Proyecto ${runId}`,
-      coordinates: [-99.1332, 19.4326],
-      ciudad: "CDMX",
-      identificador: `SMOKE-PROY-${runId}`,
-      descripcion: "Prueba automatizada contra backend real",
-      estado: true,
-    });
-    return body.proyecto ?? body;
-  });
-  const proyectoId = required(idOf(proyecto), "id de proyecto creado");
-
-  await step("editar proyecto", () =>
-    patch(`/api/proyectos/${proyectoId}`, token, { descripcion: "Prueba editada" }),
-  );
-  await step("ver proyecto", () => request(`/api/proyectos/${proyectoId}`));
-
-  const modulo = await step("crear modulo", async () => {
-    const body = await create("/api/modulos", token, {
-      nombre: `Smoke Modulo ${runId}`,
-      proyecto: proyectoId,
-      tipo: "ENTRADA",
-      identificador: `SMOKE-MOD-${runId}`,
-      descripcion: "Prueba automatizada contra backend real",
-      estado: true,
-    });
-    return body.modulo ?? body;
-  });
-  const moduloId = required(idOf(modulo), "id de modulo creado");
-
-  await step("editar modulo", () =>
-    patch(`/api/modulos/${moduloId}`, token, { descripcion: "Prueba editada" }),
-  );
-  await step("ver modulo", () => request(`/api/modulos/${moduloId}`));
-
-  const pension = await step("crear pension", async () => {
-    const body = await create("/api/pensiones", token, {
-      proyecto: proyectoId,
-      nombre: `Smoke Pension ${runId}`,
-      validez: Array.from({ length: 7 }, (_, weekDay) => ({
-        weekDay,
-        from: [0, 0],
-        to: [23, 59],
-      })),
-      precio: 100,
-      descripcion: "Prueba automatizada contra backend real",
-      estado: true,
-    });
-    return body.pension ?? body;
-  });
-  const pensionId = required(idOf(pension), "id de pension creada");
-
-  await step("editar pension", () =>
-    patch(`/api/pensiones/${pensionId}`, token, { precio: 101 }),
-  );
-  await step("ver pension", () => request(`/api/pensiones/${pensionId}`));
-
-  const now = Date.now();
-  const pensionPass = await step("crear pension pass", async () => {
-    const body = await create("/api/pension-pass", token, {
-      name: `Smoke Pass ${runId}`,
-      pension: pensionId,
-      usuario: usuarioId,
-      idPass: `SMOKE-PASS-${runId}`,
-      vigent: true,
-      antiPassback: true,
-      inParking: false,
-      created: now,
-      from: now,
-      to: now + 30 * 24 * 60 * 60 * 1000,
-      estado: true,
-    });
-    return body.pensionPass ?? body;
-  });
-  const pensionPassId = required(idOf(pensionPass), "id de pension pass creado");
-
-  await step("editar pension pass", () =>
-    patch(`/api/pension-pass/${pensionPassId}`, token, { name: `Smoke Pass Edit ${runId}` }),
-  );
-  await step("ver pension pass", () => request(`/api/pension-pass/${pensionPassId}`));
-
-  console.log("Smoke contra backend configurado terminado.");
 };
 
 main().catch((error) => {
