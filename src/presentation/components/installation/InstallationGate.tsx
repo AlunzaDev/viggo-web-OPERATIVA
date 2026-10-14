@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { FaCheckCircle, FaLink, FaLock, FaParking, FaSyncAlt } from "react-icons/fa";
+import { useEffect, useState, type ReactNode } from "react";
+import { FaCheckCircle, FaKey, FaLink, FaLock, FaParking, FaSyncAlt } from "react-icons/fa";
 import { type LocalInstallation } from "../../services/installation/installation.api";
+import { type InstallationLinkProject } from "../../services/installation/installation.contract";
 import {
   loadInstallationGateState,
+  previewInstallationGateLink,
   submitInstallationGateRequest,
 } from "../../services/installation/installation-gate.flow";
 import {
   getInstallationBackendMessage,
   getInstallationGateMode,
   getInstallationIdLabel,
-  getInstallationProjectsPlaceholder,
   getInstallationStatusCopy,
   getInstallationWaitingBadgeLabel,
   getInstallationWaitingMeta,
@@ -17,7 +18,6 @@ import {
   isInstallationWaitingApproval,
   normalizeInstallationError,
   shouldRedirectToSessionExpired,
-  type ProjectOption,
 } from "../../services/installation/installation-gate.service";
 import { ScreenLoader } from "../shared/loading/ScreenLoader";
 import { showAppToast } from "../../utils/feedback/swalToast";
@@ -29,27 +29,18 @@ type InstallationGateProps = {
 
 export function InstallationGate({ children }: InstallationGateProps) {
   const [installation, setInstallation] = useState<LocalInstallation | null>(null);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [installationLinkToken, setInstallationLinkToken] = useState("");
+  // Project the current token belongs to; the operator confirms it before requesting.
+  const [linkProject, setLinkProject] = useState<InstallationLinkProject | null>(null);
   const [backendUnavailable, setBackendUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const selectedProject = useMemo(
-    () => projects.find((project) => project.id === selectedProjectId) ?? null,
-    [projects, selectedProjectId],
-  );
 
   const isWaitingApproval = isInstallationWaitingApproval(installation);
   const waitingStateMeta = getInstallationWaitingMeta(installation);
   const gateMode = getInstallationGateMode(installation, backendUnavailable);
   const backendMessage = getInstallationBackendMessage(backendUnavailable);
   const installationIdLabel = getInstallationIdLabel(installation, backendUnavailable);
-  const projectsPlaceholder = getInstallationProjectsPlaceholder({
-    backendUnavailable,
-    projectsCount: projects.length,
-  });
 
   const showInstallationAlert = (rawMessage: string) => {
     if (shouldRedirectToSessionExpired(rawMessage)) {
@@ -70,13 +61,8 @@ export function InstallationGate({ children }: InstallationGateProps) {
     try {
       const nextState = await loadInstallationGateState();
       setInstallation(nextState.installation);
-      setProjects(nextState.projects);
       setBackendUnavailable(nextState.backendUnavailable);
-      if (!nextState.installation?.configured) {
-        setSelectedProjectId("");
-      }
     } catch (loadError) {
-      setProjects([]);
       setInstallation(null);
       const message =
         loadError instanceof Error
@@ -103,23 +89,38 @@ export function InstallationGate({ children }: InstallationGateProps) {
     void loadData();
   }, []);
 
-  const handleRequest = async () => {
-    if (!selectedProjectId) {
-      showInstallationAlert("Selecciona un proyecto para solicitar la vinculacion.");
-      return;
-    }
+  const handleTokenChange = (value: string) => {
+    setInstallationLinkToken(value);
+    // A different token may belong to another project: confirm it again.
+    setLinkProject(null);
+  };
 
-    if (!installationLinkToken.trim()) {
-      showInstallationAlert("Ingresa el token de vinculacion del proyecto.");
+  const handlePreview = async () => {
+    setSaving(true);
+    try {
+      setLinkProject(await previewInstallationGateLink(installationLinkToken));
+      setBackendUnavailable(false);
+    } catch (previewError) {
+      setLinkProject(null);
+      showInstallationAlert(
+        previewError instanceof Error
+          ? previewError.message
+          : "No se pudo validar el token de vinculacion.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRequest = async () => {
+    if (!linkProject) {
+      showInstallationAlert("Confirma el proyecto antes de solicitar la vinculacion.");
       return;
     }
 
     setSaving(true);
     try {
-      const nextInstallation = await submitInstallationGateRequest({
-        projectId: selectedProjectId,
-        installationLinkToken,
-      });
+      const nextInstallation = await submitInstallationGateRequest({ installationLinkToken });
       setBackendUnavailable(false);
       setInstallation(nextInstallation);
     } catch (requestError) {
@@ -163,45 +164,31 @@ export function InstallationGate({ children }: InstallationGateProps) {
         {gateMode === "ready" ? (
           <>
             <div className="installation-gate__selector">
-              <label htmlFor="installation-project">Proyecto en la nube</label>
-              <select
-                id="installation-project"
-                value={selectedProjectId}
-                onChange={(event) => setSelectedProjectId(event.target.value)}
-                disabled={saving || projects.length === 0}
-              >
-                <option value="">{projectsPlaceholder}</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.nombre}
-                    {project.identificador ? ` - ${project.identificador}` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {selectedProject ? (
-              <article className="installation-gate__preview">
-                <FaParking />
-                <div>
-                  <strong>{selectedProject.nombre}</strong>
-                  <span>{selectedProject.identificador || selectedProject.id}</span>
-                </div>
-              </article>
-            ) : null}
-
-            <div className="installation-gate__selector">
               <label htmlFor="installation-link-token">Token de vinculacion</label>
               <input
                 id="installation-link-token"
                 type="password"
                 value={installationLinkToken}
-                onChange={(event) => setInstallationLinkToken(event.target.value)}
-                placeholder="Ingresa el token generado al crear el proyecto"
+                onChange={(event) => handleTokenChange(event.target.value)}
+                placeholder="Pega el token generado al crear el proyecto"
                 disabled={saving}
                 autoComplete="off"
               />
             </div>
+
+            {linkProject ? (
+              <article className="installation-gate__preview">
+                <FaParking />
+                <div>
+                  <strong>{linkProject.nombre}</strong>
+                  <span>
+                    {[linkProject.identificador || linkProject.id, linkProject.ciudad]
+                      .filter(Boolean)
+                      .join(" - ")}
+                  </span>
+                </div>
+              </article>
+            ) : null}
           </>
         ) : gateMode === "waitingApproval" ? (
           <div className="installation-gate__waiting-shell">
@@ -229,19 +216,25 @@ export function InstallationGate({ children }: InstallationGateProps) {
             <FaSyncAlt /> {isWaitingApproval ? "Actualizar vinculacion" : "Revisar estado"}
           </button>
           {!isWaitingApproval && !backendUnavailable ? (
-            <button
-              type="button"
-              className="installation-gate__primary"
-              onClick={handleRequest}
-              disabled={
-                backendUnavailable ||
-                saving ||
-                !selectedProjectId ||
-                !installationLinkToken.trim()
-              }
-            >
-              <FaLink /> {saving ? "Enviando..." : "Solicitar vinculacion"}
-            </button>
+            linkProject ? (
+              <button
+                type="button"
+                className="installation-gate__primary"
+                onClick={handleRequest}
+                disabled={saving}
+              >
+                <FaLink /> {saving ? "Enviando..." : "Solicitar vinculacion"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="installation-gate__primary"
+                onClick={handlePreview}
+                disabled={saving || !installationLinkToken.trim()}
+              >
+                <FaKey /> {saving ? "Validando..." : "Validar token"}
+              </button>
+            )
           ) : null}
         </div>
       </section>

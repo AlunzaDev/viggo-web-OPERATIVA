@@ -1,14 +1,17 @@
-import { asRecord, extractNamedCollection } from "../../../infrastructure/http/api-contracts";
+import { asRecord } from "../../../infrastructure/http/api-contracts";
 import type {
   BrowserInstallationLocation,
   LocalInstallation,
   LocalInstallationStatus,
 } from "./installation.api";
 
-export type InstallationCloudProject = {
+/** Project a link token belongs to, shown to the operator before requesting the link. */
+export type InstallationLinkProject = {
   id: string;
   nombre: string;
   identificador: string;
+  codigoProyecto: string;
+  ciudad: string;
 };
 
 const INSTALLATION_STATUSES: LocalInstallationStatus[] = [
@@ -63,38 +66,31 @@ export const normalizeLocalInstallation = (value: unknown): LocalInstallation =>
   };
 };
 
-export const normalizeInstallationCloudProject = (
-  value: unknown,
-): InstallationCloudProject | null => {
-  const record = asRecord(value);
+export const normalizeInstallationLinkProject = (
+  data: unknown,
+): InstallationLinkProject | null => {
+  const record = asRecord(asRecord(data)?.proyecto);
   if (!record) return null;
 
   const id = normalizeText(record.id ?? record._id);
   const nombre = normalizeText(record.nombre);
-  const identificador = normalizeText(record.identificador);
 
   if (!id || !nombre) return null;
 
   return {
     id,
     nombre,
-    identificador,
+    identificador: normalizeText(record.identificador),
+    codigoProyecto: normalizeText(record.codigoProyecto),
+    ciudad: normalizeText(record.ciudad),
   };
 };
 
-export const normalizeInstallationCloudProjects = (
-  data: unknown,
-): InstallationCloudProject[] =>
-  extractNamedCollection(data, "proyectos")
-    .map((item) => normalizeInstallationCloudProject(item))
-    .filter((item): item is InstallationCloudProject => Boolean(item));
-
+// The cloud derives the project from the link token: no project id is sent.
 export const buildInstallationRequestPayload = (
-  proyectoId: string,
   installationLinkToken: string,
   browserLocation?: BrowserInstallationLocation,
 ) => ({
-  proyectoId,
   installationLinkToken,
   browserCoordinates: browserLocation?.coordinates,
   browserLocationAccuracy: browserLocation?.accuracy,

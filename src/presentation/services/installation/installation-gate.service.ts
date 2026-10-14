@@ -8,18 +8,12 @@ import {
   normalizeOperationalUserMessage,
 } from "../operations/operational-state.presenter";
 
-export type ProjectOption = {
-  id: string;
-  nombre: string;
-  identificador: string;
-};
-
 export type InstallationAlertTone = "error" | "warning";
 export type InstallationGateMode = "backendUnavailable" | "ready" | "waitingApproval";
 
 const WAITING_INSTALLATION_STATUSES: LocalInstallationStatus[] = ["requested", "approved"];
 const INSTALLATION_STATUS_COPY: Record<LocalInstallationStatus, string> = {
-  pending: "Selecciona el proyecto de esta terminal local.",
+  pending: "Ingresa el token de vinculacion del proyecto de esta terminal local.",
   requested: "Solicitud enviada. Esperando aprobacion en la nube.",
   approved: "Solicitud aprobada. Recarga para terminar la vinculacion.",
   rejected: "Solicitud rechazada. Revisa el motivo y solicita de nuevo.",
@@ -58,21 +52,6 @@ export const shouldRedirectToSessionExpired = (rawMessage: string): boolean => {
     normalized.includes("invalid token")
   );
 };
-
-export const normalizeProjectOption = (value: unknown): ProjectOption | null => {
-  if (!value || typeof value !== "object") return null;
-  const record = value as Record<string, unknown>;
-  const id = String(record.id ?? record._id ?? "").trim();
-  const nombre = String(record.nombre ?? "").trim();
-  const identificador = String(record.identificador ?? "").trim();
-  if (!id || !nombre) return null;
-  return { id, nombre, identificador };
-};
-
-export const mapInstallationProjects = (projects: unknown[]): ProjectOption[] =>
-  projects
-    .map((project) => normalizeProjectOption(project))
-    .filter((project): project is ProjectOption => Boolean(project));
 
 export const isInstallationWaitingApproval = (
   installation: LocalInstallation | null,
@@ -130,15 +109,6 @@ export const getInstallationBackendMessage = (
     ? "El backend local no esta disponible. Inicia el API operativo para continuar con esta instalacion."
     : null;
 
-export const getInstallationProjectsPlaceholder = (input: {
-  backendUnavailable: boolean;
-  projectsCount: number;
-}): string => {
-  if (input.backendUnavailable) return "Backend local no disponible";
-  if (input.projectsCount === 0) return "No hay proyectos disponibles en nube";
-  return "Selecciona un proyecto";
-};
-
 export const getInstallationWaitingBadgeLabel = (
   installation: LocalInstallation | null,
 ): string => (installation?.status === "approved" ? "Aprobado" : "En revision");
@@ -149,12 +119,21 @@ export const normalizeInstallationError = (
   const message = rawMessage.trim();
   const normalized = message.toLowerCase();
 
-  if (normalized.includes("nube no esta disponible para consultar proyectos")) {
+  if (normalized.includes("nube no esta disponible para validar el token")) {
     return {
       title: "No pudimos conectar con la nube",
       message:
-        "Revisa la conexion o intenta nuevamente en unos momentos para cargar los proyectos disponibles.",
+        "Revisa la conexion o intenta nuevamente en unos momentos para validar el token.",
       tone: "warning",
+    };
+  }
+
+  if (normalized.includes("token de vinculacion invalido")) {
+    return {
+      title: "Token de vinculacion invalido",
+      message:
+        "Revisa que el token corresponda a un proyecto activo; puedes copiarlo de nuevo desde el panel administrativo.",
+      tone: "error",
     };
   }
 
@@ -176,10 +155,10 @@ export const normalizeInstallationError = (
     };
   }
 
-  if (normalized.includes("selecciona un proyecto")) {
+  if (normalized.includes("confirma el proyecto")) {
     return {
-      title: "Selecciona un proyecto",
-      message: "Elige el proyecto que quieres vincular antes de continuar.",
+      title: "Confirma el proyecto",
+      message: "Valida el token y revisa el proyecto antes de solicitar la vinculacion.",
       tone: "warning",
     };
   }

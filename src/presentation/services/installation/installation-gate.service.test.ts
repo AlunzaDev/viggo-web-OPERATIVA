@@ -6,7 +6,6 @@ import {
   getInstallationBackendMessage,
   getInstallationGateMode,
   getInstallationIdLabel,
-  getInstallationProjectsPlaceholder,
   getInstallationStatusCopy,
   getInstallationWaitingBadgeLabel,
   getInstallationWaitingMeta,
@@ -66,7 +65,7 @@ describe("installation-gate.service", () => {
   });
 
   it("returns consistent installation copy and waiting meta", () => {
-    expect(getInstallationStatusCopy(null)).toContain("Selecciona el proyecto");
+    expect(getInstallationStatusCopy(null)).toContain("token de vinculacion");
     expect(getInstallationStatusCopy(buildInstallation({ status: "requested" }))).toContain(
       "Solicitud enviada",
     );
@@ -85,7 +84,7 @@ describe("installation-gate.service", () => {
     ).toBe("Aprobado");
   });
 
-  it("returns unified labels for id, backend message and project placeholder", () => {
+  it("returns unified labels for id and backend message", () => {
     expect(getInstallationIdLabel(buildInstallation(), false)).toBe("viggo-local-123");
     expect(getInstallationIdLabel(null, true)).toBe("API local sin iniciar");
     expect(getInstallationIdLabel(null, false)).toBe("sin identificar");
@@ -93,27 +92,19 @@ describe("installation-gate.service", () => {
     expect(getInstallationBackendMessage(true)).toContain("backend local no esta disponible");
     expect(getInstallationBackendMessage(false)).toBeNull();
 
-    expect(
-      getInstallationProjectsPlaceholder({ backendUnavailable: true, projectsCount: 0 }),
-    ).toBe("Backend local no disponible");
-    expect(
-      getInstallationProjectsPlaceholder({ backendUnavailable: false, projectsCount: 0 }),
-    ).toBe("No hay proyectos disponibles en nube");
-    expect(
-      getInstallationProjectsPlaceholder({ backendUnavailable: false, projectsCount: 2 }),
-    ).toBe("Selecciona un proyecto");
   });
 
   it("normalizes installation and geolocation errors for the user", () => {
     expect(
-      normalizeInstallationError("La nube no esta disponible para consultar proyectos").title,
+      normalizeInstallationError("La nube no esta disponible para validar el token de vinculacion").title,
     ).toBe("No pudimos conectar con la nube");
     expect(
       normalizeInstallationError("La nube no esta disponible para solicitar la vinculacion").title,
     ).toBe("No pudimos enviar la solicitud");
-    expect(normalizeInstallationError("Selecciona un proyecto").title).toBe(
-      "Selecciona un proyecto",
+    expect(normalizeInstallationError("Confirma el proyecto antes de solicitar").title).toBe(
+      "Confirma el proyecto",
     );
+    expect(normalizeInstallationError("Token de vinculacion invalido").tone).toBe("error");
     expect(normalizeInstallationError(LOCATION_PERMISSION_DENIED_ERROR).title).toBe(
       "Permite la ubicacion",
     );

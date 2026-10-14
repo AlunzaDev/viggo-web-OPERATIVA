@@ -1,9 +1,9 @@
 import { api } from "../../../infrastructure/http/axios.instance";
 import {
   buildInstallationRequestPayload,
-  normalizeInstallationCloudProjects,
+  normalizeInstallationLinkProject,
   normalizeLocalInstallation,
-  type InstallationCloudProject,
+  type InstallationLinkProject,
 } from "./installation.contract";
 
 export type LocalInstallationStatus =
@@ -41,19 +41,21 @@ export const getLocalInstallation = async (): Promise<LocalInstallation> => {
   return normalizeLocalInstallation(data);
 };
 
-export const getInstallationCloudProjects = async (): Promise<InstallationCloudProject[]> => {
-  const { data } = await api.get("/api/installation/cloud-projects");
-  return normalizeInstallationCloudProjects(data);
+/** Project the link token belongs to (null if the cloud does not recognize it). */
+export const previewInstallationLink = async (
+  installationLinkToken: string,
+): Promise<InstallationLinkProject | null> => {
+  const { data } = await api.post("/api/installation/link-preview", { installationLinkToken });
+  return normalizeInstallationLinkProject(data);
 };
 
 export const requestLocalInstallationProject = async (
-  proyectoId: string,
   installationLinkToken: string,
   browserLocation?: BrowserInstallationLocation,
 ): Promise<LocalInstallation> => {
   const { data } = await api.post(
     "/api/installation/project-request",
-    buildInstallationRequestPayload(proyectoId, installationLinkToken, browserLocation),
+    buildInstallationRequestPayload(installationLinkToken, browserLocation),
   );
   return normalizeLocalInstallation(data);
 };

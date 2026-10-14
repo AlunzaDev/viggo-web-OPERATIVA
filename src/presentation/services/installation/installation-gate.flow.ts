@@ -1,41 +1,20 @@
 import {
-  getInstallationCloudProjects,
   getLocalInstallation,
+  previewInstallationLink,
   requestLocalInstallationProject,
   type LocalInstallation,
 } from "./installation.api";
-import {
-  isBackendUnavailableMessage,
-  mapInstallationProjects,
-  resolveBrowserLocation,
-  type ProjectOption,
-} from "./installation-gate.service";
+import type { InstallationLinkProject } from "./installation.contract";
+import { isBackendUnavailableMessage, resolveBrowserLocation } from "./installation-gate.service";
 
 export type InstallationGateState = {
   installation: LocalInstallation | null;
-  projects: ProjectOption[];
   backendUnavailable: boolean;
 };
 
 export const loadInstallationGateState = async (): Promise<InstallationGateState> => {
   try {
-    const installation = await getLocalInstallation();
-
-    if (installation.configured) {
-      return {
-        installation,
-        projects: [],
-        backendUnavailable: false,
-      };
-    }
-
-    const projectRows = await getInstallationCloudProjects();
-
-    return {
-      installation,
-      projects: mapInstallationProjects(projectRows),
-      backendUnavailable: false,
-    };
+    return { installation: await getLocalInstallation(), backendUnavailable: false };
   } catch (error) {
     const message =
       error instanceof Error
@@ -50,14 +29,25 @@ export const loadInstallationGateState = async (): Promise<InstallationGateState
   }
 };
 
-export const submitInstallationGateRequest = async (input: {
-  projectId: string;
-  installationLinkToken: string;
-}): Promise<LocalInstallation> => {
-  if (!input.projectId) {
-    throw new Error("Selecciona un proyecto para solicitar la vinculacion.");
+/** Finds the project the link token belongs to, so the operator can confirm it. */
+export const previewInstallationGateLink = async (
+  installationLinkToken: string,
+): Promise<InstallationLinkProject> => {
+  const token = installationLinkToken.trim();
+  if (!token) {
+    throw new Error("Ingresa el token de vinculacion del proyecto.");
   }
 
+  const project = await previewInstallationLink(token);
+  if (!project) {
+    throw new Error("Token de vinculacion invalido");
+  }
+  return project;
+};
+
+export const submitInstallationGateRequest = async (input: {
+  installationLinkToken: string;
+}): Promise<LocalInstallation> => {
   if (!input.installationLinkToken.trim()) {
     throw new Error("Ingresa el token de vinculacion del proyecto.");
   }
@@ -71,7 +61,6 @@ export const submitInstallationGateRequest = async (input: {
   }
 
   return requestLocalInstallationProject(
-    input.projectId,
     input.installationLinkToken.trim(),
     locationResolution.location,
   );
