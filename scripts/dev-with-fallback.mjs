@@ -1,10 +1,18 @@
 import net from "node:net";
 import { spawn } from "node:child_process";
+import { loadEnv } from "vite";
 
 process.stdout.write("\x1Bc");
 
-const preferredPort = Number(process.env.VITE_DEV_PORT ?? 3001);
-const fallbackPort = Number(process.env.VITE_DEV_FALLBACK_PORT ?? 3003);
+const fileEnv = loadEnv("dev", process.cwd(), "VITE_");
+const preferredPort = Number(
+  process.env.VITE_DEV_PORT ?? fileEnv.VITE_DEV_PORT ?? 3003,
+);
+const fallbackPort = Number(
+  process.env.VITE_DEV_FALLBACK_PORT ??
+    fileEnv.VITE_DEV_FALLBACK_PORT ??
+    3004,
+);
 const probeHosts = ["127.0.0.1", "::1"];
 
 const canConnectToPort = (host, port) =>
