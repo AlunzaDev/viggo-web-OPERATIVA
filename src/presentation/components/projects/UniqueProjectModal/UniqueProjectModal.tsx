@@ -1,6 +1,6 @@
 import { FaAlignLeft, FaBuilding, FaCity, FaHashtag, FaImage, FaPowerOff } from "react-icons/fa";
 import type { ParkingEntity } from "../../../../domain/entities/parking.entity";
-import { CopyableId } from "../../shared/CopyableId";
+import { CopyableId } from "@alunzadev/viggo-ui";
 import { UniqueModalBase } from "../../shared/modals/UniqueModalBase";
 import "../../../styles/projects/UniqueProjectModal.css";
 

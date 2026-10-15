@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { applyTheme, resolveInitialTheme } from "./config/theme-mode";
+import "@alunzadev/viggo-ui/styles.css";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
 

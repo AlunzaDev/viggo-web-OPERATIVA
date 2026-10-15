@@ -10,9 +10,12 @@ import {
   FaSyncAlt,
   FaWallet,
 } from "react-icons/fa";
-import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
-import { FilterSidebar } from "../../components/shared/FilterSidebar";
-import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
+import {
+  CrudActionsIsland,
+  FilterSidebar,
+  SidebarFilterField,
+  SidebarFilterForm,
+} from "@alunzadev/viggo-ui";
 import { OperationalLogDetailModal, type OperationalLogDetailItem } from "../../components/shared/operationalLogs/OperationalLogDetailModal";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { ScreenLoader } from "../../components/shared/loading/ScreenLoader";

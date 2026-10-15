@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { FaEdit, FaIdBadge, FaInfoCircle, FaPlus, FaPowerOff, FaShieldAlt } from "react-icons/fa";
-import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
+import { CrudActionsIsland } from "@alunzadev/viggo-ui";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { CreateModalBase } from "../../components/shared/modals/CreateModalBase";
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";

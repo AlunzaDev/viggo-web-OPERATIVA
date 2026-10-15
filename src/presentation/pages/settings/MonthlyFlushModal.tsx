@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaCalendarAlt, FaChevronDown, FaClock } from "react-icons/fa";
-import { BaseModalWrapper } from "../../components/shared/modals/BaseModalWrapper";
+import { BaseModalWrapper } from "@alunzadev/viggo-ui";
 import { ScreenLoader } from "../../components/shared/loading/ScreenLoader";
 import type { MonthlyFlushHistoryItem } from "../../services/monthlyFlush/monthlyFlush.api";
 

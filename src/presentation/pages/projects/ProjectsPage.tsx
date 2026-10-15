@@ -3,12 +3,15 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaEraser, FaInfoCircle, FaPlus, FaPowerOff, FaSortAlphaDown, FaSortAlphaDownAlt } from "react-icons/fa";
 import { UniqueProjectModal } from "../../components/projects/UniqueProjectModal/UniqueProjectModal";
-import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
-import { CopyableId } from "../../components/shared/CopyableId";
+import {
+  CopyableId,
+  CrudActionsIsland,
+  FilterSidebar,
+  InfoChip,
+  SidebarFilterField,
+  SidebarFilterForm,
+} from "@alunzadev/viggo-ui";
 import { EmptyState } from "../../components/shared/EmptyState";
-import { FilterSidebar } from "../../components/shared/FilterSidebar";
-import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
-import { InfoChip } from "../../components/shared/InfoChip";
 import { MobileCardsList } from "../../components/shared/lists/MobileCardsList";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { TableBase } from "../../components/shared/tables/TableBase";

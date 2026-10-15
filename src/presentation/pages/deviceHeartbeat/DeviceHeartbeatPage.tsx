@@ -23,7 +23,7 @@ import {
   FaTerminal,
   FaWifi,
 } from "react-icons/fa";
-import { CopyableId } from "../../components/shared/CopyableId";
+import { CopyableId } from "@alunzadev/viggo-ui";
 import { RemoteSupportViewerModal } from "../../components/remoteSupport/RemoteSupportViewerModal";
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { type ParkingEntity } from "../../../domain/entities/parking.entity";

@@ -11,7 +11,7 @@ import {
   FaSatelliteDish,
   FaWallet,
 } from "react-icons/fa";
-import { CopyableId } from "../CopyableId";
+import { CopyableId } from "@alunzadev/viggo-ui";
 import { UniqueModalBase } from "../modals/UniqueModalBase";
 import "../../../styles/shared/OperationalLogDetailModal.css";
 

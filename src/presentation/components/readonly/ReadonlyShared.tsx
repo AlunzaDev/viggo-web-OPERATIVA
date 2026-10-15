@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { CrudActionsIsland } from "../shared/CrudActionsIsland";
-import { CopyableId } from "../shared/CopyableId";
+import { CopyableId, CrudActionsIsland } from "@alunzadev/viggo-ui";
 import { UniqueModalBase } from "../shared/modals/UniqueModalBase";
 import { TableBase } from "../shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";

@@ -1,4 +1,4 @@
-import { BaseModalWrapper } from "./BaseModalWrapper";
+import { BaseModalWrapper } from "@alunzadev/viggo-ui";
 
 type RequiredRangeParkingOption = {
   id: string;

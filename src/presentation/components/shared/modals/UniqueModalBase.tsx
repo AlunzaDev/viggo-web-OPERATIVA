@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Swal from "sweetalert2";
 import { FaCheckCircle, FaEdit, FaSave } from "react-icons/fa";
-import { BaseModalWrapper } from "./BaseModalWrapper";
+import { BaseModalWrapper } from "@alunzadev/viggo-ui";
 
 export type UniqueModalBaseProps = {
   open: boolean;

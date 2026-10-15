@@ -6,8 +6,11 @@ import {
 import {
   ReadonlyTablePage as SharedReadonlyTablePage,
 } from "../../components/readonly/ReadonlyShared";
-import { FilterSidebar } from "../../components/shared/FilterSidebar";
-import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
+import {
+  FilterSidebar,
+  SidebarFilterField,
+  SidebarFilterForm,
+} from "@alunzadev/viggo-ui";
 import {
   loadReadonlyPaymentsData,
   loadReadonlyPensionMovesData,

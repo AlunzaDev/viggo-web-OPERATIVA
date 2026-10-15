@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCashRegister, FaEye, FaSyncAlt } from "react-icons/fa";
-import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
-import { FilterSidebar } from "../../components/shared/FilterSidebar";
-import { SidebarFilterField, SidebarFilterForm } from "../../components/shared/SidebarFilterForm";
+import {
+  CrudActionsIsland,
+  FilterSidebar,
+  SidebarFilterField,
+  SidebarFilterForm,
+} from "@alunzadev/viggo-ui";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import {
   formatCutStatus,

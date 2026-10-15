@@ -5,7 +5,7 @@ import {
   ModuleEntity,
   type ModuleDeviceBindingRequest,
 } from "../../../domain/entities/module.entity";
-import { CrudActionsIsland } from "../../components/shared/CrudActionsIsland";
+import { CrudActionsIsland } from "@alunzadev/viggo-ui";
 import { CrudRowActions } from "../../components/shared/CrudRowActions";
 import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
 import { EmptyState } from "../../components/shared/EmptyState";

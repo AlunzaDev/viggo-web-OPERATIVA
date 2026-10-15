@@ -1,6 +1,6 @@
 import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
 import Swal from "sweetalert2";
-import { BaseModalWrapper } from "./BaseModalWrapper";
+import { BaseModalWrapper } from "@alunzadev/viggo-ui";
 
 export type CreateModalBaseProps = {
   open: boolean;

@@ -15,7 +15,7 @@ import {
   ModuleEntity,
   type ModuleDeviceBindingRequest,
 } from "../../../domain/entities/module.entity";
-import { CopyableId } from "../shared/CopyableId";
+import { CopyableId } from "@alunzadev/viggo-ui";
 import { UniqueModalBase } from "../shared/modals/UniqueModalBase";
 import {
   buildBindingSummary,
