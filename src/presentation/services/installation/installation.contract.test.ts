@@ -26,6 +26,8 @@ describe("installation.contract", () => {
     expect(installation.source).toBe("cloudApproval");
     expect(installation.proyectoNombre).toBe("AKIA");
     expect(installation.requestedAt).toBe(123);
+    expect(installation.cloudCredentials).toBeNull();
+    expect(normalizeLocalInstallation({ installation: { cloudCredentials: false } }).cloudCredentials).toBe(false);
   });
 
   it("normalizes the project a link token belongs to", () => {

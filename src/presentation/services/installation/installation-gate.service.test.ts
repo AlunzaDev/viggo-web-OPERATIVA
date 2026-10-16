@@ -11,7 +11,9 @@ import {
   getInstallationWaitingMeta,
   isBackendUnavailableMessage,
   isInstallationWaitingApproval,
+  needsCloudRelink,
   normalizeInstallationError,
+  shouldPollInstallation,
   shouldRedirectToSessionExpired,
 } from "./installation-gate.service";
 
@@ -32,10 +34,31 @@ const buildInstallation = (
   assignedByUserId: null,
   assignedAt: null,
   updatedAt: null,
+  cloudCredentials: null,
   ...overrides,
 });
 
 describe("installation-gate.service", () => {
+  it("asks to link again when linked without cloud credentials", () => {
+    const linked = { configured: true, status: "linked" as const, proyectoId: "p1" };
+    expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: false }))).toBe(true);
+    expect(getInstallationStatusCopy(buildInstallation({ ...linked, cloudCredentials: false }))).toContain("sin credenciales");
+    expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: true }))).toBe(false);
+    // An older local API that does not report it is trusted as before.
+    expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: null }))).toBe(false);
+    expect(needsCloudRelink(buildInstallation({ cloudCredentials: false }))).toBe(false);
+  });
+
+  it("polls only while the request is under review and the local API answers", () => {
+    expect(shouldPollInstallation(buildInstallation({ status: "requested" }), false)).toBe(true);
+    expect(shouldPollInstallation(buildInstallation({ status: "approved" }), false)).toBe(true);
+    expect(shouldPollInstallation(buildInstallation({ status: "requested" }), true)).toBe(false);
+    for (const status of ["pending", "rejected", "linked"] as const) {
+      expect(shouldPollInstallation(buildInstallation({ status }), false)).toBe(false);
+    }
+    expect(shouldPollInstallation(null, false)).toBe(false);
+  });
+
   it("detects backend unavailable messages consistently", () => {
     expect(isBackendUnavailableMessage("Network Error")).toBe(true);
     expect(isBackendUnavailableMessage("backend no disponible")).toBe(true);

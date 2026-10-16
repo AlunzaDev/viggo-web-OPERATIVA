@@ -20,6 +20,9 @@ const INSTALLATION_STATUS_COPY: Record<LocalInstallationStatus, string> = {
   linked: "Este punto local ya esta vinculado al proyecto seleccionado.",
 };
 
+/** How often the gate checks whether the cloud approved the request. */
+export const INSTALLATION_POLL_INTERVAL_MS = 12_000;
+
 export const GEOLOCATION_TIMEOUT_MS = 8000;
 export const GEOLOCATION_RELAXED_TIMEOUT_MS = 15000;
 export const GEOLOCATION_CACHE_MAX_AGE_MS = 1000 * 60 * 5;
@@ -61,9 +64,24 @@ export const isInstallationWaitingApproval = (
       WAITING_INSTALLATION_STATUSES.includes(installation.status),
   );
 
+/**
+ * Linked by PROJECT_ID or the seed (or with a token that no longer decrypts): it looks
+ * configured, but online login, sync and event delivery cannot reach the cloud.
+ */
+export const needsCloudRelink = (installation: LocalInstallation | null): boolean =>
+  Boolean(installation?.configured && installation.cloudCredentials === false);
+
+export const shouldPollInstallation = (
+  installation: LocalInstallation | null,
+  backendUnavailable: boolean,
+): boolean => !backendUnavailable && isInstallationWaitingApproval(installation);
+
 export const getInstallationStatusCopy = (
   installation: LocalInstallation | null,
 ) => {
+  if (needsCloudRelink(installation)) {
+    return "Este punto local esta vinculado sin credenciales de la nube: el inicio de sesion en linea, la sincronizacion y el envio de eventos no funcionan. Vuelve a vincularlo con el token del proyecto.";
+  }
   if (!installation) return INSTALLATION_STATUS_COPY.pending;
   return INSTALLATION_STATUS_COPY[installation.status] ?? INSTALLATION_STATUS_COPY.pending;
 };
@@ -82,7 +100,7 @@ export const getInstallationWaitingMeta = (
   return {
     title: "Solicitud enviada correctamente",
     description:
-      "La solicitud ya quedo en revision. Solo falta que la aprueben en administrativo para habilitar este punto local.",
+      "La solicitud ya quedo en revision. En cuanto la aprueben en administrativo, esta pantalla continua sola.",
   };
 };
 

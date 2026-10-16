@@ -63,6 +63,7 @@ export const normalizeLocalInstallation = (value: unknown): LocalInstallation =>
     assignedByUserId: normalizeNullableText(record.assignedByUserId),
     assignedAt: normalizeNullableNumber(record.assignedAt),
     updatedAt: normalizeNullableNumber(record.updatedAt),
+    cloudCredentials: typeof record.cloudCredentials === "boolean" ? record.cloudCredentials : null,
   };
 };
 

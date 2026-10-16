@@ -34,6 +34,8 @@ export type LocalInstallation = {
   assignedByUserId: string | null;
   assignedAt: number | null;
   updatedAt: number | null;
+  /** False when linked without the cloud token (PROJECT_ID, seed); null if not reported. */
+  cloudCredentials: boolean | null;
 };
 
 export const getLocalInstallation = async (): Promise<LocalInstallation> => {

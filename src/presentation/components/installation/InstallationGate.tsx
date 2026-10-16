@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { FaCheckCircle, FaKey, FaLink, FaLock, FaParking, FaSyncAlt } from "react-icons/fa";
+import { FaCheckCircle, FaExclamationTriangle, FaKey, FaLink, FaLock, FaParking, FaSyncAlt } from "react-icons/fa";
 import { type LocalInstallation } from "../../services/installation/installation.api";
 import { type InstallationLinkProject } from "../../services/installation/installation.contract";
 import {
@@ -14,9 +14,12 @@ import {
   getInstallationStatusCopy,
   getInstallationWaitingBadgeLabel,
   getInstallationWaitingMeta,
+  INSTALLATION_POLL_INTERVAL_MS,
   isBackendUnavailableMessage,
   isInstallationWaitingApproval,
+  needsCloudRelink,
   normalizeInstallationError,
+  shouldPollInstallation,
   shouldRedirectToSessionExpired,
 } from "../../services/installation/installation-gate.service";
 import { ScreenLoader } from "../shared/loading/ScreenLoader";
@@ -27,6 +30,23 @@ type InstallationGateProps = {
   children: ReactNode;
 };
 
+// "Continue without the cloud" lasts for this browser session only.
+const OFFLINE_ACK_KEY = "viggo.installation.offlineAck";
+const readOfflineAck = () => {
+  try {
+    return window.sessionStorage.getItem(OFFLINE_ACK_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+const writeOfflineAck = () => {
+  try {
+    window.sessionStorage.setItem(OFFLINE_ACK_KEY, "1");
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+};
+
 export function InstallationGate({ children }: InstallationGateProps) {
   const [installation, setInstallation] = useState<LocalInstallation | null>(null);
   const [installationLinkToken, setInstallationLinkToken] = useState("");
@@ -35,7 +55,9 @@ export function InstallationGate({ children }: InstallationGateProps) {
   const [backendUnavailable, setBackendUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [offlineAck, setOfflineAck] = useState(readOfflineAck);
 
+  const relinkNeeded = needsCloudRelink(installation);
   const isWaitingApproval = isInstallationWaitingApproval(installation);
   const waitingStateMeta = getInstallationWaitingMeta(installation);
   const gateMode = getInstallationGateMode(installation, backendUnavailable);
@@ -89,6 +111,45 @@ export function InstallationGate({ children }: InstallationGateProps) {
     void loadData();
   }, []);
 
+  const polling = shouldPollInstallation(installation, backendUnavailable);
+
+  // While the request is under review, check on our own so the operator does not have to.
+  useEffect(() => {
+    if (!polling) return;
+    let cancelled = false;
+
+    const check = async () => {
+      if (cancelled || document.hidden) return;
+      try {
+        const nextState = await loadInstallationGateState();
+        if (!cancelled) setInstallation(nextState.installation);
+      } catch (pollError) {
+        // Stop when the local API is down; other errors are retried on the next tick.
+        const unavailable =
+          typeof pollError === "object" && pollError !== null && "backendUnavailable" in pollError
+            ? Boolean((pollError as { backendUnavailable?: unknown }).backendUnavailable)
+            : false;
+        if (!cancelled && unavailable) setBackendUnavailable(true);
+      }
+    };
+
+    const timer = window.setInterval(() => void check(), INSTALLATION_POLL_INTERVAL_MS);
+    const onVisible = () => {
+      if (!document.hidden) void check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [polling]);
+
+  const handleContinueOffline = () => {
+    writeOfflineAck();
+    setOfflineAck(true);
+  };
+
   const handleTokenChange = (value: string) => {
     setInstallationLinkToken(value);
     // A different token may belong to another project: confirm it again.
@@ -140,16 +201,16 @@ export function InstallationGate({ children }: InstallationGateProps) {
   };
 
   if (loading) return <ScreenLoader label="instalacion" />;
-  if (installation?.configured) return <>{children}</>;
+  if (installation?.configured && (!relinkNeeded || offlineAck)) return <>{children}</>;
 
   return (
     <main className="installation-gate">
       <section className="installation-gate__card">
         <span className="installation-gate__eyebrow">
-          {isWaitingApproval ? <FaCheckCircle /> : <FaLock />}
+          {isWaitingApproval ? <FaCheckCircle /> : relinkNeeded ? <FaExclamationTriangle /> : <FaLock />}
           Instalacion local
         </span>
-        <h1>Vincula este punto local a un proyecto</h1>
+        <h1>{relinkNeeded ? "Este punto local no puede conectarse a la nube" : "Vincula este punto local a un proyecto"}</h1>
         <p>{getInstallationStatusCopy(installation)}</p>
         <p className="installation-gate__id">
           ID de instalacion: <strong>{installationIdLabel}</strong>
@@ -199,6 +260,9 @@ export function InstallationGate({ children }: InstallationGateProps) {
               </span>
               <strong>{waitingStateMeta.title}</strong>
               <p>{waitingStateMeta.description}</p>
+              {polling ? (
+                <p className="installation-gate__id">Revisando automaticamente cada {INSTALLATION_POLL_INTERVAL_MS / 1000} s.</p>
+              ) : null}
             </article>
 
             <article className="installation-gate__preview installation-gate__preview--waiting">
@@ -215,6 +279,11 @@ export function InstallationGate({ children }: InstallationGateProps) {
           <button type="button" onClick={() => void loadData()} disabled={saving}>
             <FaSyncAlt /> {isWaitingApproval ? "Actualizar vinculacion" : "Revisar estado"}
           </button>
+          {relinkNeeded && !isWaitingApproval ? (
+            <button type="button" onClick={handleContinueOffline} disabled={saving}>
+              Continuar sin conexion a la nube
+            </button>
+          ) : null}
           {!isWaitingApproval && !backendUnavailable ? (
             linkProject ? (
               <button
