@@ -8,9 +8,7 @@
     "preflight:operative": "npm --prefix ../viggo-server-api-OPERATIVA run preflight",
     "build": "tsc -b && vite build --mode prod",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "smoke:backend": "node scripts/smoke-real-backend.mjs",
-    "smoke:real-backend": "node scripts/smoke-real-backend.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@alunzadev/viggo-ui": "0.1.0",
