@@ -12,6 +12,7 @@ import {
   isBackendUnavailableMessage,
   isInstallationWaitingApproval,
   needsCloudRelink,
+  getInstallationShortCode,
   normalizeInstallationError,
   shouldPollInstallation,
   shouldRedirectToSessionExpired,
@@ -39,6 +40,12 @@ const buildInstallation = (
 });
 
 describe("installation-gate.service", () => {
+  it("shows the last six characters of the installation id as the verification code", () => {
+    expect(getInstallationShortCode(buildInstallation({ installationId: "viggo-local-dc604cddffce" }))).toBe("DDFFCE");
+    expect(getInstallationShortCode(buildInstallation({ installationId: "" }))).toBeNull();
+    expect(getInstallationShortCode(null)).toBeNull();
+  });
+
   it("asks to link again when linked without cloud credentials", () => {
     const linked = { configured: true, status: "linked" as const, proyectoId: "p1" };
     expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: false }))).toBe(true);

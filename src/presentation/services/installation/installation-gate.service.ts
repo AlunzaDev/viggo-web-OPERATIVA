@@ -113,6 +113,15 @@ export const getInstallationGateMode = (
   return "ready";
 };
 
+/**
+ * Code the technician reads to whoever approves the request in ADMINISTRATIVO (last 6
+ * characters of the installation id, shown there too), so the right device is approved.
+ */
+export const getInstallationShortCode = (installation: LocalInstallation | null): string | null => {
+  const code = String(installation?.installationId ?? "").replace(/[^a-z0-9]/gi, "").slice(-6).toUpperCase();
+  return code || null;
+};
+
 export const getInstallationIdLabel = (
   installation: LocalInstallation | null,
   backendUnavailable: boolean,

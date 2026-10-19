@@ -11,6 +11,7 @@ import {
   getInstallationBackendMessage,
   getInstallationGateMode,
   getInstallationIdLabel,
+  getInstallationShortCode,
   getInstallationStatusCopy,
   getInstallationWaitingBadgeLabel,
   getInstallationWaitingMeta,
@@ -215,6 +216,13 @@ export function InstallationGate({ children }: InstallationGateProps) {
         <p className="installation-gate__id">
           ID de instalacion: <strong>{installationIdLabel}</strong>
         </p>
+        {getInstallationShortCode(installation) && !installation?.configured ? (
+          <p className="installation-gate__id">
+            Codigo de verificacion: <strong>{getInstallationShortCode(installation)}</strong>
+            <br />
+            Dicta este codigo a quien aprueba la solicitud en administrativo.
+          </p>
+        ) : null}
 
         {installation?.status === "rejected" && installation.reviewNote ? (
           <p className="installation-gate__error">{installation.reviewNote}</p>
