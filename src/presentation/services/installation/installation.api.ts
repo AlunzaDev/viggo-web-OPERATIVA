@@ -43,6 +43,15 @@ export const getLocalInstallation = async (): Promise<LocalInstallation> => {
   return normalizeLocalInstallation(data);
 };
 
+/**
+ * Unlinks this installation so it can be linked again (Viggo staff only). The API refuses
+ * while local changes are still waiting to reach the cloud.
+ */
+export const resetLocalInstallation = async (installationId: string): Promise<LocalInstallation> => {
+  const { data } = await api.post("/api/installation/reset", { installationId });
+  return normalizeLocalInstallation(data);
+};
+
 /** Project the link token belongs to (null if the cloud does not recognize it). */
 export const previewInstallationLink = async (
   installationLinkToken: string,

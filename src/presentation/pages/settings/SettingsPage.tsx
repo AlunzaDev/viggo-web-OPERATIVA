@@ -10,6 +10,7 @@ import {
   FaSun,
   FaSyncAlt,
   FaUserCog,
+  FaUnlink,
   FaUsers,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -48,6 +49,10 @@ import {
   saveMonthlyFlushFlow,
 } from "../../services/monthlyFlush/monthlyFlush.flow";
 import { MonthlyFlushModal } from "./MonthlyFlushModal";
+import {
+  getLocalInstallation,
+  resetLocalInstallation,
+} from "../../services/installation/installation.api";
 import "../../styles/settings/SettingsPage.css";
 
 const ROLE_LABEL: Record<string, string> = {
@@ -97,6 +102,8 @@ export function SettingsPage() {
   const projectsCount = user?.parkings.length ?? 0;
   const canManageLocalConfig =
     user?.role === "superRole" || user?.role === "adminRole";
+  // Unlinking leaves the parking without the cloud; cashiers are admins too.
+  const canResetInstallation = user?.role === "superRole";
 
   const loadConfigStatus = useCallback(async () => {
     setConfigLoading(true);
@@ -176,6 +183,35 @@ export function SettingsPage() {
       );
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleResetInstallation = async () => {
+    try {
+      const { installationId } = await getLocalInstallation();
+      const result = await Swal.fire({
+        icon: "warning",
+        title: "Reiniciar instalacion",
+        html:
+          "Este punto local se desvinculara de su proyecto y dejara de comunicarse con la nube hasta que se apruebe una nueva vinculacion. Los datos locales se conservan.<br/><br/>" +
+          `Escribe el ID de la instalacion para confirmar: <strong>${installationId}</strong>`,
+        input: "text",
+        inputPlaceholder: installationId,
+        showCancelButton: true,
+        confirmButtonText: "Reiniciar",
+        cancelButtonText: "Cancelar",
+        inputValidator: (value) => (value.trim() === installationId ? undefined : "El ID no coincide"),
+      });
+      if (!result.isConfirmed) return;
+      await resetLocalInstallation(installationId);
+      // The installation gate takes over and shows the linking screen.
+      window.location.assign("/");
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo reiniciar la instalacion",
+        text: error instanceof Error ? error.message : "Intenta de nuevo en un momento.",
+      });
     }
   };
 
@@ -381,6 +417,16 @@ export function SettingsPage() {
                 {syncing ? <FaSyncAlt /> : <FaCloudDownloadAlt />}
                 {syncing ? "Sincronizando..." : "Sincronizar ahora"}
               </button>
+
+              {canResetInstallation ? (
+                <button
+                  className="btn-setting-action"
+                  disabled={configLoading || syncing}
+                  onClick={() => void handleResetInstallation()}
+                >
+                  <FaUnlink /> Reiniciar instalacion
+                </button>
+              ) : null}
             </div>
           </div>
         ) : null}
