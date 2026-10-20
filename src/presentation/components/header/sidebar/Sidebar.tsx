@@ -10,6 +10,7 @@ import {
   FaExclamationTriangle,
   FaIdCard,
   FaReceipt,
+  FaTags,
   FaTicketAlt,
   FaWallet,
 } from "react-icons/fa";
@@ -75,9 +76,12 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(({ isOpen, onClose 
         items: [{ label: "Pagos", path: "/pagos", icon: <FaCreditCard />, visible: can("payments") }],
       },
       {
-        id: "cuenta",
-        label: "Cuenta",
-        items: [{ label: "Cuenta", path: "/account", icon: <FaCog />, activePaths: ["/account", "/settings"] }],
+        id: "configuracion",
+        label: "Configuración",
+        items: [
+          { label: "Tarifa", path: "/tarifa", icon: <FaTags /> },
+          { label: "Cuenta", path: "/account", icon: <FaCog />, activePaths: ["/account", "/settings"] },
+        ],
       },
     ];
   }, [user?.modules, user?.role]);

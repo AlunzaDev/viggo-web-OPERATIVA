@@ -1,0 +1,158 @@
+.parking-rate-page {
+  display: grid;
+  gap: 18px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.parking-rate-page__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.parking-rate-card .modal-section-header {
+  gap: 10px;
+}
+
+.parking-rate-summary {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.parking-rate-muted {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.parking-rate-error {
+  margin: 12px 0 0;
+  color: var(--error-color);
+  font-size: 0.88rem;
+}
+
+.parking-rate-form {
+  margin-top: 18px;
+}
+
+.parking-rate-input {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+}
+
+.parking-rate-input:focus-within {
+  border-color: var(--primary-color);
+}
+
+.parking-rate-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.parking-rate-input span {
+  padding: 0 10px;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.parking-rate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.parking-rate-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parking-rate-stay {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.parking-rate-result {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 30%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+
+.parking-rate-result__label {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.parking-rate-result__amount {
+  color: var(--primary-color);
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.parking-rate-result ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.parking-rate-result li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.parking-rate-history {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0 0 0 14px;
+  border-left: 2px solid color-mix(in srgb, var(--primary-color) 40%, var(--border));
+  list-style: none;
+}
+
+.parking-rate-history li {
+  display: grid;
+  gap: 3px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.parking-rate-history li > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .parking-rate-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

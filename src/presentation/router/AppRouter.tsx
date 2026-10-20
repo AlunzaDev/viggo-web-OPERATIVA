@@ -7,6 +7,10 @@ import { RemoteSupportLauncherPage } from "../pages/remoteSupport/RemoteSupportL
 import { ProtectedRoute } from "./ProtectedRoute";
 import { getDefaultAuthorizedPath } from "./module-routing";
 
+const ParkingRatePage = lazy(async () => {
+  const module = await import("../pages/parkingRate/ParkingRatePage");
+  return { default: module.ParkingRatePage };
+});
 const LoginPage = lazy(async () => {
   const module = await import("../pages/auth/LoginPage");
   return { default: module.LoginPage };
@@ -279,6 +283,15 @@ export function AppRouter() {
           element={
             <ProtectedRoute modules={["modules", "cashPayments", "payments", "tickets"]}>
               <OperationalLogsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tarifa"
+          element={
+            // Everyone can see the rate; the page only lets users with the tickets module edit it.
+            <ProtectedRoute>
+              <ParkingRatePage />
             </ProtectedRoute>
           }
         />
