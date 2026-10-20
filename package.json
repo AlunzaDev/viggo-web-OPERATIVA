@@ -13,7 +13,7 @@
     "smoke:real-backend": "node scripts/smoke-real-backend.mjs"
   },
   "dependencies": {
-    "@alunzadev/viggo-ui": "0.1.1",
+    "@alunzadev/viggo-ui": "0.3.0",
     "@react-pdf/renderer": "^4.5.1",
     "axios": "^1.18.1",
     "country-state-city": "^3.2.1",

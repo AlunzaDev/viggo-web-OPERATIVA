@@ -51,7 +51,7 @@ function MainLayoutContent({ children }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => readSidebarState());
   const [userSidebarOpen, setUserSidebarOpen] = useState(false);
   const [isRouteLoading, setIsRouteLoading] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
   const userSidebarRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const userToggleButtonRef = useRef<HTMLButtonElement>(null);
