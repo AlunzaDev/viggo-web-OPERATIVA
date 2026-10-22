@@ -7,6 +7,11 @@ import { RemoteSupportLauncherPage } from "../pages/remoteSupport/RemoteSupportL
 import { ProtectedRoute } from "./ProtectedRoute";
 import { getDefaultAuthorizedPath } from "./module-routing";
 
+const OccupancyPage = lazy(async () => {
+  const module = await import("../pages/occupancy/OccupancyPage");
+  return { default: module.OccupancyPage };
+});
+
 const ParkingRatePage = lazy(async () => {
   const module = await import("../pages/parkingRate/ParkingRatePage");
   return { default: module.ParkingRatePage };
@@ -283,6 +288,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute modules={["modules", "cashPayments", "payments", "tickets"]}>
               <OperationalLogsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ocupacion"
+          element={
+            <ProtectedRoute modules={["tickets"]}>
+              <OccupancyPage />
             </ProtectedRoute>
           }
         />

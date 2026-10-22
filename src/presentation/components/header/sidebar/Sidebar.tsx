@@ -9,6 +9,7 @@ import {
   FaExchangeAlt,
   FaExclamationTriangle,
   FaIdCard,
+  FaParking,
   FaReceipt,
   FaTags,
   FaTicketAlt,
@@ -68,6 +69,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(({ isOpen, onClose 
           { label: "Modulos", path: "/modulos", icon: <FaCubes />, visible: can("modules") },
           { label: "Heartbeat", path: "/heartbeat", icon: <FaBroadcastTower />, visible: can("modules"), activePaths: ["/heartbeat", "/device-map"] },
           { label: "Tickets", path: "/tickets", icon: <FaReceipt />, visible: can("tickets") },
+          { label: "Ocupación", path: "/ocupacion", icon: <FaParking />, visible: can("tickets") },
         ],
       },
       {

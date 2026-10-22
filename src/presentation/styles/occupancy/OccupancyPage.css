@@ -1,0 +1,128 @@
+.occupancy-page {
+  display: grid;
+  gap: 18px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.occupancy-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.occupancy-spin {
+  animation: occupancy-spin 0.9s linear infinite;
+}
+
+@keyframes occupancy-spin {
+  to { transform: rotate(360deg); }
+}
+
+.occupancy-muted {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.occupancy-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.occupancy-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.occupancy-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  border-top: 4px solid var(--border-color, rgba(148, 163, 184, 0.4));
+}
+
+.occupancy-card--success { border-top-color: var(--success-color); }
+.occupancy-card--warning { border-top-color: var(--edit-color, #f59e0b); }
+.occupancy-card--danger { border-top-color: var(--error-color); }
+
+.occupancy-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.occupancy-card__value {
+  color: var(--text);
+  font-size: 2.2rem;
+  line-height: 1.1;
+}
+
+.occupancy-meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--input-bg);
+  overflow: hidden;
+}
+
+.occupancy-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+  color: var(--primary-color);
+  transition: width 0.4s ease;
+}
+
+.occupancy-card--success .occupancy-meter span { color: var(--success-color); }
+.occupancy-card--warning .occupancy-meter span { color: var(--edit-color, #f59e0b); }
+.occupancy-card--danger .occupancy-meter span { color: var(--error-color); }
+
+.occupancy-section {
+  display: grid;
+  gap: 12px;
+}
+
+.occupancy-section .modal-section-header {
+  gap: 10px;
+}
+
+.occupancy-chart {
+  width: 100%;
+  min-height: 280px;
+}
+
+.occupancy-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.occupancy-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.occupancy-table th,
+.occupancy-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--input-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.occupancy-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.occupancy-row--forgotten td {
+  color: var(--text-muted);
+}
