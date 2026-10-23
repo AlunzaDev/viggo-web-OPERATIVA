@@ -1,7 +1,4 @@
-import {
-  BaseCombobox,
-  type ComboOption,
-} from "../shared/BaseCombobox/BaseCombobox";
+import { BaseCombobox, type ComboOption } from "@alunzadev/viggo-ui";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {

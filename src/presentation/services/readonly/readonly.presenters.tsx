@@ -1,4 +1,4 @@
-import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
+import { CrudStatusBadge } from "@alunzadev/viggo-ui";
 
 export const renderReadonlyStatusBadge = (
   label: string,

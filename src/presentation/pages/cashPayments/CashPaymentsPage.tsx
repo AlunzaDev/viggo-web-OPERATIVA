@@ -1,5 +1,5 @@
+import { BaseCombobox } from "@alunzadev/viggo-ui";
 import { Link } from "react-router-dom";
-import { BaseCombobox } from "../../components/shared/BaseCombobox/BaseCombobox";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { CashRegisterPanel } from "../../components/cashPayments/CashRegisterPanel";
 import { CashPaymentsHeader } from "../../components/cashPayments/CashPaymentsHeader";

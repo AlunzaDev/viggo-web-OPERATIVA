@@ -1,7 +1,7 @@
+import { ScreenLoader } from "@alunzadev/viggo-ui";
 import { lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { MainLayout } from "../components/mainLayout/MainLayout";
-import { ScreenLoader } from "../components/shared/loading/ScreenLoader";
 import { useAuth } from "../context/auth/useAuth";
 import { RemoteSupportLauncherPage } from "../pages/remoteSupport/RemoteSupportLauncherPage";
 import { ProtectedRoute } from "./ProtectedRoute";

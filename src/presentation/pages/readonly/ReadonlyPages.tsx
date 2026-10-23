@@ -23,7 +23,6 @@ import {
   renderReadonlyBooleanStatus,
   renderReadonlyStatusBadge,
 } from "../../services/readonly/readonly.presenters";
-import "../../styles/adminCrud/AdminCrud.css";
 
 type Option = { id: string; nombre: string };
 const ALL_FILTER_VALUE = "__all__";

@@ -1,3 +1,4 @@
+import { BaseCombobox, type ComboOption } from "@alunzadev/viggo-ui";
 import { useEffect, useState, type KeyboardEvent, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -9,10 +10,6 @@ import {
   FaQrcode,
   FaUndo,
 } from "react-icons/fa";
-import {
-  BaseCombobox,
-  type ComboOption,
-} from "../shared/BaseCombobox/BaseCombobox";
 import { formatMoney, STEPS } from "../../utils/cashPayments/cash-payments.formatters";
 import type {
   CashRegisterShiftDetail,

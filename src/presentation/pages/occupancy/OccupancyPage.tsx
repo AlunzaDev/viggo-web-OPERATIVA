@@ -1,7 +1,6 @@
+import { InfoChip, PageHeader } from "@alunzadev/viggo-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCar, FaChartBar, FaIdCard, FaParking, FaSyncAlt, FaTicketAlt } from "react-icons/fa";
-import { InfoChip } from "@alunzadev/viggo-ui";
-import { PageHeader } from "../../components/shared/PageHeader";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { getOccupancy, type Occupancy } from "../../services/occupancy/occupancy.api";
 import { formatStay, occupancyTone } from "@alunzadev/viggo-contracts";

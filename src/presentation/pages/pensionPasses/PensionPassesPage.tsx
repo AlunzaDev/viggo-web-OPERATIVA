@@ -1,17 +1,11 @@
+import { CopyableId, CreateModalBase, CrudActionsIsland, CrudRowActions, CrudStatusBadge, TableBase, UniqueModalBase } from "@alunzadev/viggo-ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCalendarAlt, FaCheckCircle, FaIdCard, FaParking, FaPlus, FaPowerOff, FaTicketAlt, FaUser } from "react-icons/fa";
 import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
 import { loadPensionOptions, loadUserOptions } from "../../services/catalogs/catalog-options";
-import { CrudRowActions } from "../../components/shared/CrudRowActions";
-import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
-import { CopyableId, CrudActionsIsland } from "@alunzadev/viggo-ui";
-import { CreateModalBase } from "../../components/shared/modals/CreateModalBase";
-import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
-import { TableBase } from "../../components/shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { buildPensionPassForm, createInitialPensionPassForm, type PensionPassForm, type PensionPassRecord } from "../../services/pensionPasses/pension-passes.contract";
 import { loadPensionPasses, savePensionPass, updatePensionPassStatus } from "../../services/pensionPasses/pension-passes.api";
-import "../../styles/adminCrud/AdminCrud.css";
 
 type PensionPass = PensionPassRecord;
 type Option = { id: string; nombre: string };
@@ -95,7 +89,7 @@ function PensionPassDetailModal({
   isSubmitting: boolean;
   error: string | null;
   onEdit: (item: PensionPass) => void;
-  onToggleStatus: (item: PensionPass) => Promise<void>;
+  onToggleStatus: (item: PensionPass) => Promise<boolean | void>;
   onClose: () => void;
 }) {
   return (
@@ -224,6 +218,7 @@ export function PensionPassesPage() {
       setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
     } catch (toggleError) {
       setError(getErrorMessage(toggleError, "No se pudo actualizar el estado del pension-pass"));
+      return false;
     } finally {
       setSaving(false);
     }
@@ -234,7 +229,7 @@ export function PensionPassesPage() {
       <CrudActionsIsland searchValue={search} onSearchChange={(event) => { setSearch(event.target.value); setPage(1); }} onSearchClear={() => { setSearch(""); setPage(1); }} searchPlaceholder="Buscar pension-pass" showCreate createLabel="Crear pension-pass" createIcon={<FaPlus />} onCreate={openCreate} isBusy={loading || saving} />
       {error ? <p className="admin-crud-error">{error}</p> : null}
       <TableBase withCard={false} isLoading={loading} isEmpty={visible.length === 0} emptyMessage="No se encontraron pension-pass." page={page} pageSize={pageSize} totalItems={filtered.length} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>name</th><th>pension</th><th>usuario</th><th>idPass</th><th className="col-status">estado</th><th>acciones</th></tr>}>
-        {visible.map((item) => <tr key={item.id} className="base-table__row"><td>{item.name}</td><td>{pensionById.get(item.pension) ?? item.pension}</td><td>{item.usuario ? userById.get(item.usuario) ?? item.usuario : "Sin usuario"}</td><td>{item.idPass}</td><td className="col-status"><CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} /></td><td><CrudRowActions entityName={`pension-pass ${item.name}`} isActive={item.estado} onView={() => setSelectedItem(item)} onEdit={() => openEdit(item)} onToggleStatus={() => toggleItemState(item)} /></td></tr>)}
+        {visible.map((item) => <tr key={item.id} className="base-table__row"><td>{item.name}</td><td>{pensionById.get(item.pension) ?? item.pension}</td><td>{item.usuario ? userById.get(item.usuario) ?? item.usuario : "Sin usuario"}</td><td>{item.idPass}</td><td className="col-status"><CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} /></td><td><CrudRowActions entityName={`pension-pass ${item.name}`} isActive={item.estado} onView={() => setSelectedItem(item)} onEdit={() => openEdit(item)} onToggleStatus={() => toggleItemState(item)} toggleStyle="power" /></td></tr>)}
       </TableBase>
       <PensionPassDetailModal
         open={Boolean(selectedItem)}

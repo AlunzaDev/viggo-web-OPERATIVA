@@ -1,3 +1,4 @@
+import { ScreenLoader } from "@alunzadev/viggo-ui";
 import { useEffect, useState, type ReactNode } from "react";
 import { FaCheckCircle, FaExclamationTriangle, FaKey, FaLink, FaLock, FaParking, FaSyncAlt } from "react-icons/fa";
 import { type LocalInstallation } from "../../services/installation/installation.api";
@@ -23,7 +24,6 @@ import {
   shouldPollInstallation,
   shouldRedirectToSessionExpired,
 } from "../../services/installation/installation-gate.service";
-import { ScreenLoader } from "../shared/loading/ScreenLoader";
 import { showAppToast } from "../../utils/feedback/swalToast";
 import "./InstallationGate.css";
 

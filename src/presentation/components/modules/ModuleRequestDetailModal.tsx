@@ -1,9 +1,9 @@
+import { UniqueModalBase } from "@alunzadev/viggo-ui";
 import { FaCheckCircle, FaClock, FaShieldAlt, FaUnlink } from "react-icons/fa";
 import {
   ModuleEntity,
   type ModuleDeviceBindingRequest,
 } from "../../../domain/entities/module.entity";
-import { UniqueModalBase } from "../shared/modals/UniqueModalBase";
 import {
   buildBindingSummary,
   formatDateTime,

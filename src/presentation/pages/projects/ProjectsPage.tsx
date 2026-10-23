@@ -1,25 +1,13 @@
+import { CopyableId, CrudActionsIsland, EmptyState, FilterSidebar, InfoChip, MobileCardsList, PageHeader, SidebarFilterField, SidebarFilterForm, TableBase } from "@alunzadev/viggo-ui";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaEraser, FaInfoCircle, FaPlus, FaPowerOff, FaSortAlphaDown, FaSortAlphaDownAlt } from "react-icons/fa";
 import { UniqueProjectModal } from "../../components/projects/UniqueProjectModal/UniqueProjectModal";
-import {
-  CopyableId,
-  CrudActionsIsland,
-  FilterSidebar,
-  InfoChip,
-  SidebarFilterField,
-  SidebarFilterForm,
-} from "@alunzadev/viggo-ui";
-import { EmptyState } from "../../components/shared/EmptyState";
-import { MobileCardsList } from "../../components/shared/lists/MobileCardsList";
-import { PageHeader } from "../../components/shared/PageHeader";
-import { TableBase } from "../../components/shared/tables/TableBase";
 import { useMediaQuery } from "../../hooks/shared/useMediaQuery";
 import { useParkings } from "../../hooks/parkings/useParkings";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import type { ParkingEntity } from "../../../domain/entities/parking.entity";
-import "../../styles/adminCrud/AdminCrud.css";
 import "../../styles/projects/ProjectsPage.css";
 
 import type { CreateProjectPayload } from "../../components/projects/CreateProjectModal/CreateProjectModal";

@@ -1,3 +1,4 @@
+import { CrudActionsIsland, CrudRowActions, CrudStatusBadge, EmptyState, PageHeader, TableBase } from "@alunzadev/viggo-ui";
 import { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useParams } from "react-router-dom";
@@ -5,12 +6,6 @@ import {
   ModuleEntity,
   type ModuleDeviceBindingRequest,
 } from "../../../domain/entities/module.entity";
-import { CrudActionsIsland } from "@alunzadev/viggo-ui";
-import { CrudRowActions } from "../../components/shared/CrudRowActions";
-import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
-import { EmptyState } from "../../components/shared/EmptyState";
-import { PageHeader } from "../../components/shared/PageHeader";
-import { TableBase } from "../../components/shared/tables/TableBase";
 import { RemoteSupportViewerModal } from "../../components/remoteSupport/RemoteSupportViewerModal";
 import { useModules } from "../../hooks/modules/useModules";
 import { useParkings } from "../../hooks/parkings/useParkings";
@@ -36,7 +31,6 @@ import {
   MESH_CENTRAL_TERMINAL_VIEW_MODE,
   type RemoteSupportViewMode,
 } from "../../services/remoteSupport/remote-support-view-mode";
-import "../../styles/adminCrud/AdminCrud.css";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 const ENABLE_MODULE_MUTATIONS = false;
@@ -398,6 +392,7 @@ export function ModulesPage() {
                 onToggleStatus={
                   ENABLE_MODULE_MUTATIONS ? () => toggleModuleState(item) : undefined
                 }
+                toggleStyle="power"
               />
             </td>
           </tr>

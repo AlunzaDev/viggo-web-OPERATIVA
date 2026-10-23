@@ -1,9 +1,8 @@
+import { InfoChip, PageHeader } from "@alunzadev/viggo-ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCalculator, FaHistory, FaSave, FaTags } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { InfoChip } from "@alunzadev/viggo-ui";
 import { hasModuleAccess } from "../../../domain/entities/module-access";
-import { PageHeader } from "../../components/shared/PageHeader";
 import { useAuth } from "../../context/auth/useAuth";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import {

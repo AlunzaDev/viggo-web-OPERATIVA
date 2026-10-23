@@ -1,3 +1,4 @@
+import { CopyableId, HeartbeatStatusFilter, HeartbeatStatusPill, HeartbeatSummary, ModuleHeartbeatCard, ScreenLoader, SubmoduleList, UniqueModalBase } from "@alunzadev/viggo-ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import L, { type Map as LeafletMap, type Marker, type Polygon, type TileLayer } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -22,14 +23,6 @@ import {
   FaWifi,
 } from "react-icons/fa";
 import {
-  CopyableId,
-  HeartbeatStatusFilter,
-  HeartbeatStatusPill,
-  HeartbeatSummary,
-  ModuleHeartbeatCard,
-  SubmoduleList,
-} from "@alunzadev/viggo-ui";
-import {
   HEARTBEAT_STATUSES,
   HEARTBEAT_STATUS_LABEL,
   MODULE_TYPE_LABEL,
@@ -37,11 +30,9 @@ import {
   resolveHeartbeatStatus,
 } from "@alunzadev/viggo-contracts";
 import { RemoteSupportViewerModal } from "../../components/remoteSupport/RemoteSupportViewerModal";
-import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { type ParkingEntity } from "../../../domain/entities/parking.entity";
 import { type ModuleEntity } from "../../../domain/entities/module.entity";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
-import { ScreenLoader } from "../../components/shared/loading/ScreenLoader";
 import {
   formatDateTime,
   getBindingLabel,

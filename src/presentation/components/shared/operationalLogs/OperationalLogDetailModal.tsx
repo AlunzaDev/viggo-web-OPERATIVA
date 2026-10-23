@@ -1,3 +1,4 @@
+import { CopyableId, UniqueModalBase } from "@alunzadev/viggo-ui";
 import {
   FaBroadcastTower,
   FaCalendarAlt,
@@ -11,8 +12,6 @@ import {
   FaSatelliteDish,
   FaWallet,
 } from "react-icons/fa";
-import { CopyableId } from "@alunzadev/viggo-ui";
-import { UniqueModalBase } from "../modals/UniqueModalBase";
 import "../../../styles/shared/OperationalLogDetailModal.css";
 
 export type OperationalLogDetailItem = {

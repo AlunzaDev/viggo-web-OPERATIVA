@@ -1,6 +1,6 @@
+import { CreateModalBase } from "@alunzadev/viggo-ui";
 import { FaLayerGroup } from "react-icons/fa";
 import { MODULE_TYPE_LABEL, MODULE_TYPES } from "../../../domain/entities/module-type.entity";
-import { CreateModalBase } from "../shared/modals/CreateModalBase";
 import type { ModuloForm, ProyectoOption } from "../../types/modules/moduleForm.types";
 
 type ModuleModalProps = {

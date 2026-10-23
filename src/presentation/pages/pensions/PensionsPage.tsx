@@ -1,17 +1,11 @@
+import { CopyableId, CreateModalBase, CrudActionsIsland, CrudRowActions, CrudStatusBadge, TableBase, UniqueModalBase } from "@alunzadev/viggo-ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaAlignLeft, FaCalendarAlt, FaClock, FaDollarSign, FaPlus, FaPowerOff, FaProjectDiagram, FaTicketAlt } from "react-icons/fa";
 import { getApiErrorMessage } from "../../../infrastructure/http/api-contracts";
 import { loadProjectOptions } from "../../services/catalogs/catalog-options";
-import { CrudRowActions } from "../../components/shared/CrudRowActions";
-import { CrudStatusBadge } from "../../components/shared/CrudStatusBadge";
-import { CopyableId, CrudActionsIsland } from "@alunzadev/viggo-ui";
-import { CreateModalBase } from "../../components/shared/modals/CreateModalBase";
-import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
-import { TableBase } from "../../components/shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { buildPensionForm, buildWeekSchedule, createInitialPensionForm, normalizeValidez, type PensionForm, type PensionRecord, type ValidezItem, WEEK_DAYS } from "../../services/pensions/pensions.contract";
 import { loadPensionsPage, savePension, updatePensionStatus } from "../../services/pensions/pensions.api";
-import "../../styles/adminCrud/AdminCrud.css";
 import "../../styles/pensions/PensionsPage.css";
 
 type Pension = PensionRecord;
@@ -166,7 +160,7 @@ function PensionDetailModal({
   isSubmitting: boolean;
   error: string | null;
   onEdit: (item: Pension) => void;
-  onToggleStatus: (item: Pension) => Promise<void>;
+  onToggleStatus: (item: Pension) => Promise<boolean | void>;
   onClose: () => void;
 }) {
   const schedule = normalizeValidez(item?.validez);
@@ -304,6 +298,7 @@ export function PensionsPage() {
       setSelectedItem((current) => current?.id === item.id ? { ...current, estado: !item.estado } : current);
     } catch (toggleError) {
       setError(getErrorMessage(toggleError, "No se pudo actualizar el estado de la pension"));
+      return false;
     } finally {
       setSaving(false);
     }
@@ -314,7 +309,7 @@ export function PensionsPage() {
       <CrudActionsIsland searchValue={search} onSearchChange={(event) => { setSearch(event.target.value); setPage(1); }} onSearchClear={() => { setSearch(""); setPage(1); }} searchPlaceholder="Buscar pensiones" showCreate createLabel="Crear pension" createIcon={<FaPlus />} onCreate={openCreate} isBusy={loading || saving} />
       {error ? <p className="admin-crud-error">{error}</p> : null}
       <TableBase withCard={false} isLoading={loading} isEmpty={items.length === 0} emptyMessage="No se encontraron pensiones." page={page} pageSize={pageSize} totalItems={totalItems} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} pageSizeOptions={PAGE_SIZE_OPTIONS} columns={<tr><th>nombre</th><th>proyecto</th><th>precio</th><th className="col-status">estado</th><th>acciones</th></tr>}>
-        {items.map((item) => <tr key={item.id} className="base-table__row"><td>{item.nombre}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{item.precio}</td><td className="col-status"><CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} /></td><td><CrudRowActions entityName={`pension ${item.nombre}`} isActive={item.estado} onView={() => setSelectedItem(item)} onEdit={() => openEdit(item)} onToggleStatus={() => toggleItemState(item)} /></td></tr>)}
+        {items.map((item) => <tr key={item.id} className="base-table__row"><td>{item.nombre}</td><td>{projectById.get(item.proyecto) ?? item.proyecto}</td><td>{item.precio}</td><td className="col-status"><CrudStatusBadge label={item.estado ? "Activo" : "Inactivo"} variant={item.estado ? "active" : "inactive"} /></td><td><CrudRowActions entityName={`pension ${item.nombre}`} isActive={item.estado} onView={() => setSelectedItem(item)} onEdit={() => openEdit(item)} onToggleStatus={() => toggleItemState(item)} toggleStyle="power" /></td></tr>)}
       </TableBase>
       <PensionDetailModal
         open={Boolean(selectedItem)}

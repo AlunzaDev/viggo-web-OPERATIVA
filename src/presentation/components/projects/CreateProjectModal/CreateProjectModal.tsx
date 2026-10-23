@@ -1,3 +1,4 @@
+import { CreateModalBase } from "@alunzadev/viggo-ui";
 import { useEffect, useMemo, useState } from "react";
 import { FaBuilding, FaEdit, FaImage, FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -8,7 +9,6 @@ import {
   type MexicoCityOption,
   type MexicoStateOption,
 } from "../../../data/mexico-location-catalog";
-import { CreateModalBase } from "../../shared/modals/CreateModalBase";
 import type { ProjectFormPayload } from "../../../hooks/parkings/useParkings";
 import "../../../styles/projects/CreateProjectModal.css";
 

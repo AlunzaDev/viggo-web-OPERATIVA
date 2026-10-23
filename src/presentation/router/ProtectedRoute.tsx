@@ -1,9 +1,9 @@
+import { ScreenLoader } from "@alunzadev/viggo-ui";
 import { useEffect, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import type { AuthUserRole } from "../../domain/entities/auth-user.entity";
 import type { AppModuleAccess } from "../../domain/entities/module-access";
 import { hasModuleAccess } from "../../domain/entities/module-access";
-import { ScreenLoader } from "../components/shared/loading/ScreenLoader";
 import { useAuth } from "../context/auth/useAuth";
 import { getDefaultAuthorizedPath } from "./module-routing";
 

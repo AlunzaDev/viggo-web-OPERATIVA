@@ -1,3 +1,4 @@
+import { PageLoadingProvider, ScreenLoader, usePageLoadingState } from "@alunzadev/viggo-ui";
 import {
   useCallback,
   useEffect,
@@ -10,9 +11,6 @@ import { useLocation } from "react-router-dom";
 import { Header } from "../header/Header";
 import { Sidebar } from "../header/sidebar/Sidebar";
 import { UserSidebar } from "../header/userSidebar/UserSidebar";
-import { PageLoadingProvider } from "../shared/loading/PageLoadingContext";
-import { usePageLoadingState } from "../shared/loading/usePageLoading";
-import { ScreenLoader } from "../shared/loading/ScreenLoader";
 import { useAuth } from "../../context/auth/useAuth";
 import { PageTitleProvider } from "../../context/page-title/PageTitleContext";
 import { useCurrentPageTitle } from "../../context/page-title/usePageTitle";

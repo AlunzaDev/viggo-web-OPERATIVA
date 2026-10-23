@@ -1,3 +1,4 @@
+import { CopyableId, UniqueModalBase } from "@alunzadev/viggo-ui";
 import {
   FaAlignLeft,
   FaDesktop,
@@ -15,8 +16,6 @@ import {
   ModuleEntity,
   type ModuleDeviceBindingRequest,
 } from "../../../domain/entities/module.entity";
-import { CopyableId } from "@alunzadev/viggo-ui";
-import { UniqueModalBase } from "../shared/modals/UniqueModalBase";
 import {
   buildBindingSummary,
   formatDateTime,

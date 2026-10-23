@@ -1,7 +1,5 @@
+import { CopyableId, CrudActionsIsland, TableBase, UniqueModalBase } from "@alunzadev/viggo-ui";
 import { useEffect, useState, type ReactNode } from "react";
-import { CopyableId, CrudActionsIsland } from "@alunzadev/viggo-ui";
-import { UniqueModalBase } from "../shared/modals/UniqueModalBase";
-import { TableBase } from "../shared/tables/TableBase";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 
 export type DetailField = { label: string; value: ReactNode; icon?: ReactNode };
