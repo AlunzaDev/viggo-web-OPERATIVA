@@ -4,18 +4,10 @@ import {
     type ModuleType,
     type ModuleTypeCapabilities,
 } from "./module-type.entity";
+import { parseSubmoduleType, type SubmoduleType } from "@alunzadev/viggo-contracts";
 
 export type { ModuleType, ModuleTypeCapabilities };
-export type ModuleSubmoduleType =
-    | "QR_SCANNER"
-    | "PRINTER"
-    | "BARRIER"
-    | "CAMERA"
-    | "CASH_DRAWER"
-    | "CASH_ACCEPTOR"
-    | "DISPLAY"
-    | "KEYPAD"
-    | "OTHER";
+export type ModuleSubmoduleType = SubmoduleType;
 
 export interface ModuleSubmodule {
     submoduloId: string;
@@ -320,23 +312,6 @@ function parseCoordinates(value: unknown): [number, number] | undefined {
     const latitude = Number(value[1]);
     if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return undefined;
     return [longitude, latitude];
-}
-
-function parseSubmoduleType(value: unknown): ModuleSubmoduleType {
-    const normalized = String(value ?? "OTHER").trim().toUpperCase();
-    if (
-        normalized === "QR_SCANNER" ||
-        normalized === "PRINTER" ||
-        normalized === "BARRIER" ||
-        normalized === "CAMERA" ||
-        normalized === "CASH_DRAWER" ||
-        normalized === "CASH_ACCEPTOR" ||
-        normalized === "DISPLAY" ||
-        normalized === "KEYPAD"
-    ) {
-        return normalized;
-    }
-    return "OTHER";
 }
 
 function parseProjectId(value: unknown): string {

@@ -4,8 +4,9 @@ import { InfoChip } from "@alunzadev/viggo-ui";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { usePageTitle } from "../../context/page-title/usePageTitle";
 import { getOccupancy, type Occupancy } from "../../services/occupancy/occupancy.api";
-import { OccupancyChart } from "./OccupancyChart";
-import { formatParkingTime, formatStay, occupancyTone } from "../../services/occupancy/occupancy.format";
+import { formatStay, occupancyTone } from "@alunzadev/viggo-contracts";
+import { OccupancyChart } from "@alunzadev/viggo-ui/charts";
+import { formatParkingTime } from "../../services/occupancy/occupancy.format";
 import "../../styles/occupancy/OccupancyPage.css";
 
 /** Seconds between refreshes: the screen is meant to stay open at the booth. */

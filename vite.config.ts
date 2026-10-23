@@ -15,7 +15,7 @@ const getManualChunk = (id: string) => {
 
   // Charts (only the occupancy screen): left to Rollup, so they are downloaded with that page
   // instead of joining the catch-all vendor chunk every page loads.
-  const chartModules = ['recharts', 'victory-vendor', 'd3-', '@reduxjs', 'react-redux', 'immer', 'reselect', 'decimal.js-light', 'es-toolkit', 'eventemitter3', 'tiny-invariant'];
+  const chartModules = ['@alunzadev/viggo-ui/dist/charts', 'recharts', 'victory-vendor', 'd3-', '@reduxjs', 'react-redux', 'immer', 'reselect', 'decimal.js-light', 'es-toolkit', 'eventemitter3', 'tiny-invariant'];
   if (chartModules.some((name) => id.includes(`/node_modules/${name}`))) {
     return undefined;
   }

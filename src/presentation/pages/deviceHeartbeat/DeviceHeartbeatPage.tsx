@@ -12,18 +12,30 @@ import {
   FaLayerGroup,
   FaMap,
   FaMapMarkerAlt,
-  FaMicrochip,
   FaMinus,
   FaPlus,
   FaPlug,
-  FaQrcode,
   FaServer,
   FaSignOutAlt,
   FaSyncAlt,
   FaTerminal,
   FaWifi,
 } from "react-icons/fa";
-import { CopyableId } from "@alunzadev/viggo-ui";
+import {
+  CopyableId,
+  HeartbeatStatusFilter,
+  HeartbeatStatusPill,
+  HeartbeatSummary,
+  ModuleHeartbeatCard,
+  SubmoduleList,
+} from "@alunzadev/viggo-ui";
+import {
+  HEARTBEAT_STATUSES,
+  HEARTBEAT_STATUS_LABEL,
+  MODULE_TYPE_LABEL,
+  heartbeatAgeLabel,
+  resolveHeartbeatStatus,
+} from "@alunzadev/viggo-contracts";
 import { RemoteSupportViewerModal } from "../../components/remoteSupport/RemoteSupportViewerModal";
 import { UniqueModalBase } from "../../components/shared/modals/UniqueModalBase";
 import { type ParkingEntity } from "../../../domain/entities/parking.entity";
@@ -33,11 +45,7 @@ import { ScreenLoader } from "../../components/shared/loading/ScreenLoader";
 import {
   formatDateTime,
   getBindingLabel,
-  getHeartbeatAgeLabel,
-  getModuleTypeLabel,
   getStatusHint,
-  getStatusLabel,
-  resolveDeviceStatus,
   type DeviceHeartbeatFilter,
 } from "./DeviceHeartbeatPage.helpers";
 import {
@@ -127,13 +135,6 @@ const resolveTileLayerAttribution = (
   layer: (typeof TILE_LAYERS)[TileLayerKey],
   themeName: "light" | "dark"
 ) => (typeof layer.attribution === "string" ? layer.attribution : layer.attribution[themeName]);
-
-const FILTERS: Array<{ id: DeviceHeartbeatFilter; label: string }> = [
-  { id: "all", label: "Todos" },
-  { id: "online", label: "Online" },
-  { id: "offline", label: "Offline" },
-  { id: "pending", label: "Esperando" },
-];
 
 const MARKER_POPUP_CLOSE_DELAY_MS = 140;
 
@@ -644,16 +645,12 @@ export function DeviceHeartbeatPage() {
               Sincronización: {getConfigSyncStatusLabel(configStatus?.lastSyncStatus)} ·{" "}
               {formatConfigStatusDate(configStatus?.lastSyncAt)}
               {lastUpdatedAt
-                ? ` · Consulta ${getHeartbeatAgeLabel(new Date(lastUpdatedAt))}`
+                ? ` · Consulta ${heartbeatAgeLabel(lastUpdatedAt).toLowerCase()}`
                 : ""}
             </span>
           </div>
 
-          <div className="device-heartbeat-map-topbar__stats">
-            <span className="is-online">{stats.online} online</span>
-            <span className="is-offline">{stats.offline} offline</span>
-            <span className="is-pending">{stats.pending} esperando</span>
-          </div>
+          <HeartbeatSummary summary={stats} className="device-heartbeat-map-topbar__stats" />
         </div>
 
         {error ? (
@@ -689,36 +686,12 @@ export function DeviceHeartbeatPage() {
               })}
             </div>
 
-            <div
+            <HeartbeatStatusFilter
+              value={statusFilter}
+              onChange={setStatusFilter}
+              summary={stats}
               className="device-heartbeat-map-status-tabs"
-              aria-label="Filtrar dispositivos por estado"
-            >
-              {FILTERS.map((filter) => {
-                const count =
-                  filter.id === "all"
-                    ? stats.total
-                    : filter.id === "online"
-                      ? stats.online
-                      : filter.id === "offline"
-                        ? stats.offline
-                        : stats.pending;
-
-                return (
-                  <button
-                    key={filter.id}
-                    type="button"
-                    className={`device-heartbeat-map-status-tab device-heartbeat-map-status-tab--${filter.id}${
-                      statusFilter === filter.id ? " is-active" : ""
-                    }`}
-                    onClick={() => setStatusFilter(filter.id)}
-                    aria-pressed={statusFilter === filter.id}
-                  >
-                    <span>{filter.label}</span>
-                    <strong>{count}</strong>
-                  </button>
-                );
-              })}
-            </div>
+            />
           </div>
 
           <div
@@ -748,15 +721,11 @@ export function DeviceHeartbeatPage() {
           <div ref={mapElementRef} className="device-heartbeat-map" />
 
           <div className="device-heartbeat-map-legend">
-            <span>
-              <i className="is-online" /> Online
-            </span>
-            <span>
-              <i className="is-offline" /> Offline
-            </span>
-            <span>
-              <i className="is-pending" /> Esperando
-            </span>
+            {HEARTBEAT_STATUSES.map((status) => (
+              <span key={status}>
+                <i className={`is-${status}`} /> {HEARTBEAT_STATUS_LABEL[status]}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -786,11 +755,7 @@ export function DeviceHeartbeatPage() {
                   <h2>{linkedProject.nombre}</h2>
                   <p>{linkedProject.identificador}</p>
                 </div>
-                <div className="device-heartbeat-project__summary">
-                  <span className="is-offline">{stats.offline} offline</span>
-                  <span className="is-online">{stats.online} online</span>
-                  <span className="is-pending">{stats.pending} esperando</span>
-                </div>
+                <HeartbeatSummary summary={stats} />
               </div>
               <span className="device-heartbeat-project__chevron">
                 {isProjectExpanded ? "˄" : "˅"}
@@ -800,75 +765,43 @@ export function DeviceHeartbeatPage() {
             {isProjectExpanded ? (
               <div className="device-heartbeat-project__grid">
                 {filteredModules.map((module) => {
-                  const status = resolveDeviceStatus(module.deviceRuntime);
                   const runtime = module.deviceRuntime;
-                  const isSelected = selectedModule?.id === module.id;
 
                   return (
-                    <article
+                    <ModuleHeartbeatCard
                       key={module.id}
-                      className={`device-heartbeat-device-card is-${status}${
-                        isSelected ? " is-selected" : ""
-                      }`}
+                      nombre={module.nombre}
+                      identificador={module.identificador}
+                      tipo={module.tipo}
+                      status={resolveHeartbeatStatus(runtime)}
+                      lastHeartbeatAt={runtime?.lastHeartbeatAt ?? null}
+                      selected={selectedModule?.id === module.id}
                       onClick={() => handleModulePreview(module.id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          handleModulePreview(module.id);
-                        }
-                      }}
+                      actions={
+                        <>
+                          <button
+                            type="button"
+                            className="device-heartbeat-device-card__action"
+                            onClick={() => handleModulePreview(module.id)}
+                          >
+                            Ver en mapa
+                          </button>
+                          <button
+                            type="button"
+                            className="device-heartbeat-device-card__action device-heartbeat-device-card__action--primary"
+                            onClick={() => handleModuleDetail(module.id)}
+                          >
+                            Abrir detalle
+                          </button>
+                        </>
+                      }
                     >
-                      <header>
-                        <span className="device-heartbeat-device-card__icon">
-                          {getTypeIcon(module.tipo)}
-                        </span>
-                        <div>
-                          <h2>{getModuleTypeLabel(module.tipo)}</h2>
-                          <p>{module.nombre || module.identificador}</p>
-                        </div>
-                      </header>
-
-                      <div className="device-heartbeat-device-card__meta-row">
-                        <span className={`device-heartbeat-pill is-${status}`}>
-                          {getStatusLabel(status)}
-                        </span>
-                        <small>{getHeartbeatAgeLabel(runtime?.lastHeartbeatAt)}</small>
-                      </div>
-
-                      <div className="device-heartbeat-device-card__summary">
-                        <strong>{module.identificador}</strong>
-                        <span>
-                          {runtime?.lastHeartbeatAt
-                            ? formatDateTime(runtime.lastHeartbeatAt)
-                            : "Sin heartbeat"}
-                        </span>
-                      </div>
-
-                      <div className="device-heartbeat-device-card__actions">
-                        <button
-                          type="button"
-                          className="device-heartbeat-device-card__action"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleModulePreview(module.id);
-                          }}
-                        >
-                          Ver en mapa
-                        </button>
-                        <button
-                          type="button"
-                          className="device-heartbeat-device-card__action device-heartbeat-device-card__action--primary"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleModuleDetail(module.id);
-                          }}
-                        >
-                          Abrir detalle
-                        </button>
-                      </div>
-                    </article>
+                      <span className="device-heartbeat-device-card__date">
+                        {runtime?.lastHeartbeatAt
+                          ? `Último heartbeat: ${formatDateTime(runtime.lastHeartbeatAt)}`
+                          : "Sin heartbeat"}
+                      </span>
+                    </ModuleHeartbeatCard>
                   );
                 })}
               </div>
@@ -916,13 +849,7 @@ export function DeviceHeartbeatPage() {
                   <h4>{detailModule.nombre}</h4>
                   <p>{detailModule.identificador}</p>
                 </div>
-                <span
-                  className={`device-heartbeat-pill is-${resolveDeviceStatus(
-                    detailModule.deviceRuntime,
-                  )}`}
-                >
-                  {getStatusLabel(resolveDeviceStatus(detailModule.deviceRuntime))}
-                </span>
+                <HeartbeatStatusPill status={resolveHeartbeatStatus(detailModule.deviceRuntime)} />
               </div>
 
               <div className="device-heartbeat-detail-copy">
@@ -939,7 +866,7 @@ export function DeviceHeartbeatPage() {
                 </article>
                 <article className="form-group admin-crud-detail-item">
                   <label>Tipo</label>
-                  <p>{getModuleTypeLabel(detailModule.tipo)}</p>
+                  <p>{MODULE_TYPE_LABEL[detailModule.tipo]}</p>
                 </article>
                 <article className="form-group admin-crud-detail-item">
                   <label>
@@ -974,9 +901,7 @@ export function DeviceHeartbeatPage() {
                 <article className="form-group admin-crud-detail-item">
                   <label>Heartbeat</label>
                   <p>
-                    {getHeartbeatAgeLabel(
-                      detailModule.deviceRuntime?.lastHeartbeatAt,
-                    )}
+                    {heartbeatAgeLabel(detailModule.deviceRuntime?.lastHeartbeatAt)}
                   </p>
                 </article>
                 <article className="form-group admin-crud-detail-item">
@@ -1110,41 +1035,19 @@ export function DeviceHeartbeatPage() {
                 <h3 className="modal-section-title">Devices auxiliares</h3>
               </div>
 
-              {detailModule.submodulos.length ? (
-                <div className="device-heartbeat-detail-subdevices">
-                  {detailModule.submodulos.map((submodule) => (
-                    <article
-                      key={submodule.submoduloId}
-                      className="device-heartbeat-detail-subdevice"
-                    >
-                      <div>
-                        <strong>{submodule.nombre}</strong>
-                        <span>{submodule.tipo}</span>
-                      </div>
-                      <div className="device-heartbeat-detail-subdevice__meta">
-                        <small>
-                          <FaQrcode /> {submodule.identificador || "Sin identificador"}
-                        </small>
-                        <small>
-                          <FaWifi /> {submodule.ip || "Sin IP"}
-                        </small>
-                        <small>
-                          <FaMapMarkerAlt /> {submodule.ubicacion || "Sin ubicación"}
-                        </small>
-                        <small>
-                          <FaMicrochip /> {submodule.mac || "Sin MAC"}
-                        </small>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className="admin-crud-detail-item">
-                  <p className="admin-crud-detail-muted">
-                    Sin devices auxiliares registrados.
-                  </p>
-                </div>
-              )}
+              <SubmoduleList
+                emptyLabel="Sin devices auxiliares registrados."
+                submodules={detailModule.submodulos.map((submodule) => ({
+                  id: submodule.submoduloId,
+                  nombre: submodule.nombre,
+                  tipo: submodule.tipo,
+                  estado: submodule.estado,
+                  identificador: submodule.identificador,
+                  ip: submodule.ip,
+                  mac: submodule.mac,
+                  ubicacion: submodule.ubicacion,
+                }))}
+              />
             </section>
           </>
         ) : null}

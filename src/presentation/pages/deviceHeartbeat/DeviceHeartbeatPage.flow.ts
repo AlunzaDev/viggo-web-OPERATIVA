@@ -6,11 +6,14 @@ import {
 import { loadHeartbeatWorkspaceSnapshot } from "../../services/heartbeat/heartbeat.service";
 import type { LocalConfigStatus } from "../../services/config/config.api";
 import {
+  HEARTBEAT_STATUS_LABEL,
+  MODULE_TYPE_LABEL,
+  heartbeatAgeLabel,
+  resolveHeartbeatStatus,
+  submoduleTypeLabel,
+} from "@alunzadev/viggo-contracts";
+import {
   buildHeartbeatStats,
-  getHeartbeatAgeLabel,
-  getModuleTypeLabel,
-  getStatusLabel,
-  resolveDeviceStatus,
   type DeviceHeartbeatFilter,
   type DeviceHeartbeatStatus,
 } from "./DeviceHeartbeatPage.helpers";
@@ -80,7 +83,7 @@ export const getFilteredHeartbeatModules = (
 ) =>
   modules.filter((module) => {
     if (statusFilter === "all") return true;
-    return resolveDeviceStatus(module.deviceRuntime) === statusFilter;
+    return resolveHeartbeatStatus(module.deviceRuntime) === statusFilter;
   });
 
 export const getHeartbeatSelectedModule = (
@@ -100,7 +103,7 @@ export const getHeartbeatMapMarkers = (
   const items: DeviceMapMarker[] = [];
 
   filteredModules.forEach((module) => {
-    const moduleStatus = resolveDeviceStatus(module.deviceRuntime);
+    const moduleStatus = resolveHeartbeatStatus(module.deviceRuntime);
     const modulePoint = toHeartbeatMapLatLng(module.coordinates);
 
     if (modulePoint) {
@@ -111,9 +114,9 @@ export const getHeartbeatMapMarkers = (
         lat: modulePoint.latitude,
         lng: modulePoint.longitude,
         tone: moduleStatus,
-        meta: `${module.identificador} · ${getModuleTypeLabel(module.tipo)}`,
-        statusLabel: getStatusLabel(moduleStatus),
-        heartbeatLabel: getHeartbeatAgeLabel(module.deviceRuntime?.lastHeartbeatAt),
+        meta: `${module.identificador} · ${MODULE_TYPE_LABEL[module.tipo]}`,
+        statusLabel: HEARTBEAT_STATUS_LABEL[moduleStatus],
+        heartbeatLabel: heartbeatAgeLabel(module.deviceRuntime?.lastHeartbeatAt),
       });
     }
 
@@ -129,9 +132,9 @@ export const getHeartbeatMapMarkers = (
         lat: submodulePoint.latitude,
         lng: submodulePoint.longitude,
         tone: submoduleStatus,
-        meta: `${submodule.tipo} · ${module.nombre}`,
-        statusLabel: getStatusLabel(submoduleStatus),
-        heartbeatLabel: getHeartbeatAgeLabel(module.deviceRuntime?.lastHeartbeatAt),
+        meta: `${submoduleTypeLabel(submodule.tipo)} · ${module.nombre}`,
+        statusLabel: HEARTBEAT_STATUS_LABEL[submoduleStatus],
+        heartbeatLabel: heartbeatAgeLabel(module.deviceRuntime?.lastHeartbeatAt),
       });
     });
   });

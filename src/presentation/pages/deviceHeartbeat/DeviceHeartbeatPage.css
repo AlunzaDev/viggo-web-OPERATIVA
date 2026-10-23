@@ -7,7 +7,6 @@
 }
 
 .device-heartbeat-map-shell,
-.device-heartbeat-sidebar,
 .device-heartbeat-empty {
   border: 1px solid var(--border-color);
   background:
@@ -66,31 +65,6 @@
   display: inline-flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.device-heartbeat-map-topbar__stats span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 0.76rem;
-  font-weight: 900;
-}
-
-.device-heartbeat-map-topbar__stats .is-online {
-  background: color-mix(in srgb, #1f9d63 16%, transparent);
-  color: #1f9d63;
-}
-
-.device-heartbeat-map-topbar__stats .is-offline {
-  background: color-mix(in srgb, #c44747 14%, transparent);
-  color: #c44747;
-}
-
-.device-heartbeat-map-topbar__stats .is-pending {
-  background: color-mix(in srgb, #d59b28 16%, transparent);
-  color: #a56808;
 }
 
 .device-heartbeat-error,
@@ -175,8 +149,7 @@
   gap: 8px;
 }
 
-.device-heartbeat-map-layer-tabs button,
-.device-heartbeat-map-status-tab {
+.device-heartbeat-map-layer-tabs button {
   border-radius: 12px;
 }
 
@@ -193,8 +166,7 @@
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
-.device-heartbeat-map-layer-tabs button:hover,
-.device-heartbeat-map-status-tab:hover {
+.device-heartbeat-map-layer-tabs button:hover {
   transform: translateY(-1px);
 }
 
@@ -249,53 +221,6 @@
   gap: 8px;
 }
 
-.device-heartbeat-map-status-tab {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 12px;
-  text-align: left;
-  cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-}
-
-.device-heartbeat-map-status-tab span {
-  font-size: 0.95rem;
-  font-weight: 900;
-}
-
-.device-heartbeat-map-status-tab strong {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 38px;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 0.98rem;
-  font-weight: 900;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.device-heartbeat-map-status-tab--all.is-active {
-  border-color: rgba(142, 168, 198, 0.34);
-}
-
-.device-heartbeat-map-status-tab--online.is-active {
-  border-color: rgba(111, 212, 125, 0.72);
-  background: linear-gradient(180deg, rgba(80, 123, 88, 0.98), rgba(60, 104, 67, 0.98));
-}
-
-.device-heartbeat-map-status-tab--offline.is-active {
-  border-color: rgba(197, 105, 105, 0.54);
-}
-
-.device-heartbeat-map-status-tab--pending.is-active {
-  border-color: rgba(203, 185, 103, 0.54);
-}
-
 :root[data-theme="dark"] .device-heartbeat-map-layer-tabs,
 :root[data-theme="dark"] .device-heartbeat-map-status-tabs,
 :root[data-theme="dark"] .device-heartbeat-map-controls {
@@ -310,8 +235,7 @@
     0 0 22px rgba(148, 199, 86, 0.08);
 }
 
-:root[data-theme="light"] .device-heartbeat-map-layer-tabs button,
-:root[data-theme="light"] .device-heartbeat-map-status-tab {
+:root[data-theme="light"] .device-heartbeat-map-layer-tabs button {
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 248, 255, 0.6));
   color: #33415d;
@@ -326,32 +250,7 @@
   color: #ffffff;
 }
 
-:root[data-theme="light"] .device-heartbeat-map-status-tab--all.is-active {
-  border-color: rgba(91, 127, 181, 0.44);
-  background: linear-gradient(180deg, rgba(219, 229, 243, 0.98), rgba(201, 214, 232, 0.98));
-  color: #314763;
-}
-
-:root[data-theme="light"] .device-heartbeat-map-status-tab--online.is-active {
-  border-color: rgba(93, 176, 108, 0.76);
-  background: linear-gradient(180deg, rgba(95, 178, 111, 0.96), rgba(69, 143, 81, 0.98));
-  color: #ffffff;
-}
-
-:root[data-theme="light"] .device-heartbeat-map-status-tab--offline.is-active {
-  border-color: rgba(205, 101, 101, 0.64);
-  background: linear-gradient(180deg, rgba(245, 226, 226, 0.98), rgba(235, 210, 210, 0.98));
-  color: #8b3e3e;
-}
-
-:root[data-theme="light"] .device-heartbeat-map-status-tab--pending.is-active {
-  border-color: rgba(212, 188, 96, 0.64);
-  background: linear-gradient(180deg, rgba(246, 238, 214, 0.98), rgba(236, 227, 197, 0.98));
-  color: #826717;
-}
-
 :root[data-theme="dark"] .device-heartbeat-map-layer-tabs button,
-:root[data-theme="dark"] .device-heartbeat-map-status-tab,
 :root[data-theme="dark"] .device-heartbeat-map-controls button {
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: linear-gradient(155deg, rgba(92, 94, 98, 0.3) 0%, rgba(62, 64, 68, 0.15) 44%, rgba(46, 48, 52, 0.05) 100%);
@@ -366,30 +265,6 @@
   border-color: rgba(111, 212, 125, 0.7);
   background: linear-gradient(180deg, rgba(83, 156, 91, 0.98), rgba(57, 126, 64, 0.98));
   color: #f8fff8;
-}
-
-:root[data-theme="dark"] .device-heartbeat-map-status-tab--all.is-active {
-  border-color: rgba(110, 146, 196, 0.48);
-  background: linear-gradient(180deg, rgba(70, 87, 110, 0.98), rgba(47, 60, 79, 0.98));
-  color: #f8fbff;
-}
-
-:root[data-theme="dark"] .device-heartbeat-map-status-tab--online.is-active {
-  border-color: rgba(111, 212, 125, 0.7);
-  background: linear-gradient(180deg, rgba(80, 123, 88, 0.98), rgba(60, 104, 67, 0.98));
-  color: #f3fff4;
-}
-
-:root[data-theme="dark"] .device-heartbeat-map-status-tab--offline.is-active {
-  border-color: rgba(197, 105, 105, 0.54);
-  background: linear-gradient(180deg, rgba(112, 73, 80, 0.98), rgba(87, 54, 61, 0.98));
-  color: #fff2f2;
-}
-
-:root[data-theme="dark"] .device-heartbeat-map-status-tab--pending.is-active {
-  border-color: rgba(203, 185, 103, 0.54);
-  background: linear-gradient(180deg, rgba(120, 109, 69, 0.98), rgba(94, 84, 50, 0.98));
-  color: #fffbe8;
 }
 
 .device-heartbeat-map {
@@ -718,37 +593,6 @@
   font-size: 0.82rem;
 }
 
-.device-heartbeat-project__summary {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.device-heartbeat-project__summary span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 900;
-}
-
-.device-heartbeat-project__summary .is-online {
-  background: color-mix(in srgb, #1f9d63 16%, transparent);
-  color: #1f9d63;
-}
-
-.device-heartbeat-project__summary .is-offline {
-  background: color-mix(in srgb, #c44747 14%, transparent);
-  color: #c44747;
-}
-
-.device-heartbeat-project__summary .is-pending {
-  background: color-mix(in srgb, #d59b28 16%, transparent);
-  color: #a56808;
-}
-
 .device-heartbeat-project__chevron {
   display: inline-flex;
   align-items: center;
@@ -779,103 +623,13 @@
 
 .device-heartbeat-projects-toolbar strong,
 .device-heartbeat-project__header h2,
-.device-heartbeat-project__summary,
-.device-heartbeat-project__toggle,
-.device-heartbeat-device-card h2,
-.device-heartbeat-sidebar__header strong {
+.device-heartbeat-project__toggle {
   color: var(--text-primary);
 }
 
-.device-heartbeat-device-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 132px;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 253, 0.94));
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-}
-
-.device-heartbeat-device-card:hover,
-.device-heartbeat-device-card.is-selected {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(12, 23, 42, 0.08);
-}
-
-.device-heartbeat-device-card.is-selected {
-  border-color: color-mix(in srgb, var(--primary-color) 38%, var(--border-color));
-}
-
-.device-heartbeat-device-card header {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 10px;
-}
-
-.device-heartbeat-device-card__icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
-  color: var(--primary-color);
-  font-size: 1rem;
-}
-
-.device-heartbeat-device-card h2 {
-  margin: 0;
-  font-size: 0.92rem;
-  color: var(--text-primary);
-  line-height: 1.1;
-}
-
-.device-heartbeat-device-card header p {
-  margin: 2px 0 0;
-  color: var(--text-secondary);
-  font-size: 0.79rem;
-  line-height: 1.2;
-}
-
-.device-heartbeat-device-card__meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.device-heartbeat-device-card__meta-row small {
-  color: var(--text-secondary);
+.device-heartbeat-device-card__date {
+  color: var(--text-muted);
   font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.device-heartbeat-device-card__summary {
-  display: grid;
-  gap: 2px;
-  margin-top: auto;
-}
-
-.device-heartbeat-device-card__summary strong {
-  color: var(--text-primary);
-  font-size: 0.88rem;
-  font-weight: 800;
-}
-
-.device-heartbeat-device-card__summary span {
-  color: var(--text-secondary);
-  font-size: 0.76rem;
-}
-
-.device-heartbeat-device-card .device-heartbeat-pill {
-  min-height: 28px;
-  padding: 0 10px;
-  font-size: 0.68rem;
 }
 
 .device-heartbeat-device-card__actions {
@@ -906,30 +660,6 @@
   background: color-mix(in srgb, var(--primary-color) 12%, #ffffff);
   border-color: color-mix(in srgb, var(--primary-color) 34%, var(--border-color));
   color: var(--primary-color);
-}
-
-.device-heartbeat-pill {
-  padding: 8px 10px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.device-heartbeat-pill.is-online {
-  background: color-mix(in srgb, #1f9d63 16%, transparent);
-  color: #1f9d63;
-}
-
-.device-heartbeat-pill.is-offline {
-  background: color-mix(in srgb, #c44747 14%, transparent);
-  color: #c44747;
-}
-
-.device-heartbeat-pill.is-pending {
-  background: color-mix(in srgb, #d59b28 16%, transparent);
-  color: #a56808;
 }
 
 .device-heartbeat-detail-modal .modal-form-actions {
@@ -969,45 +699,6 @@
   margin-top: 14px;
 }
 
-.device-heartbeat-detail-subdevices {
-  display: grid;
-  gap: 12px;
-}
-
-.device-heartbeat-detail-subdevice {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
-}
-
-.device-heartbeat-detail-subdevice strong {
-  color: var(--text-primary);
-}
-
-.device-heartbeat-detail-subdevice span {
-  display: block;
-  margin-top: 4px;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-
-.device-heartbeat-detail-subdevice__meta {
-  display: grid;
-  gap: 6px;
-}
-
-.device-heartbeat-detail-subdevice__meta small {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
 @keyframes device-heartbeat-spin {
   from {
     transform: rotate(0deg);
@@ -1033,10 +724,6 @@
   .device-heartbeat-project__header {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .device-heartbeat-island__filters {
-    flex-wrap: wrap;
   }
 
   .device-heartbeat-map-topbar__stats,
@@ -1078,10 +765,6 @@
   .device-heartbeat-map-panel,
   .device-heartbeat-map {
     min-height: clamp(320px, 52dvh, 420px);
-  }
-
-  .device-heartbeat-island__filters {
-    width: 100%;
   }
 
   .device-heartbeat-detail-hero {

@@ -1,51 +1,18 @@
-export const MODULE_TYPES = ["ENTRADA", "SALIDA", "POS"] as const;
+import {
+  MODULE_TYPES,
+  MODULE_TYPE_CAPABILITIES,
+  MODULE_TYPE_LABEL,
+  parseModuleType as parseSharedModuleType,
+  type ModuleType,
+  type ModuleTypeCapabilities,
+} from "@alunzadev/viggo-contracts";
 
-export type ModuleType = (typeof MODULE_TYPES)[number];
+// Types, capabilities and labels are shared with every Viggo app (@alunzadev/viggo-contracts).
+export { MODULE_TYPES, MODULE_TYPE_CAPABILITIES, MODULE_TYPE_LABEL, type ModuleType, type ModuleTypeCapabilities };
 
-export const MODULE_TYPE_LABEL: Record<ModuleType, string> = {
-  ENTRADA: "Entrada",
-  SALIDA: "Salida",
-  POS: "POS",
-};
-
-export type ModuleTypeCapabilities = {
-  canIssueTickets: boolean;
-  canValidateExit: boolean;
-  canChargePayments: boolean;
-  requiresDeviceBinding: boolean;
-  supportsRemoteSupport: boolean;
-};
-
-export const MODULE_TYPE_CAPABILITIES: Record<ModuleType, ModuleTypeCapabilities> = {
-  ENTRADA: {
-    canIssueTickets: true,
-    canValidateExit: false,
-    canChargePayments: false,
-    requiresDeviceBinding: true,
-    supportsRemoteSupport: true,
-  },
-  SALIDA: {
-    canIssueTickets: false,
-    canValidateExit: true,
-    canChargePayments: false,
-    requiresDeviceBinding: true,
-    supportsRemoteSupport: true,
-  },
-  POS: {
-    canIssueTickets: false,
-    canValidateExit: false,
-    canChargePayments: true,
-    requiresDeviceBinding: false,
-    supportsRemoteSupport: true,
-  },
-};
-
+/** The module type of an API value; an unknown type means the API sent something broken. */
 export const parseModuleType = (value: unknown): ModuleType => {
-  const normalized = String(value ?? "").trim().toUpperCase();
-
-  if (MODULE_TYPES.includes(normalized as ModuleType)) {
-    return normalized as ModuleType;
-  }
-
-  throw new Error("El modulo incluyo un tipo invalido");
+  const type = parseSharedModuleType(value);
+  if (!type) throw new Error("El modulo incluyo un tipo invalido");
+  return type;
 };
