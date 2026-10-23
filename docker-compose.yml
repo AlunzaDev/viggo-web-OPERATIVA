@@ -10,6 +10,7 @@ services:
       args:
         APP_ENV: ${APP_ENV:-prod}
       secrets:
+        - npmrc
         - frontend_env
     restart: unless-stopped
     ports:
@@ -26,5 +27,7 @@ services:
       start_period: 10s
 
 secrets:
+  npmrc:
+    file: ${NPMRC_FILE:-.npmrc.auth}
   frontend_env:
     file: ${FRONTEND_ENV_FILE:-.env.docker}

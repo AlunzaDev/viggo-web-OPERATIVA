@@ -28,3 +28,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local registry credentials; only passed as a BuildKit secret.
+.npmrc.auth*

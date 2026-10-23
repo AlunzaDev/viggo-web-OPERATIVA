@@ -6,8 +6,8 @@ WORKDIR /project
 
 ARG APP_ENV=prod
 
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json package-lock.json .npmrc ./
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc,required=true npm ci
 
 COPY index.html ./
 COPY tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts ./

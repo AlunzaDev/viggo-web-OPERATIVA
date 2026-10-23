@@ -11,3 +11,6 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+
+# Local registry credentials; only passed as a BuildKit secret.
+.npmrc.auth*
