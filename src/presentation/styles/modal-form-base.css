@@ -196,14 +196,6 @@
   background: color-mix(in srgb, var(--error-color) 8%, var(--input-bg));
 }
 
-.form-field-error {
-  margin: -2px 0 0;
-  color: var(--error-color);
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
 /* En Windows/Chrome, el dropdown nativo puede abrir con fondo claro.
    Forzamos contraste de las opciones para evitar "texto blanco sobre blanco". */
 .form-group select option {
@@ -261,16 +253,6 @@
   margin: 0.7rem 0 0;
 }
 
-.btn-form-spinner {
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
-  border-top-color: currentColor;
-  flex: 0 0 auto;
-  animation: modal-form-spin 0.7s linear infinite;
-}
-
 .btn-form-primary {
   background: var(--primary-color);
   color: var(--text-on-primary);
@@ -294,75 +276,6 @@
     border-color var(--dur-2) var(--ease),
     box-shadow var(--dur-2) var(--ease),
     color var(--dur-2) var(--ease);
-}
-
-.unique-base-modal .btn-form-secondary--edit {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 46%, var(--border));
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--surface-2) 86%, var(--primary-color) 14%) 0%,
-      color-mix(in srgb, var(--surface) 92%, var(--primary-color) 8%) 100%
-    );
-  color: color-mix(in srgb, var(--text) 90%, var(--primary-color));
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
-    0 6px 16px color-mix(in srgb, var(--primary-color) 20%, transparent);
-}
-
-.unique-base-modal .btn-form-secondary--edit::after {
-  content: "";
-  position: absolute;
-  top: -30%;
-  left: -120%;
-  width: 50%;
-  height: 160%;
-  pointer-events: none;
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    color-mix(in srgb, #ffffff 35%, transparent) 50%,
-    transparent 100%
-  );
-  transform: rotate(14deg);
-  transition: left var(--dur-3) var(--ease);
-}
-
-.unique-base-modal .btn-form-secondary--edit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--primary-color) 76%, #94f0a4 24%);
-  color: color-mix(in srgb, var(--text) 78%, #bdfdc9 22%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent),
-    0 10px 24px color-mix(in srgb, var(--primary-color) 32%, transparent);
-}
-
-.unique-base-modal .btn-form-secondary--edit:hover:not(:disabled)::after {
-  left: 140%;
-}
-
-.unique-base-modal .btn-form-secondary--edit svg {
-  transition: transform var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
-}
-
-.unique-base-modal .btn-form-secondary--edit:hover:not(:disabled) svg {
-  transform: translateX(1px) scale(1.08);
-  color: #a8f8b6;
-}
-
-.unique-base-modal .btn-form-secondary--edit:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--primary-color) 22%, transparent),
-    0 10px 24px color-mix(in srgb, var(--primary-color) 30%, transparent);
-}
-
-.unique-base-modal .btn-form-secondary--edit:disabled {
-  opacity: 0.6;
-  box-shadow: none;
-  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,3 @@
-@import url("../shared/page.css");
-@import url("../shared/modal.css");
-
 .permission-profiles-page {
   display: grid;
   gap: 16px;
@@ -34,10 +31,6 @@
   color: var(--text);
   cursor: pointer;
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-}
-
-.permission-profiles-page__create-btn {
-  padding: 10px 14px;
 }
 
 .permission-profiles-page__create-btn:hover,
@@ -260,11 +253,6 @@
 .permission-profiles-page__detail-empty {
   margin: 0;
   color: var(--text-soft);
-}
-
-.permission-profiles-page__form {
-  display: grid;
-  gap: 16px;
 }
 
 .permission-profiles-page__modal {

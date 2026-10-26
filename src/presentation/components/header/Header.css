@@ -34,42 +34,6 @@
   gap: 12px;
 }
 
-.header-connection-indicator {
-  width: 13px;
-  height: 13px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--bg) 72%, transparent);
-  background: var(--primary-color);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--primary-color) 18%, transparent),
-    0 0 14px color-mix(in srgb, var(--primary-color) 50%, transparent);
-}
-
-.header-connection-indicator.is-online {
-  border-color: color-mix(in srgb, #16a866 36%, var(--bg));
-  background: #16a866;
-  box-shadow:
-    0 0 0 3px rgba(22, 168, 102, 0.18),
-    0 0 14px rgba(22, 168, 102, 0.48);
-}
-
-:root[data-theme="light"] .header-connection-indicator.is-online {
-  border-color: rgba(255, 255, 255, 0.92);
-  background: #128a50;
-  box-shadow:
-    0 0 0 3px rgba(18, 138, 80, 0.16),
-    0 0 13px rgba(18, 138, 80, 0.34);
-}
-
-.header-connection-indicator.is-offline {
-  background: #ef4444;
-  box-shadow:
-    0 0 0 3px rgba(239, 68, 68, 0.18),
-    0 0 14px rgba(239, 68, 68, 0.48);
-  animation: header-connection-alert 1.15s ease-in-out infinite;
-}
-
 @keyframes header-connection-alert {
   0%,
   100% {

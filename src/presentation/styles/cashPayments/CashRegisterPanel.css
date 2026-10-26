@@ -128,10 +128,6 @@
   border-color: rgba(46, 106, 69, 0.13);
 }
 
-.cash-register-card--preview {
-  background: #f8fcf8;
-}
-
 .cash-register-card--close {
   align-content: start;
 }
@@ -344,11 +340,6 @@
 
 .cash-register-card__action--open svg {
   opacity: 0.92;
-}
-
-.cash-register-card__action--secondary {
-  background: #eff6f1;
-  color: #1d5436;
 }
 
 .cash-register-card__action--danger {
