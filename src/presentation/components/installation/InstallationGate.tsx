@@ -167,7 +167,7 @@ export function InstallationGate({ children }: InstallationGateProps) {
       showInstallationAlert(
         previewError instanceof Error
           ? previewError.message
-          : "No se pudo validar el token de vinculacion.",
+          : "No se pudo validar el código de vinculación.",
       );
     } finally {
       setSaving(false);
@@ -176,7 +176,7 @@ export function InstallationGate({ children }: InstallationGateProps) {
 
   const handleRequest = async () => {
     if (!linkProject) {
-      showInstallationAlert("Confirma el proyecto antes de solicitar la vinculacion.");
+      showInstallationAlert("Confirma el proyecto antes de solicitar la vinculación.");
       return;
     }
 
@@ -194,14 +194,14 @@ export function InstallationGate({ children }: InstallationGateProps) {
       showInstallationAlert(
         requestError instanceof Error
           ? requestError.message
-          : "No se pudo solicitar la vinculacion.",
+          : "No se pudo solicitar la vinculación.",
       );
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <ScreenLoader label="instalacion" />;
+  if (loading) return <ScreenLoader label="instalación" />;
   if (installation?.configured && (!relinkNeeded || offlineAck)) return <>{children}</>;
 
   return (
@@ -209,18 +209,18 @@ export function InstallationGate({ children }: InstallationGateProps) {
       <section className="installation-gate__card">
         <span className="installation-gate__eyebrow">
           {isWaitingApproval ? <FaCheckCircle /> : relinkNeeded ? <FaExclamationTriangle /> : <FaLock />}
-          Instalacion local
+          Instalación
         </span>
-        <h1>{relinkNeeded ? "Este punto local no puede conectarse a la nube" : "Vincula este punto local a un proyecto"}</h1>
+        <h1>{relinkNeeded ? "Este equipo no puede conectarse al panel administrativo" : "Vincula este equipo a un proyecto"}</h1>
         <p>{getInstallationStatusCopy(installation)}</p>
         <p className="installation-gate__id">
-          ID de instalacion: <strong>{installationIdLabel}</strong>
+          Identificador del equipo: <strong>{installationIdLabel}</strong>
         </p>
         {getInstallationShortCode(installation) && !installation?.configured ? (
           <p className="installation-gate__id">
-            Codigo de verificacion: <strong>{getInstallationShortCode(installation)}</strong>
+            Código de verificación: <strong>{getInstallationShortCode(installation)}</strong>
             <br />
-            Dicta este codigo a quien aprueba la solicitud en administrativo.
+            Dicta este código a quien aprueba la solicitud en el panel administrativo.
           </p>
         ) : null}
 
@@ -233,13 +233,13 @@ export function InstallationGate({ children }: InstallationGateProps) {
         {gateMode === "ready" ? (
           <>
             <div className="installation-gate__selector">
-              <label htmlFor="installation-link-token">Token de vinculacion</label>
+              <label htmlFor="installation-link-token">Código de vinculación</label>
               <input
                 id="installation-link-token"
                 type="password"
                 value={installationLinkToken}
                 onChange={(event) => handleTokenChange(event.target.value)}
-                placeholder="Pega el token generado al crear el proyecto"
+                placeholder="Pega el código que se generó al crear el proyecto"
                 disabled={saving}
                 autoComplete="off"
               />
@@ -269,7 +269,7 @@ export function InstallationGate({ children }: InstallationGateProps) {
               <strong>{waitingStateMeta.title}</strong>
               <p>{waitingStateMeta.description}</p>
               {polling ? (
-                <p className="installation-gate__id">Revisando automaticamente cada {INSTALLATION_POLL_INTERVAL_MS / 1000} s.</p>
+                <p className="installation-gate__id">Revisando automáticamente cada {INSTALLATION_POLL_INTERVAL_MS / 1000} s.</p>
               ) : null}
             </article>
 
@@ -285,11 +285,11 @@ export function InstallationGate({ children }: InstallationGateProps) {
 
         <div className="installation-gate__actions">
           <button type="button" onClick={() => void loadData()} disabled={saving}>
-            <FaSyncAlt /> {isWaitingApproval ? "Actualizar vinculacion" : "Revisar estado"}
+            <FaSyncAlt /> {isWaitingApproval ? "Actualizar vinculación" : "Revisar estado"}
           </button>
           {relinkNeeded && !isWaitingApproval ? (
             <button type="button" onClick={handleContinueOffline} disabled={saving}>
-              Continuar sin conexion a la nube
+              Continuar sin conexión al panel administrativo
             </button>
           ) : null}
           {!isWaitingApproval && !backendUnavailable ? (
@@ -300,7 +300,7 @@ export function InstallationGate({ children }: InstallationGateProps) {
                 onClick={handleRequest}
                 disabled={saving}
               >
-                <FaLink /> {saving ? "Enviando..." : "Solicitar vinculacion"}
+                <FaLink /> {saving ? "Enviando..." : "Solicitar vinculación"}
               </button>
             ) : (
               <button
@@ -309,7 +309,7 @@ export function InstallationGate({ children }: InstallationGateProps) {
                 onClick={handlePreview}
                 disabled={saving || !installationLinkToken.trim()}
               >
-                <FaKey /> {saving ? "Validando..." : "Validar token"}
+                <FaKey /> {saving ? "Validando..." : "Validar código"}
               </button>
             )
           ) : null}

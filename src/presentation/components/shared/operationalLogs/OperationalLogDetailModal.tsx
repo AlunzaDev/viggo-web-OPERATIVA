@@ -64,7 +64,7 @@ const getSourceLabel = (source: OperationalLogDetailItem["source"]) =>
     backend: "Backend",
     device: "Device",
     app: "App",
-    sync: "Sync",
+    sync: "Sincronización",
     system: "Sistema",
   })[source] ?? source;
 

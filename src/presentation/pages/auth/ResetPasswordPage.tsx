@@ -28,7 +28,7 @@ export function ResetPasswordPage() {
       Swal.fire({
         icon: "error",
         title: "Enlace invalido",
-        text: "El token de recuperación no es válido.",
+        text: "El enlace de recuperación no es válido o ya venció.",
       });
       return;
     }

@@ -240,7 +240,7 @@ describe("AuthDataSourceImpl", () => {
         newPassword: "NewPassword1",
       }),
     ).rejects.toThrow(
-      "El backend actual no expone cambio de contraseña autenticado.",
+      "Por ahora no se puede cambiar la contraseña desde aquí.",
     );
   });
 });

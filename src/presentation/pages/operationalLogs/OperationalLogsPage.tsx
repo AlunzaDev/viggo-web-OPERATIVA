@@ -66,7 +66,7 @@ const getSourceLabel = (source: OperationalLogItem["source"]) =>
     backend: "Backend",
     device: "Device",
     app: "App",
-    sync: "Sync",
+    sync: "Sincronización",
     system: "Sistema",
   })[source] ?? source;
 
@@ -235,7 +235,7 @@ export function OperationalLogsPage() {
   };
 
   if (isLoading) {
-    return <ScreenLoader label="bitacora operativa" fullscreen={false} />;
+    return <ScreenLoader label="bitácora" fullscreen={false} />;
   }
 
   return (

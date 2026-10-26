@@ -78,7 +78,7 @@ export const buildBindingSummary = (
 
 export const formatFingerprintPreview = (fingerprint?: string) => {
   const value = String(fingerprint ?? "").trim();
-  if (!value) return "Sin fingerprint";
+  if (!value) return "Sin huella";
   if (value.length <= 18) return value;
   return `${value.slice(0, 10)}...${value.slice(-8)}`;
 };

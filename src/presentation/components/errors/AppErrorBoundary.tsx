@@ -107,7 +107,7 @@ export class AppErrorBoundary extends Component<
   public static getDerivedStateFromError(error: Error): AppErrorBoundaryState {
     const message =
       error?.message?.trim() ||
-      "Recarga la pagina o intenta nuevamente en unos momentos.";
+      "Recarga la página o intenta de nuevo en unos momentos.";
 
     return {
       hasError: true,
@@ -158,7 +158,7 @@ export class AppErrorBoundary extends Component<
     const message =
       error?.message?.trim() ||
       this.state.message ||
-      "Recarga la pagina o intenta nuevamente en unos momentos.";
+      "Recarga la página o intenta de nuevo en unos momentos.";
 
     if (!isBackendOutageMessage(message)) return;
 
@@ -245,7 +245,7 @@ export class AppErrorBoundary extends Component<
 
     this.setState({
       isRetrying: true,
-      retryMessage: "Verificando conexion con el backend...",
+      retryMessage: "Revisando la conexión...",
     });
 
     const isBackendAvailable = await checkBackendAvailability();
@@ -258,7 +258,7 @@ export class AppErrorBoundary extends Component<
 
     this.setState({
       isRetrying: false,
-      retryMessage: "El backend sigue sin responder. Intenta de nuevo en unos momentos.",
+      retryMessage: "El sistema sigue sin responder. Intenta de nuevo en unos momentos.",
     });
   };
 
@@ -276,14 +276,14 @@ export class AppErrorBoundary extends Component<
         return null;
       }
 
-      const title = isBackendOutage ? "Backend sin conexion" : "Ocurrio un error inesperado";
+      const title = isBackendOutage ? "Sin conexión con el sistema" : "Ocurrió un error inesperado";
       const description = isBackendOutage
         ? isWaitingForNextCycle
-          ? "El sistema agoto los intentos inmediatos. Esperara unos minutos y volvera a recargar solo."
+          ? "No se pudo recuperar la conexión. Esperaremos unos minutos y volveremos a intentar solos."
           : this.state.autoReloadAttempts >= BACKEND_OUTAGE_MAX_RELOAD_ATTEMPTS
-          ? "El sistema no pudo recuperar conexion despues de varios intentos automaticos. Preparando el siguiente ciclo."
-          : "El sistema no puede comunicarse con el servidor. Intentara recargar la pagina para recuperar conexion."
-        : "Recarga la pagina o intenta nuevamente en unos momentos.";
+          ? "No se pudo recuperar la conexión después de varios intentos. En unos minutos volveremos a intentar."
+          : "El sistema de este estacionamiento no responde. Vamos a recargar la página para intentar reconectar."
+        : "Recarga la página o intenta de nuevo en unos momentos.";
       const Icon = isBackendOutage ? ServerCrash : ShieldAlert;
       const backgroundImage = isBackendOutage
         ? `url(${backendDownBackground})`

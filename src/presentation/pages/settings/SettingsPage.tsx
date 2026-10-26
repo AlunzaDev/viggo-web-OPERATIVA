@@ -242,7 +242,7 @@ export function SettingsPage() {
       setMonthlyFlushMinute(form.minute);
     } catch (error) {
       setMonthlyFlushError(
-        error instanceof Error ? error.message : "No se pudo guardar el flush mensual",
+        error instanceof Error ? error.message : "No se pudo guardar la limpieza mensual",
       );
     } finally {
       setMonthlyFlushSaving(false);
@@ -263,7 +263,7 @@ export function SettingsPage() {
       setMonthlyFlushMinute(form.minute);
     } catch (error) {
       setMonthlyFlushError(
-        error instanceof Error ? error.message : "No se pudo ejecutar el flush mensual",
+        error instanceof Error ? error.message : "No se pudo ejecutar la limpieza mensual",
       );
     } finally {
       setMonthlyFlushRunning(false);
@@ -478,7 +478,7 @@ export function SettingsPage() {
 
             {canManageLocalConfig ? (
               <button className="btn-setting-action" onClick={() => void handleOpenMonthlyFlush()}>
-                <FaHistory /> Flush mensual
+                <FaHistory /> Limpieza mensual
               </button>
             ) : null}
           </div>

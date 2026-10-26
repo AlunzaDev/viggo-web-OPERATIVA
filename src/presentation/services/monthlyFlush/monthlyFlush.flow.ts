@@ -48,7 +48,7 @@ export const loadMonthlyFlushFlow = async (): Promise<MonthlyFlushLoadResult> =>
   } catch (error) {
     return {
       status: null,
-      error: error instanceof Error ? error.message : "No se pudo cargar el flush mensual",
+      error: error instanceof Error ? error.message : "No se pudo cargar la limpieza mensual",
       form: getDefaultForm(),
     };
   }

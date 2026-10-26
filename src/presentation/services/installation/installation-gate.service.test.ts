@@ -49,7 +49,7 @@ describe("installation-gate.service", () => {
   it("asks to link again when linked without cloud credentials", () => {
     const linked = { configured: true, status: "linked" as const, proyectoId: "p1" };
     expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: false }))).toBe(true);
-    expect(getInstallationStatusCopy(buildInstallation({ ...linked, cloudCredentials: false }))).toContain("sin credenciales");
+    expect(getInstallationStatusCopy(buildInstallation({ ...linked, cloudCredentials: false }))).toContain("no puede conectarse con el panel administrativo");
     expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: true }))).toBe(false);
     // An older local API that does not report it is trusted as before.
     expect(needsCloudRelink(buildInstallation({ ...linked, cloudCredentials: null }))).toBe(false);
@@ -95,7 +95,7 @@ describe("installation-gate.service", () => {
   });
 
   it("returns consistent installation copy and waiting meta", () => {
-    expect(getInstallationStatusCopy(null)).toContain("token de vinculacion");
+    expect(getInstallationStatusCopy(null)).toContain("código de vinculación");
     expect(getInstallationStatusCopy(buildInstallation({ status: "requested" }))).toContain(
       "Solicitud enviada",
     );
@@ -108,7 +108,7 @@ describe("installation-gate.service", () => {
     ).toBe("Solicitud enviada correctamente");
     expect(
       getInstallationWaitingMeta(buildInstallation({ status: "approved" })).title,
-    ).toBe("Aprobacion recibida");
+    ).toBe("Aprobación recibida");
     expect(
       getInstallationWaitingBadgeLabel(buildInstallation({ status: "approved" })),
     ).toBe("Aprobado");
@@ -116,10 +116,10 @@ describe("installation-gate.service", () => {
 
   it("returns unified labels for id and backend message", () => {
     expect(getInstallationIdLabel(buildInstallation(), false)).toBe("viggo-local-123");
-    expect(getInstallationIdLabel(null, true)).toBe("API local sin iniciar");
+    expect(getInstallationIdLabel(null, true)).toBe("no disponible");
     expect(getInstallationIdLabel(null, false)).toBe("sin identificar");
 
-    expect(getInstallationBackendMessage(true)).toContain("backend local no esta disponible");
+    expect(getInstallationBackendMessage(true)).toContain("no responde");
     expect(getInstallationBackendMessage(false)).toBeNull();
 
   });
@@ -127,7 +127,7 @@ describe("installation-gate.service", () => {
   it("normalizes installation and geolocation errors for the user", () => {
     expect(
       normalizeInstallationError("La nube no esta disponible para validar el token de vinculacion").title,
-    ).toBe("No pudimos conectar con la nube");
+    ).toBe("No pudimos conectar con el panel administrativo");
     expect(
       normalizeInstallationError("La nube no esta disponible para solicitar la vinculacion").title,
     ).toBe("No pudimos enviar la solicitud");
@@ -136,13 +136,13 @@ describe("installation-gate.service", () => {
     );
     expect(normalizeInstallationError("Token de vinculacion invalido").tone).toBe("error");
     expect(normalizeInstallationError(LOCATION_PERMISSION_DENIED_ERROR).title).toBe(
-      "Permite la ubicacion",
+      "Permite la ubicación",
     );
     expect(normalizeInstallationError(LOCATION_FETCH_FAILED_ERROR).title).toBe(
-      "No pudimos validar tu ubicacion",
+      "No pudimos validar tu ubicación",
     );
     expect(normalizeInstallationError("Network Error").title).toBe(
-      "El backend local no esta disponible",
+      "El sistema de este estacionamiento no responde",
     );
   });
 });

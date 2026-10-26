@@ -9,6 +9,13 @@ export type OperationalMessageContext =
   | "operational_logs"
   | "generic";
 
+const SYSTEM_DOWN_HINT = "Espera un momento e intenta de nuevo. Si sigue igual, avisa a soporte.";
+const RETRY_HINT = "Intenta de nuevo en unos momentos. Si sigue pasando, avisa a soporte.";
+
+/** Raw errors (English, status codes, internals) that mean nothing to the person using the app. */
+export const isTechnicalMessage = (message: string): boolean =>
+  /\b(status code|request|response|failed|exception|undefined|null|timeout|econn\w*|err_\w+|jwt|token|prisma|sql|internal|cannot|unexpected|api|backend)\b/i.test(message);
+
 export const isOperationalBackendUnavailable = (rawMessage: string): boolean => {
   const normalized = rawMessage.trim().toLowerCase();
 
@@ -42,57 +49,59 @@ export const normalizeOperationalUserMessage = (
   if (isOperationalBackendUnavailable(message)) {
     if (context === "installation_load" || context === "installation_request") {
       return {
-        title: "El backend local no esta disponible",
-        message:
-          "Inicia el API operativo para revisar la instalacion, cargar proyectos o solicitar la vinculacion.",
+        title: "El sistema de este estacionamiento no responde",
+        message: SYSTEM_DOWN_HINT,
         tone: "error",
       };
     }
 
     if (context === "config_load" || context === "config_sync") {
       return {
-        title: "El backend local no esta disponible",
-        message:
-          "Inicia el API operativo y vuelve a intentar para consultar o sincronizar la configuracion local.",
+        title: "El sistema de este estacionamiento no responde",
+        message: SYSTEM_DOWN_HINT,
         tone: "error",
       };
     }
 
     if (context === "heartbeat") {
       return {
-        title: "No pudimos revisar el estado del punto local",
-        message:
-          "El backend operativo no esta disponible en este momento. Inicialo para volver a consultar el heartbeat.",
+        title: "No pudimos revisar el estado de los equipos",
+        message: `El sistema de este estacionamiento no responde. ${SYSTEM_DOWN_HINT}`,
         tone: "error",
       };
     }
 
     if (context === "operational_logs") {
       return {
-        title: "No pudimos cargar la bitacora local",
-        message:
-          "El backend operativo no esta disponible en este momento. Inicialo para volver a consultar los eventos.",
+        title: "No pudimos cargar la bitácora",
+        message: `El sistema de este estacionamiento no responde. ${SYSTEM_DOWN_HINT}`,
         tone: "error",
       };
     }
+
+    return {
+      title: "Sin conexión con el sistema",
+      message: SYSTEM_DOWN_HINT,
+      tone: "error",
+    };
   }
 
   if (isOperationalCloudUnavailable(message)) {
     return {
-      title: "No pudimos conectar con administrativo",
+      title: "No pudimos conectar con el panel administrativo",
       message:
         context === "config_sync"
-          ? "El punto local sigue funcionando, pero la sincronizacion con administrativo no esta disponible por ahora."
-          : "La nube no esta disponible en este momento. Intenta nuevamente mas tarde.",
+          ? "El estacionamiento sigue funcionando, pero por ahora no se puede sincronizar con el panel administrativo."
+          : "Intenta de nuevo más tarde.",
       tone: "warning",
     };
   }
 
   if (normalized.includes("aun no esta vinculada a un proyecto")) {
     return {
-      title: "Esta instalacion aun no esta vinculada",
+      title: "Este equipo aún no está vinculado",
       message:
-        "Completa la vinculacion del punto local antes de continuar con la sincronizacion.",
+        "Completa la vinculación antes de continuar.",
       tone: "warning",
     };
   }
@@ -103,16 +112,16 @@ export const normalizeOperationalUserMessage = (
     normalized.includes("invalid request")
   ) {
     return {
-      title: "Hay datos pendientes por revisar",
+      title: "Hay datos por revisar",
       message:
-        "Se detectaron datos invalidos en la configuracion sincronizada. Revisa proyecto, modulos o coordenadas.",
+        "Algunos datos de la configuración no son válidos. Revisa el proyecto, los módulos o la ubicación.",
       tone: "warning",
     };
   }
 
   return {
-    title: "No pudimos completar la accion",
-    message: message || "Intenta nuevamente en unos momentos.",
+    title: "No pudimos completar la acción",
+    message: message && !isTechnicalMessage(message) ? message : RETRY_HINT,
     tone: "error",
   };
 };

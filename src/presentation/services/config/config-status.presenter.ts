@@ -30,7 +30,7 @@ export const getConfigSyncStatusLabel = (
 
 export const getConfigSyncIssueLabel = (
   status?: LocalConfigStatus["lastSyncStatus"] | null,
-) => (status === "failed" ? "Ultimo error" : "Ultima alerta");
+) => (status === "failed" ? "Último error" : "Última alerta");
 
 export const normalizeConfigSyncError = (
   rawMessage: string,
@@ -51,33 +51,33 @@ export const normalizeConfigSyncError = (
   }
 
   if (normalized.includes("aun no esta vinculada a un proyecto")) {
-    return "Este punto local todavia no esta vinculado a un proyecto. Completa la vinculacion antes de sincronizar.";
+    return "Este equipo todavía no está vinculado a un proyecto. Completa la vinculación antes de sincronizar.";
   }
 
   if (normalized.includes("sync_service_token no esta configurado")) {
-    return "La sincronizacion automatica no esta habilitada en esta instalacion local.";
+    return "La sincronización automática no está activada en este equipo.";
   }
 
   if (normalized.includes("la sincronizacion dejo inconsistencias locales")) {
-    return "Se detectaron inconsistencias en los datos sincronizados. Revisa modulos, submodulos y catalogos del proyecto.";
+    return "Algunos datos sincronizados no coinciden. Revisa los módulos, submódulos y catálogos del proyecto.";
   }
 
   if (
     normalized.includes("hay datos inválidos en la solicitud") ||
     normalized.includes("hay datos invalidos en la solicitud")
   ) {
-    return "Hay datos invalidos en la configuracion sincronizada. Revisa proyecto, modulos o coordenadas.";
+    return "Algunos datos de la configuración no son válidos. Revisa el proyecto, los módulos o la ubicación.";
   }
 
   if (
     normalized.includes("coordinates debe contener") ||
     normalized.includes("longitud debe ser un numero valido")
   ) {
-    return "Hay coordenadas invalidas en la configuracion del proyecto o de sus modulos.";
+    return "La ubicación del proyecto o de alguno de sus módulos no es válida.";
   }
 
   if (context === "load" && normalized.includes("no se pudo cargar la configuracion local")) {
-    return "No pudimos cargar la configuracion local. Intenta nuevamente en unos momentos.";
+    return "No pudimos cargar la configuración. Intenta de nuevo en unos momentos.";
   }
 
   return normalizeOperationalUserMessage(
@@ -87,7 +87,7 @@ export const normalizeConfigSyncError = (
 };
 
 export const formatConfigSyncSuccess = (result: LocalConfigSyncResult) =>
-  `Aplicado: ${result.configuration.modulos} modulos, ${result.configuration.pensiones} pensiones, ${result.configuration.pensionPasses} pension pass, ${result.access.users} usuarios y ${result.access.permissionProfiles} perfiles.${
+  `Aplicado: ${result.configuration.modulos} módulos, ${result.configuration.pensiones} pensiones, ${result.configuration.pensionPasses} pases de pensión, ${result.access.users} usuarios y ${result.access.permissionProfiles} perfiles.${
     result.integrity?.warnings?.length
       ? ` Alertas: ${result.integrity.warnings.length}.`
       : ""

@@ -13,11 +13,11 @@ export type InstallationGateMode = "backendUnavailable" | "ready" | "waitingAppr
 
 const WAITING_INSTALLATION_STATUSES: LocalInstallationStatus[] = ["requested", "approved"];
 const INSTALLATION_STATUS_COPY: Record<LocalInstallationStatus, string> = {
-  pending: "Ingresa el token de vinculacion del proyecto de esta terminal local.",
-  requested: "Solicitud enviada. Esperando aprobacion en la nube.",
-  approved: "Solicitud aprobada. Recarga para terminar la vinculacion.",
-  rejected: "Solicitud rechazada. Revisa el motivo y solicita de nuevo.",
-  linked: "Este punto local ya esta vinculado al proyecto seleccionado.",
+  pending: "Escribe el código de vinculación del proyecto para conectar este equipo.",
+  requested: "Solicitud enviada. Falta que la aprueben en el panel administrativo.",
+  approved: "Solicitud aprobada. Recarga la página para terminar.",
+  rejected: "La solicitud fue rechazada. Revisa el motivo y vuelve a solicitarla.",
+  linked: "Este equipo ya está vinculado al proyecto.",
 };
 
 /** How often the gate checks whether the cloud approved the request. */
@@ -80,7 +80,7 @@ export const getInstallationStatusCopy = (
   installation: LocalInstallation | null,
 ) => {
   if (needsCloudRelink(installation)) {
-    return "Este punto local esta vinculado sin credenciales de la nube: el inicio de sesion en linea, la sincronizacion y el envio de eventos no funcionan. Vuelve a vincularlo con el token del proyecto.";
+    return "Este equipo está vinculado, pero no puede conectarse con el panel administrativo: no funcionan el inicio de sesión en línea ni el envío de información. Vuelve a vincularlo con el código del proyecto.";
   }
   if (!installation) return INSTALLATION_STATUS_COPY.pending;
   return INSTALLATION_STATUS_COPY[installation.status] ?? INSTALLATION_STATUS_COPY.pending;
@@ -91,16 +91,16 @@ export const getInstallationWaitingMeta = (
 ) => {
   if (installation?.status === "approved") {
     return {
-      title: "Aprobacion recibida",
+      title: "Aprobación recibida",
       description:
-        "Este punto local ya fue aprobado. Revisa el estado para terminar la vinculacion y entrar al sistema.",
+        "Este equipo ya fue aprobado. Revisa el estado para terminar y entrar al sistema.",
     };
   }
 
   return {
     title: "Solicitud enviada correctamente",
     description:
-      "La solicitud ya quedo en revision. En cuanto la aprueben en administrativo, esta pantalla continua sola.",
+      "La solicitud está en revisión. En cuanto la aprueben en el panel administrativo, esta pantalla continúa sola.",
   };
 };
 
@@ -127,18 +127,18 @@ export const getInstallationIdLabel = (
   backendUnavailable: boolean,
 ): string =>
   installation?.installationId ??
-  (backendUnavailable ? "API local sin iniciar" : "sin identificar");
+  (backendUnavailable ? "no disponible" : "sin identificar");
 
 export const getInstallationBackendMessage = (
   backendUnavailable: boolean,
 ): string | null =>
   backendUnavailable
-    ? "El backend local no esta disponible. Inicia el API operativo para continuar con esta instalacion."
+    ? "El sistema de este estacionamiento no responde. Espera un momento y pulsa «Revisar estado»; si sigue igual, avisa a soporte."
     : null;
 
 export const getInstallationWaitingBadgeLabel = (
   installation: LocalInstallation | null,
-): string => (installation?.status === "approved" ? "Aprobado" : "En revision");
+): string => (installation?.status === "approved" ? "Aprobado" : "En revisión");
 
 export const normalizeInstallationError = (
   rawMessage: string,
@@ -148,18 +148,18 @@ export const normalizeInstallationError = (
 
   if (normalized.includes("nube no esta disponible para validar el token")) {
     return {
-      title: "No pudimos conectar con la nube",
+      title: "No pudimos conectar con el panel administrativo",
       message:
-        "Revisa la conexion o intenta nuevamente en unos momentos para validar el token.",
+        "Revisa la conexión a internet e intenta de nuevo en unos momentos.",
       tone: "warning",
     };
   }
 
   if (normalized.includes("token de vinculacion invalido")) {
     return {
-      title: "Token de vinculacion invalido",
+      title: "Código de vinculación no válido",
       message:
-        "Revisa que el token corresponda a un proyecto activo; puedes copiarlo de nuevo desde el panel administrativo.",
+        "Revisa que el código sea de un proyecto activo. Puedes copiarlo de nuevo desde el panel administrativo.",
       tone: "error",
     };
   }
@@ -168,16 +168,16 @@ export const normalizeInstallationError = (
     return {
       title: "No pudimos enviar la solicitud",
       message:
-        "La nube no esta disponible en este momento. Intenta nuevamente en unos minutos.",
+        "No hay conexión con el panel administrativo en este momento. Intenta de nuevo en unos minutos.",
       tone: "warning",
     };
   }
 
   if (normalized.includes("no se pudo cargar la configuracion de instalacion")) {
     return {
-      title: "No pudimos revisar esta instalacion",
+      title: "No pudimos revisar este equipo",
       message:
-        "Intenta nuevamente en unos momentos para consultar el estado local y la vinculacion.",
+        "Intenta de nuevo en unos momentos.",
       tone: "warning",
     };
   }
@@ -185,75 +185,67 @@ export const normalizeInstallationError = (
   if (normalized.includes("confirma el proyecto")) {
     return {
       title: "Confirma el proyecto",
-      message: "Valida el token y revisa el proyecto antes de solicitar la vinculacion.",
+      message: "Valida el código y revisa que el proyecto sea el correcto antes de solicitar la vinculación.",
       tone: "warning",
     };
   }
 
   if (normalized.includes("ingresa el token")) {
     return {
-      title: "Falta el token de vinculacion",
+      title: "Falta el código de vinculación",
       message:
-        "Captura el token del proyecto para poder solicitar la vinculacion de este punto local.",
+        "Escribe el código del proyecto para solicitar la vinculación de este equipo.",
       tone: "warning",
-    };
-  }
-
-  if (normalized.includes("token de vinculacion invalido")) {
-    return {
-      title: "El token no coincide",
-      message: "Verifica que el token pertenezca a este proyecto e intenta nuevamente.",
-      tone: "error",
     };
   }
 
   if (normalized.includes("no hay proyectos disponibles")) {
     return {
       title: "No hay proyectos disponibles",
-      message: "Todavia no hay proyectos listos para vincular desde la nube.",
+      message: "Todavía no hay proyectos listos para vincular.",
       tone: "warning",
     };
   }
 
   if (message === LOCATION_REQUIRED_ERROR) {
     return {
-      title: "Activa tu ubicacion",
+      title: "Activa tu ubicación",
       message:
-        "Necesitamos la ubicacion del navegador para validar que esta instalacion este cerca del proyecto antes de solicitar la vinculacion.",
+        "Necesitamos la ubicación del navegador para confirmar que este equipo está cerca del estacionamiento.",
       tone: "warning",
     };
   }
 
   if (message === LOCATION_PERMISSION_DENIED_ERROR) {
     return {
-      title: "Permite la ubicacion",
-      message: "Da permiso de ubicacion en el navegador e intenta nuevamente.",
+      title: "Permite la ubicación",
+      message: "Da permiso de ubicación en el navegador e intenta de nuevo.",
       tone: "warning",
     };
   }
 
   if (message === LOCATION_TIMEOUT_ERROR) {
     return {
-      title: "No se obtuvo la ubicacion a tiempo",
+      title: "No se obtuvo la ubicación a tiempo",
       message:
-        "El navegador tardo demasiado en resolver tu ubicacion. Intenta de nuevo en un lugar con mejor senal o GPS.",
+        "El navegador tardó demasiado en obtener tu ubicación. Intenta de nuevo en un lugar con mejor señal.",
       tone: "warning",
     };
   }
 
   if (message === LOCATION_UNAVAILABLE_ERROR) {
     return {
-      title: "Ubicacion no disponible",
+      title: "Ubicación no disponible",
       message:
-        "El dispositivo no pudo determinar tu ubicacion actual. Revisa si la ubicacion del sistema esta activa e intenta de nuevo.",
+        "El equipo no pudo obtener tu ubicación. Revisa que la ubicación esté activada e intenta de nuevo.",
       tone: "warning",
     };
   }
 
   if (message === LOCATION_FETCH_FAILED_ERROR) {
     return {
-      title: "No pudimos validar tu ubicacion",
-      message: "Intenta nuevamente en unos segundos. Si sigue igual, revisa el permiso de ubicacion del navegador.",
+      title: "No pudimos validar tu ubicación",
+      message: "Intenta de nuevo en unos segundos. Si sigue igual, revisa el permiso de ubicación del navegador.",
       tone: "warning",
     };
   }

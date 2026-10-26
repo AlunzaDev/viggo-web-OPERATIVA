@@ -108,7 +108,7 @@ export function MonthlyFlushModal({
     isRunningManual && typeof document !== "undefined"
       ? createPortal(
           <div className="settings-monthly-flush-modal__loading-overlay" aria-hidden="true">
-            <ScreenLoader label="flush mensual" registerPageLoading={false} />
+            <ScreenLoader label="limpieza mensual" registerPageLoading={false} />
           </div>,
           document.body,
         )
@@ -125,7 +125,7 @@ export function MonthlyFlushModal({
         showCloseButton
       >
         <div className="settings-monthly-flush-modal__content">
-          <h2 className="modal-form-title">Flush mensual</h2>
+          <h2 className="modal-form-title">Limpieza mensual</h2>
 
           {error ? (
             <div className="modal-form-error" role="alert">
@@ -137,8 +137,8 @@ export function MonthlyFlushModal({
             <section className="modal-form-section">
               <div className="settings-monthly-flush-modal__hero">
                 <div className="settings-monthly-flush-modal__hero-copy">
-                  <p className="settings-monthly-flush-modal__eyebrow">Bitacora local</p>
-                  <h3>{enabled ? "Flush automatico activo" : "Flush automatico pausado"}</h3>
+                  <p className="settings-monthly-flush-modal__eyebrow">Bitácora</p>
+                  <h3>{enabled ? "Limpieza automática activa" : "Limpieza automática pausada"}</h3>
                   <p>
                     El dia <strong>{closeDay}</strong> se consolida el mes anterior a las{" "}
                     <strong>
@@ -358,11 +358,11 @@ export function MonthlyFlushModal({
                 </div>
 
                 <div className="settings-monthly-flush-modal__field">
-                  <span>Flush manual</span>
+                  <span>Limpieza manual</span>
                   <div className="settings-monthly-flush-modal__manual-card">
                     <div className="settings-monthly-flush-modal__manual-copy">
                       <strong>Consolidar un mes especifico</strong>
-                      <small>Usalo si quieres correr el consolidado sin esperar al automatico.</small>
+                      <small>Úsala si quieres resumir la bitácora sin esperar a la automática.</small>
                     </div>
                     <div className="settings-monthly-flush-modal__manual-controls">
                       <input

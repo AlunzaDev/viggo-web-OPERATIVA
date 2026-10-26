@@ -351,7 +351,7 @@ export function CreateProjectModal({
             <label className={`create-project-modal__state-toggle ${form.estado ? "is-checked" : ""}`}>
               <span className="create-project-modal__state-copy">
                 <strong>Proyecto activo</strong>
-                <small>Se enviara al backend como estado.</small>
+                <small>Indica si el proyecto está en operación.</small>
               </span>
               <input
                 type="checkbox"

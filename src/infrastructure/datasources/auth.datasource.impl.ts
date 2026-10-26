@@ -56,7 +56,7 @@ const getTokenFromResponse = (data: Record<string, unknown>): string => {
   );
 
   if (typeof token !== "string") {
-    throw new Error("La respuesta de autenticación no incluyó un token válido");
+    throw new Error("No se pudo iniciar sesión. Intenta de nuevo.");
   }
 
   return token.trim();
@@ -271,7 +271,7 @@ export class AuthDataSourceImpl implements AuthDataSource {
     void newPassword;
 
     throw new Error(
-      "El backend actual no expone cambio de contraseña autenticado.",
+      "Por ahora no se puede cambiar la contraseña desde aquí.",
     );
   }
 }
